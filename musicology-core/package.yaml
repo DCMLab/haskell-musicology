@@ -1,0 +1,63 @@
+name:                musicology-core
+version:             0.1.0.0
+github:              "DCMLab/haskell-musicology"
+license:             BSD3
+author:              "Christoph Finkensiep"
+maintainer:          "chfin@chfin.de"
+copyright:           "2019 Christoph Finkensiep"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description: Please see the README on GitHub at <https://github.com/DCMLab/haskell-musicology#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- containers
+- aeson
+- deepseq
+- Euterpea
+- vector-space
+- Frames
+- mtl
+- machines
+- vinyl
+- mwc-random
+- primitive
+- HCodecs
+- unordered-containers
+- vector
+- microlens
+
+library:
+  source-dirs: src
+
+executables:
+  musicology-core-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - musicology-core
+
+tests:
+  musicology-core-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - musicology-core
