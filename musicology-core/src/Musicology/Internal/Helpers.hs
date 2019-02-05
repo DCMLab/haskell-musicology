@@ -7,6 +7,8 @@ import Musicology.Types
 
 import Frames
 import qualified Data.Vinyl.Functor
+import Data.Vinyl.Class.Method (RecMapMethod)
+import Data.Vinyl.Core (RecordToList)
 
 import Data.VectorSpace
 
@@ -32,7 +34,8 @@ processFoldable xs p = run $ source xs ~> p
 processFoldableT :: (Monad m, Foldable t) => t a -> ProcessT m a b -> m [b]
 processFoldableT xs p = runT $ source xs ~> p
 
-previewFrame :: _ => Int ->Frame (Record a) -> IO ()
+previewFrame :: (RecMapMethod Show ElField a, RecordToList a)
+             => Int ->Frame (Record a) -> IO ()
 previewFrame n fr = do
   preview [1..n]
   putStrLn "..."
@@ -60,7 +63,7 @@ release :: Ord k => M.Map k v -> k -> (M.Map k v, [v])
 release q gate = (q', M.elems rels)
   where (rels, q') = M.spanAntitone (<=gate) q
 
-pcFills :: (Eq p, Pitch p) => p -> p -> p -> Bool
+pcFills :: (Eq p, Interval p) => p -> p -> p -> Bool
 pcFills pl pm ph = odir == EQ && pl /= pm && pm /= ph ||
                    odir /= EQ && dir1 == odir && dir2 == odir
   where odir = direction (ph^-^pl)
@@ -70,20 +73,21 @@ pcFills pl pm ph = odir == EQ && pl /= pm && pm /= ph ||
 rerunStateT :: (m (a, s) -> n (b, t)) -> (t -> s) -> StateT s m a -> StateT t n b
 rerunStateT f r m = StateT $ f . runStateT m . r
 
-onoffGroups :: (Foldable f, Timed n) =>
-                 f n -> [[OnOff n (TimeOf n)]]
+onoffGroups :: (Foldable f, HasTime n) => f n -> [[OnOff n (TimeOf n)]]
 onoffGroups notes = L.groupBy eq $ L.sortOn onset $ foldl convert mempty notes
   where convert onoffs note = (Onset note (onset note))
                               : (Offset note (offset note))
                               : onoffs
         eq a b = onset a == onset b
 
-newPitches :: (Eq p, Pitched a, PitchOf a ~ p) => Timed a => [p] -> [OnOff a (TimeOf a)] -> [p]
+newPitches :: (Eq p, HasPitch a, IntervalOf a ~ p, HasTime a) =>
+              [Pitch p] -> [OnOff a (TimeOf a)] -> [Pitch p]
 newPitches curr grp = (curr L.\\ (pitch <$> offs)) `L.union` (pitch <$> ons)
   where (ons, offs) = L.partition isOn grp
 
-groupsToSlices :: (Foldable f, Timed n, Num (TimeOf n), Ord (TimeOf n), Pitched n, Eq (PitchOf n)) =>
-                  f [OnOff n (TimeOf n)] -> [TimedEvent [PitchOf n] (TimeOf n)]
+groupsToSlices :: (Foldable f, HasTime n, Num (TimeOf n), Ord (TimeOf n),
+                   HasPitch n, Eq (IntervalOf n))
+               => f [OnOff n (TimeOf n)] -> [TimedEvent [Pitch (IntervalOf n)] (TimeOf n)]
 groupsToSlices groups = processFoldable groups $ construct $ do
   first <- await
   slices $ halfSlice [] first

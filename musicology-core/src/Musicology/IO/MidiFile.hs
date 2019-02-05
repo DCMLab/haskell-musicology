@@ -49,13 +49,13 @@ data MidiNote = MidiNote
   }
   deriving (Eq, Show, Generic)
 
-asTicks :: MidiNote -> Note MidiPitch Int
+asTicks :: MidiNote -> Note MidiInterval Int
 asTicks (MidiNote on off _ _ _ _ pitch _ _ _ _ _ _ _ _) = Note pitch on off
 
-asWholes :: MidiNote -> Note MidiPitch (Ratio Int)
+asWholes :: MidiNote -> Note MidiInterval (Ratio Int)
 asWholes (MidiNote _ _ on off _ _ pitch _ _ _ _ _ _ _ _) = Note pitch on off
 
-asSecs :: MidiNote -> Note MidiPitch Double
+asSecs :: MidiNote -> Note MidiInterval Double
 asSecs (MidiNote _ _ _ _ on off pitch _ _ _ _ _ _ _ _) = Note pitch on off
 
 instance NFData MidiNote
@@ -90,7 +90,7 @@ declareColumn "subbeat" ''RatioInt
 midiNoteToRecord :: MidiNote -> MidiRecord
 midiNoteToRecord (MidiNote ont oft onw ofw ons ofs p v t c s m bar beat sub) =
   ont &: oft &: onw &: ofw &: ons &: ofs &:
-  p &: v &: t &: c &: s &: m &: bar &: beat &: sub &: RNil
+  toInterval p &: v &: t &: c &: s &: m &: bar &: beat &: sub &: RNil
 
 printNote :: MidiNote -> IO ()
 printNote (MidiNote ont offt onw offw ons offs p vel id ch sh maj bar beat subb) =
@@ -212,7 +212,7 @@ eventsToNotes evs tdiv insNote = sortOn sorting notes
                                  (OnVal ont onw ons onvel
                                   (KeySignature sh mode) bar beat subb):_ ->
                                    Just $ MidiNote ont nowt onw noww ons nows
-                                   p onvel trackid ch sh (mode == 0) bar beat subb
+                                   (toPitch p) onvel trackid ch sh (mode == 0) bar beat subb
                         ons' = case open of
                                  []    -> ons
                                  _:rst -> M.insert nKey rst ons

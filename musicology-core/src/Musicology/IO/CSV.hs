@@ -28,6 +28,6 @@ tableTypes' (rowGen
 loadPiece :: FilePath -> IO (Frame CsvNote)
 loadPiece fp = inCoreAoS $ readTableOpt csvNoteParser fp
 
-frameNotes :: Frame CsvNote -> [Note MidiPitch Int]
+frameNotes :: Frame CsvNote -> [Note MidiInterval Int]
 frameNotes fr = fmap toNote $ F.toList fr
-  where toNote row = Note (view csvPitch row) (view csvOnset row) (view csvOffset row)
+  where toNote row = Note (toPitch $ view csvPitch row) (view csvOnset row) (view csvOffset row)
