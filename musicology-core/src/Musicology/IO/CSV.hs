@@ -7,12 +7,18 @@ import Frames.TH
 import Lens.Micro
 import Lens.Micro.Extras
 import qualified Data.Foldable as F
+import Language.Haskell.TH
+import System.FilePath
 
 import Musicology.Types as Mus hiding (onset, offset, pitch)
 
-fn = "/home/chfin/Uni/phd/data/midi_archive/notes/s/k555.tsv"
+-- fn = "/home/chfin/Uni/phd/data/midi_archive/notes/s/k555.tsv"
+fn = $(do file <- loc_filename <$> location
+          litE $ stringL $ joinPath [(takeDirectory file), "..", "..", "..", "res", "midi.tsv"])
 
-tableTypes' (rowGen "/home/chfin/Uni/phd/data/midi_archive/notes/s/k555.tsv")
+tableTypes' (rowGen
+             $(do file <- loc_filename <$> location
+                  litE $ stringL $ joinPath [(takeDirectory file), "..", "..", "..", "res", "midi.tsv"])) -- relative to musicology-core/
   { rowTypeName = "CsvNote"
 --  , columnNames = ["Track", "Channel", "Onset", "Offset", "Pitch", "Velocity"]
   , separator = "\t"

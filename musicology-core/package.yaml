@@ -36,6 +36,8 @@ dependencies:
 - unordered-containers
 - vector
 - microlens
+- template-haskell
+- filepath
 
 library:
   source-dirs: src
