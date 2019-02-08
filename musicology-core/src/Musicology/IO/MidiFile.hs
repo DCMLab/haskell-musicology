@@ -246,3 +246,10 @@ pieceBarlen fp =
           where findTime ((_,(TimeSignature num den _ _)):_) = Just $ num % (2^den)
                 findTime ((_,ev):rst) = findTime rst
                 findTime _            = Nothing
+
+pieceBeatlen fp =
+  importFile fp >>= return . either (const $ 1%4) barlen
+  where barlen m = maybe (1%4) id (listToMaybe (tracks m) >>= findTime)
+          where findTime ((_,(TimeSignature _ den _ _)):_) = Just $ 1 % (2^den)
+                findTime ((_,ev):rst) = findTime rst
+                findTime _            = Nothing
