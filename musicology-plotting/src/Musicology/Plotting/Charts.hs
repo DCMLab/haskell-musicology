@@ -20,10 +20,10 @@ data PianoRollPlot n = PRPlot
 
 pianoRollStyle color = (solidFillStyle color, Just $ solidLine 1.0 $ opaque black)
 
-ptod :: (Pitch p) => p -> Double
-ptod = fromIntegral . toMidi
+ptod :: (Interval p) => (Pitch p) -> Double
+ptod = fromIntegral . toMidi . toInterval
 
-plotPianoRoll :: (Pitched n, Timed n, PlotValue (TimeOf n)) =>
+plotPianoRoll :: (HasPitch n, HasTime n, PlotValue (TimeOf n)) =>
                  PianoRollPlot n -> Plot (TimeOf n) Double
 plotPianoRoll (PRPlot notes style) = Plot render legend points
   where ps = (ptod . pitch) <$> notes
@@ -33,7 +33,7 @@ plotPianoRoll (PRPlot notes style) = Plot render legend points
         legend = []
         points = (ons <> offs, ((+0.5) <$> ps) <> ((\p->p-0.5) <$> ps))
 
-renderPianoRoll :: (Pitched n, Timed n, PlotValue (TimeOf n)) =>
+renderPianoRoll :: (HasPitch n, HasTime n, PlotValue (TimeOf n)) =>
                    [n] -> (FillStyle, Maybe LineStyle)-> PointMapFn (TimeOf n) Double
                 -> BackendProgram ()
 renderPianoRoll notes style pmap = forM_ notes renderNote

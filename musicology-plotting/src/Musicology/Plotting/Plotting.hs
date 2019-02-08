@@ -41,10 +41,10 @@ fixRatios (J.Object o) = J.Object $ fixRatio "onset" $ fixRatio "offset" o
         fix v = v
 fixRatios v = v
 
-pianorollView :: (ToJSON p, ToJSON t, Pitch p) =>
+pianorollView :: (ToJSON p, ToJSON t, Interval p) =>
              [(Note p t)] -> Maybe T.Text -> [(VLProperty, VLSpec)] 
 pianorollView notes colorName =
-  let pitches = fmap (fromIntegral . toMidi . pitch) notes
+  let pitches = fmap (fromIntegral . toMidi . toInterval . pitch) notes
       minp = minimum pitches
       maxp = maximum pitches
       (Array nj) = (toJSON notes)
@@ -64,12 +64,12 @@ pianorollView notes colorName =
       --        . calculateAs "datum.pitch-0.5" "pl"
   in [mark Rect [], vals [], enc []] -- tran []
 
-pianoroll :: (ToJSON p, ToJSON t, Pitch p) =>
+pianoroll :: (ToJSON p, ToJSON t, Interval p) =>
              [(Note p t)] -> VegaLite
 pianoroll notes = toVegaLite $ [width 800, height 300, sel []] ++ pianorollView notes Nothing
   where sel = selection . select "grid" Interval [ BindScales ]
 
-plotpolysView :: (ToJSON p, ToJSON t, Pitch p) =>
+plotpolysView :: (ToJSON p, ToJSON t, Interval p) =>
              [Note p t] -> [[Note p t]] -> [(VLProperty, VLSpec)]
 plotpolysView notes polys = [layer [background, foreground]]
   where background = fromVL $ toVegaLite $ pianorollView notes (Just "#888888")
@@ -80,7 +80,7 @@ plotpolysView notes polys = [layer [background, foreground]]
         polydat = V.concat $ zipWith (polyJson . mkn "poly ") [1..] polys
         mkn pfx = (pfx <>) . T.pack . show
         vals    = dataFromJson (Array $ polydat)
-        pitches = fmap (fromIntegral . toMidi . pitch) notes
+        pitches = fmap (fromIntegral . toMidi . toInterval . pitch) notes
         minp    = minimum pitches
         maxp    = maximum pitches
         enc     = encoding
@@ -93,12 +93,12 @@ plotpolysView notes polys = [layer [background, foreground]]
         foreground = fromVL $ toVegaLite [mark Rect [], vals [], enc [], sel []]
         sel = selection . select "grid" Interval [ BindScales ]
 
-plotpolys' :: (ToJSON p, ToJSON t, Pitch p) =>
+plotpolys' :: (ToJSON p, ToJSON t, Interval p) =>
              [Note p t] -> [[Note p t]] -> VegaLite
 plotpolys' notes polys = toVegaLite $ [width 800, height 300, sel []] ++ plotpolysView notes polys
   where sel = selection . select "grid" Interval [ BindScales ]
 
-plotpolys :: (ToJSON p, ToJSON t, Pitch p) =>
+plotpolys :: (ToJSON p, ToJSON t, Interval p) =>
              [Note p t] -> [[[Note p t]]] -> VegaLite
 plotpolys notes polys = plotpolys' notes $ concat <$> polys
 
