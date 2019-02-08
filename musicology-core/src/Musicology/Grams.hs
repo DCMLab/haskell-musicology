@@ -7,6 +7,8 @@ import Control.Monad
 import Control.Monad.Trans
 import Control.Monad.Identity
 
+import Safe.Foldable (minimumMay)
+
 import Musicology.Internal.Helpers (release, processFoldable, processFoldableT)
 import qualified Data.Map as M
 
@@ -72,8 +74,10 @@ skipgramsRSMach coin pred cost n k = unfoldPlan ([], 0::Int, M.empty) go
         go (pfxs, i, queue) = do
           candidate     <- await <|> (mapM_ (mapM_ yield) (M.elems queue) *> stop)
           let oldClosed  = filter (\p -> totalCost p candidate <= k) pfxs
-              gate       = minimum $ fmap prefixOnset oldClosed
-              (q', rels) = release queue gate
+              gate       = minimumMay $ fmap prefixOnset oldClosed
+              (q', rels) = case gate of
+                             Just g  -> release queue g
+                             Nothing -> (M.empty, M.elems queue)
           mapM_ (mapM_ yield) rels
           extendable    <- filterM (doesExtend candidate) oldClosed
           let extended   = mkPrefix candidate : fmap (extendPrefix candidate) extendable
