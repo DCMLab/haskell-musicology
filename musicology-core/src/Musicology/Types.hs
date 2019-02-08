@@ -93,7 +93,7 @@ aug = (^+^chromaticSemitone)
 ---------------
 
 newtype MidiIC = MidiIC Int
-  deriving (Eq, Ord, NFData)
+  deriving (Eq, Ord, NFData, ToJSON, FromJSON)
 
 mic :: Int -> MidiIC
 mic = MidiIC . flip mod 12
@@ -479,6 +479,12 @@ instance (ToJSON p, ToJSON t) => ToJSON (Note p t) where
     object ["pitch" .= p, "onset" .= on, "offset" .= off]
   toEncoding (Note (Pitch p) on off) =
     pairs ("pitch" .= p <> "onset" .= on <> "offset" .= off)
+
+instance (FromJSON p, FromJSON t) => FromJSON (Note p t) where
+  parseJSON = withObject "Note" $ \v -> Note
+    <$> (toPitch <$> v .: "pitch")
+    <*> v .: "onset"
+    <*> v .: "offset"
 
 ----------------------------------------------
 -- Ons and Offs                             --
