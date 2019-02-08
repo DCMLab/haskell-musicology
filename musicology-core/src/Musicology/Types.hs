@@ -10,6 +10,7 @@
 module Musicology.Types
   ( IntervalClass(..)
   , Interval(..)
+  , oct, iabs
   -- , ClassyInterval(..)
   , Diatonic(..), Chromatic(..)
   , aug, dim, down
@@ -69,6 +70,10 @@ class VectorSpace i => Interval i where
 
 oct :: IntervalClass i => Int -> i -> IOf i
 oct octs ic = emb ic ^+^ octave octs
+
+iabs :: Interval i => i -> i
+iabs i | direction i == LT = negateV i
+       | otherwise         = i
 
 -- class (Interval i, IntervalClass (PCOf i), IOf (ICOf i) ~ i) => ClassyInterval i where  
 
