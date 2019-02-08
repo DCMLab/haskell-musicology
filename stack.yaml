@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-13.5
+resolver: lts-13.6
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -48,12 +48,23 @@ extra-deps:
 - lazysmallcheck-0.6
 - Frames-0.6.1
 - discrimination-0.3
+# charts stuff
 - git: git@github.com:timbod7/haskell-chart.git
   commit: 23e9739b80ecbb6fe70c4a7989714414f9f915c7
   subdirs:
   - chart
+  - chart-cairo
+- cairo-0.13.6.0
+- gtk2hs-buildtools-0.13.5.0
+# ihaskell stuff
+- git: git@github.com:gibiansky/IHaskell.git
+  commit: c070adf8828dad378bb0048483c16f2640a339b5
+  subdirs:
+  - .
+  - ihaskell-display/ihaskell-charts
+- ghc-parser-0.2.0.2
 
-allow-newer: true
+# allow-newer: true
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
