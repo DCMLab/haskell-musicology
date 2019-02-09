@@ -1,3 +1,5 @@
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -9,6 +11,7 @@ import Frames
 import qualified Data.Vinyl.Functor
 import Data.Vinyl.Class.Method (RecMapMethod)
 import Data.Vinyl.Core (RecordToList)
+import Data.Proxy
 
 import Data.VectorSpace
 
@@ -34,22 +37,28 @@ processFoldable xs p = run $ source xs ~> p
 processFoldableT :: (Monad m, Foldable t) => t a -> ProcessT m a b -> m [b]
 processFoldableT xs p = runT $ source xs ~> p
 
-printRow :: (RecMapMethod Show ElField a, RecordToList a)
-         => (Record a) -> IO ()
-printRow row = putStrLn $ L.intercalate "\t" $ showFields row
+-- frames helpers
 
-previewFrame :: (RecMapMethod Show ElField a, RecordToList a)
+showRow :: (RecMapMethod Show ElField a, RecordToList a)
+         => (Record a) -> String
+showRow row = L.intercalate "\t" $ showFields row
+
+showHeader :: forall a . (ColumnHeaders a) => Frame (Record a) -> String
+showHeader frame = L.intercalate "\t" $ columnHeaders (Proxy :: Proxy (Record a))
+
+previewFrame :: (RecMapMethod Show ElField a, RecordToList a, ColumnHeaders a)
              => Int -> Frame (Record a) -> IO ()
 previewFrame n fr = do
+  putStrLn $ showHeader fr
   preview [1..n]
   putStrLn "..."
   preview [l-n..l-1]
   where l = frameLength fr
-        preview is = mapM_ (printRow . frameRow fr) is
+        preview is = mapM_ (putStrLn . showRow . frameRow fr) is
 
 viewFrame :: (RecMapMethod Show ElField a, RecordToList a)
           => Frame (Record a) -> IO ()
-viewFrame frame = mapM_ printRow frame
+viewFrame frame = mapM_ (putStrLn . showRow) frame
 
 -- release :: Ord k => M.Map k v -> k -> (M.Map k v, [v])
 -- release q gate = (q', M.elems rels)
