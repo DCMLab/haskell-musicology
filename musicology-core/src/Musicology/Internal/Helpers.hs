@@ -56,9 +56,11 @@ previewFrame n fr = do
   where l = frameLength fr
         preview is = mapM_ (putStrLn . showRow . frameRow fr) is
 
-viewFrame :: (RecMapMethod Show ElField a, RecordToList a)
+viewFrame :: (RecMapMethod Show ElField a, RecordToList a, ColumnHeaders a)
           => Frame (Record a) -> IO ()
-viewFrame frame = mapM_ (putStrLn . showRow) frame
+viewFrame frame = do
+  putStrLn $ showHeader frame
+  mapM_ (putStrLn . showRow) frame
 
 -- release :: Ord k => M.Map k v -> k -> (M.Map k v, [v])
 -- release q gate = (q', M.elems rels)
