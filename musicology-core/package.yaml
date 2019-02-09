@@ -39,6 +39,7 @@ dependencies:
 - microlens
 - template-haskell
 - filepath
+- directory
 
 library:
   source-dirs: src

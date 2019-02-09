@@ -28,6 +28,9 @@ import qualified Data.Vector as V
 import GHC.Generics (Generic)
 import Control.DeepSeq (NFData)
 
+import System.FilePath (takeExtension, takeBaseName)
+import System.Directory (listDirectory)
+
 -- import qualified Data.Machine as MC
 
 data MidiNote = MidiNote
@@ -253,3 +256,8 @@ pieceBeatlen fp =
           where findTime ((_,(TimeSignature _ den _ _)):_) = Just $ 1 % (2^den)
                 findTime ((_,ev):rst) = findTime rst
                 findTime _            = Nothing
+
+dirMidiPieces :: FilePath -> IO [FilePath]
+dirMidiPieces dir = do
+  contents <- listDirectory dir
+  return $ takeBaseName <$> filter ((==".mid") . takeExtension) contents

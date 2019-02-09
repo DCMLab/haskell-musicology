@@ -34,16 +34,22 @@ processFoldable xs p = run $ source xs ~> p
 processFoldableT :: (Monad m, Foldable t) => t a -> ProcessT m a b -> m [b]
 processFoldableT xs p = runT $ source xs ~> p
 
+printRow :: (RecMapMethod Show ElField a, RecordToList a)
+         => (Record a) -> IO ()
+printRow row = putStrLn $ L.intercalate "\t" $ showFields row
+
 previewFrame :: (RecMapMethod Show ElField a, RecordToList a)
-             => Int ->Frame (Record a) -> IO ()
+             => Int -> Frame (Record a) -> IO ()
 previewFrame n fr = do
   preview [1..n]
   putStrLn "..."
   preview [l-n..l-1]
   where l = frameLength fr
-        preview is = mapM_ (printrow . frameRow fr) is
-        -- printrow :: AsVinyl a => Record a -> IO ()
-        printrow row = putStrLn $ L.intercalate "\t" $ showFields row
+        preview is = mapM_ (printRow . frameRow fr) is
+
+viewFrame :: (RecMapMethod Show ElField a, RecordToList a)
+          => Frame (Record a) -> IO ()
+viewFrame frame = mapM_ printRow frame
 
 -- release :: Ord k => M.Map k v -> k -> (M.Map k v, [v])
 -- release q gate = (q', M.elems rels)
