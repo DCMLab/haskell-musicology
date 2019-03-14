@@ -58,9 +58,10 @@ extra-deps:
 - gtk2hs-buildtools-0.13.5.0
 # ihaskell stuff
 - git: git@github.com:gibiansky/IHaskell.git
-  commit: c070adf8828dad378bb0048483c16f2640a339b5
+  commit: 5086d0821e1677077d0ebbcaa5c044fa819b40a5
   subdirs:
   - .
+  - ipython-kernel
   - ihaskell-display/ihaskell-charts
 - ghc-parser-0.2.0.2
 
