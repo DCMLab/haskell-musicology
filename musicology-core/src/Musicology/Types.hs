@@ -13,13 +13,13 @@ module Musicology.Types
   , oct, iabs
   -- , ClassyInterval(..)
   , Diatonic(..), Chromatic(..)
-  , aug, dim, down
+  , aug, dim, down, minor, major
   , VectorSpace(..), AdditiveGroup(..)
   , MidiInterval, MidiIC(..), mic
   , SInterval(..), SIC(..), sic
   , unison, second, third, fourth, tritone, fifth, sixth, seventh
   , unison', second', third', fourth', tritone', fifth', sixth', seventh'
-  , Pitch(..), toPitch, toInterval, pto, pfrom
+  , Pitch(..), toPitch, toInterval, pto, pfrom, (+^), (^+), (-^), pc
   , MidiPitch, MidiPC, SPitch, SPC
   , flt, shp, nat
   , c, d, e, f, g, a, b
@@ -28,7 +28,7 @@ module Musicology.Types
   , Pitched(..), HasInterval(..), HasPitch(..)
   -- , PitchClassContainer(..), PitchContainer(..), embed, embed'
   -- , AbsPitchContainer(..)
-  , TimedEvent(..)
+  , TimedEvent(..), timedEventContent
   , Note(..)
   , OnOff(..), isOn, isOff
   ) where
@@ -304,6 +304,9 @@ instance NFData a => NFData (Pitch a)
 instance Functor Pitch where
   fmap f (Pitch p) = Pitch (f p)
 
+instance EM.ToMusic1 p => EM.ToMusic1 (Pitch p) where
+  toMusic1 = EM.toMusic1 . EM.mMap toInterval
+
 toPitch = Pitch
 toInterval (Pitch i) = i
 
@@ -312,6 +315,8 @@ toInterval (Pitch i) = i
 (Pitch p) +^ i = Pitch (p ^+^ i)
 i ^+ (Pitch p) = Pitch (p ^+^ i)
 (Pitch p) -^ i = Pitch (p ^-^ i)
+pc :: (Interval p) => Pitch p -> Pitch (ICOf p)
+pc = fmap ic
 
 -- this needs FlexibleInstances
 -- instance Show (Pitch SInterval) where
@@ -431,6 +436,8 @@ instance Interval p => Pitched (Identity p) where
 
 data TimedEvent c t = TimedEvent c t t
   deriving (Eq, Ord, Show, Read)
+
+timedEventContent (TimedEvent c _ _) = c
 
 instance (Num t, Ord t) => Timed (TimedEvent p t) where
   type TimeOf (TimedEvent p t) = t
