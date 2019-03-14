@@ -80,11 +80,11 @@ release :: Ord k => M.Map k v -> k -> (M.Map k v, [v])
 release q gate = (q', M.elems rels)
   where (rels, q') = M.spanAntitone (<=gate) q
 
-pcFills :: (Eq p, Interval p) => p -> p -> p -> Bool
-pcFills pl pm ph = odir == EQ && pl /= pm && pm /= ph ||
-                   odir /= EQ && dir1 == odir && dir2 == odir
-  where odir = direction (ph^-^pl)
-        dir1 = direction (pm^-^pl)
+intFills :: (Eq p, Interval p) => p -> p -> Bool
+intFills pm ph = odir == EQ && pm /= zeroV && pm /= ph ||
+                 odir /= EQ && dir1 == odir && dir2 == odir
+  where odir = direction ph
+        dir1 = direction pm
         dir2 = direction (ph^-^pm)
 
 rerunStateT :: (m (a, s) -> n (b, t)) -> (t -> s) -> StateT s m a -> StateT t n b
