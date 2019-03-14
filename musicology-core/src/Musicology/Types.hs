@@ -26,6 +26,7 @@ module Musicology.Types
   , c', d', e', f', g', a', b'
   , Timed(..), HasTime(..)
   , Pitched(..), HasInterval(..), HasPitch(..)
+  , transpose, embedI, embedP, embed, embed'
   -- , PitchClassContainer(..), PitchContainer(..), embed, embed'
   -- , AbsPitchContainer(..)
   , TimedEvent(..), timedEventContent
@@ -404,14 +405,15 @@ class Pitched a => HasPitch a where
 
 -- some container helpers (put in separate module?)
 
-embPs :: (Functor f, IntervalClass ic) => f (Pitch ic) -> f (Pitch (IOf ic))
-embPs = fmap (fmap emb)
+transpose :: (Functor f, Interval i) => i -> f i -> f i
+transpose by = fmap (^+^ by)
 
-transposePs :: (Functor f, Interval i) => i -> f (Pitch i) -> f (Pitch i)
-transposePs by = fmap (+^ by)
+embedI rot trans = (^+^ trans) . emb . (^+^ rot)
 
-embed rot trans = transposePs trans . embPs . transposePs rot
-embed' slide c0 = embed (negateV (ic slide)) (c0 ^+^ slide)
+embedP rot trans = (+^ trans) . (fmap emb) . (+^ rot)
+
+embed rot trans = transpose trans . (fmap emb) . transpose rot
+embed' slide c0 = embed (negateV (ic slide)) (toInterval c0 ^+^ slide)
 
 -- class (Pitch (PitchOf c), PitchContainer c) => AbsPitchContainer c where
 --   refPitch :: c -> PitchOf c
