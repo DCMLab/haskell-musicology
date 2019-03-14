@@ -102,20 +102,11 @@ mic = MidiIC . flip mod 12
 instance Show MidiIC where
   show (MidiIC i) = show i
 
-instance Num MidiIC where
-  fromInteger = mic . fromInteger
-  (MidiIC a) + (MidiIC b) = mic $ a+b
-  (MidiIC a) - (MidiIC b) = mic $ a-b
-  (MidiIC a) * (MidiIC b) = mic $ a*b -- never use this one!
-  negate (MidiIC i) = mic (-i)
-  abs = id
-  signum (MidiIC i) = mic $ signum i
-
 instance AdditiveGroup MidiIC where
   zeroV = MidiIC 0
-  negateV = negate
-  (^+^) = (+)
-  (^-^) = (-)
+  negateV (MidiIC m) = mic $ negate m
+  (MidiIC a) ^+^ (MidiIC b) = mic $ a + b
+  (MidiIC a) ^-^ (MidiIC b) = mic $ a - b
 
 instance VectorSpace MidiIC where
   type Scalar MidiIC = Int
@@ -125,7 +116,7 @@ instance Interval MidiIC where
   type ICOf MidiIC = MidiIC
   ic = id
   toMidi (MidiIC i) = i+60
-  octave x = 0
+  octave x = mic 0
   direction (MidiIC 0) = EQ
   direction (MidiIC i) = if i == 0
                          then EQ
