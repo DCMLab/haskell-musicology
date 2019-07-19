@@ -5,7 +5,13 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Musicology.MusicXML where
+module Musicology.MusicXML
+  ( parseWithIds, idfy
+  , XmlNote(..), XmlRecord
+  , xmlNoteToRecord, notesToFrame
+  , asNote, asNoteWithId
+  , xmlNotes, scoreNotes
+  )where
 
 import Text.XML.Light
 import Text.XML.Light.Lexer (XmlSource)
@@ -118,8 +124,8 @@ notesToFrame notes = toFrame $ map xmlNoteToRecord notes
 asNote :: XmlNote -> Note SInterval (Ratio Int)
 asNote (XmlNote on off dia chrom _ _) = Note (spelled dia chrom) on off
 
-asNoteId :: XmlNote -> NoteId SInterval (Ratio Int) (Maybe String)
-asNoteId (XmlNote on off dia chrom _ id) = NoteId (spelled dia chrom) on off id 
+asNoteWithId :: XmlNote -> NoteId SInterval (Ratio Int) (Maybe String)
+asNoteWithId (XmlNote on off dia chrom _ id) = NoteId (spelled dia chrom) on off id 
 
 data ParsingState = PS
   { psNotes :: [XmlNote]
