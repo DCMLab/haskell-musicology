@@ -116,7 +116,10 @@ notesToFrame :: [XmlNote] -> Frame XmlRecord
 notesToFrame notes = toFrame $ map xmlNoteToRecord notes
 
 asNote :: XmlNote -> Note SInterval (Ratio Int)
-asNote (XmlNote on off dia chrom _ _) = Note (Pitch (SInterval dia chrom)) on off
+asNote (XmlNote on off dia chrom _ _) = Note (spelled dia chrom) on off
+
+asNoteId :: XmlNote -> NoteId SInterval (Ratio Int) (Maybe String)
+asNoteId (XmlNote on off dia chrom _ id) = NoteId (spelled dia chrom) on off id 
 
 data ParsingState = PS
   { psNotes :: [XmlNote]

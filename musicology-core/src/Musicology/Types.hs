@@ -20,17 +20,18 @@ module Musicology.Types
   , unison, second, third, fourth, tritone, fifth, sixth, seventh
   , unison', second', third', fourth', tritone', fifth', sixth', seventh'
   , Pitch(..), toPitch, toInterval, pto, pfrom, (+^), (^+), (-^), pc
-  , MidiPitch, MidiPC, SPitch, SPC
+  , MidiPitch, MidiPC, SPitch, SPC, spelled, spc
   , flt, shp, nat
   , c, d, e, f, g, a, b
   , c', d', e', f', g', a', b'
   , Timed(..), HasTime(..)
   , Pitched(..), HasInterval(..), HasPitch(..)
+  , Identifiable(..)
   , transpose, embedI, embedP, embed, embed'
   -- , PitchClassContainer(..), PitchContainer(..), embed, embed'
   -- , AbsPitchContainer(..)
   , TimedEvent(..), timedEventContent
-  , Note(..)
+  , Note(..), NoteId(..)
   , OnOff(..), isOn, isOff
   ) where
 
@@ -338,6 +339,9 @@ instance Show (Pitch SInterval) where
   show (Pitch (SInterval d c)) = diaget dianames d <> accstr accs '♯' '♭' <> show (div d 7)
     where accs = c - dia2chrom d
 
+spelled :: Int -> Int -> SPitch
+spelled d c = Pitch $ SInterval d c
+
 newtype Accidental = Acc Int
 runAcc (Acc x) = x
 
@@ -345,8 +349,9 @@ flt = Acc (-1)
 shp = Acc 1
 nat = Acc 0
 
+toSpelled :: Int -> Int -> Accidental -> Int -> SPitch
 toSpelled dia chrom acc oct =
-  Pitch $ SInterval (dia + 7*oct) (chrom + (runAcc acc) + 12*oct)
+  spelled (dia + 7*oct) (chrom + (runAcc acc) + 12*oct)
 
 c = toSpelled 0 0
 d = toSpelled 1 2
@@ -360,7 +365,11 @@ instance Show (Pitch SIC) where
   show (Pitch (SIC d c)) = diaget dianames d <> accstr accs '♯' '♭'
     where accs = c - dia2chrom d
 
-toSPC dia chrom acc = Pitch $ sic dia (chrom + (runAcc acc))
+spc :: Int -> Int -> SPC
+spc d c = Pitch $ sic d c
+
+toSPC :: Int -> Int -> Accidental -> SPC
+toSPC dia chrom acc = spc dia (chrom + (runAcc acc))
 
 c' = toSPC 0 0
 d' = toSPC 1 2
@@ -422,6 +431,14 @@ instance Interval p => Pitched (Maybe p) where
   
 instance Interval p => Pitched (Identity p) where
   type IntervalOf (Identity p) = p
+
+---------
+-- IDs --
+---------
+
+class Identifiable i where
+  type IdOf i
+  getId :: i -> IdOf i
 
 ----------------
 -- TimedEvent --
@@ -485,6 +502,48 @@ instance (FromJSON p, FromJSON t) => FromJSON (Note p t) where
     <$> (toPitch <$> v .: "pitch")
     <*> v .: "onset"
     <*> v .: "offset"
+
+-- note with id
+---------------
+
+data NoteId p t i = NoteId !(Pitch p) !t !t !i
+  deriving (Eq, Ord, Generic)
+
+instance (NFData p, NFData t, NFData i) => NFData (NoteId p t i)
+
+deriving instance (Show (Pitch p), Show t, Show i) => Show (NoteId p t i)
+deriving instance (Read (Pitch p), Read t, Read i) => Read (NoteId p t i)
+
+instance (Num t, Ord t) => Timed (NoteId p t i) where
+  type TimeOf (NoteId p t i) = t
+
+instance (Num t, Ord t) => HasTime (NoteId p t i) where
+  onset (NoteId _ on _ _) = on
+  offset (NoteId _ _ off _) = off
+
+instance Interval p => Pitched (NoteId p t i) where
+  type IntervalOf (NoteId p t i) = p
+
+instance Interval p => HasPitch (NoteId p t i) where
+  pitch (NoteId p _ _ _) = p
+
+instance Identifiable (NoteId p t i) where
+  type IdOf (NoteId p t i) = i
+  getId (NoteId _ _ _ i) = i
+
+instance (ToJSON p, ToJSON t, ToJSON i) => ToJSON (NoteId p t i) where
+  toJSON (NoteId (Pitch p) on off id) =
+    object ["pitch" .= p, "onset" .= on, "offset" .= off, "id" .= id]
+  toEncoding (NoteId (Pitch p) on off id) =
+    pairs ("pitch" .= p <> "onset" .= on <> "offset" .= off <> "id" .= id)
+
+instance (FromJSON p, FromJSON t, FromJSON i) => FromJSON (NoteId p t i) where
+  parseJSON = withObject "Note" $ \v -> NoteId
+    <$> (toPitch <$> v .: "pitch")
+    <*> v .: "onset"
+    <*> v .: "offset"
+    <*> v .: "id"
+
 
 ----------------------------------------------
 -- Ons and Offs                             --
