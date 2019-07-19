@@ -50,7 +50,7 @@ previewFrame :: (RecMapMethod Show ElField a, RecordToList a, ColumnHeaders a)
              => Int -> Frame (Record a) -> IO ()
 previewFrame n fr = do
   putStrLn $ showHeader fr
-  preview [1..n]
+  preview [0..n-1]
   putStrLn "..."
   preview [l-n..l-1]
   where l = frameLength fr
