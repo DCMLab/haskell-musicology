@@ -11,7 +11,7 @@ module Musicology.MusicXML
   , xmlNoteToRecord, notesToFrame
   , asNote, asNoteWithId
   , xmlNotes, scoreNotes
-  )where
+  ) where
 
 import Text.XML.Light
 import Text.XML.Light.Lexer (XmlSource)

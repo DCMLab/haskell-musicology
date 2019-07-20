@@ -24,6 +24,7 @@ dependencies:
 - safe
 - containers
 - aeson
+- text
 - deepseq
 - Euterpea
 - vector-space

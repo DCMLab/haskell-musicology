@@ -30,6 +30,7 @@ dependencies:
 - vinyl
 - pipes
 - text
+- aeson
 
 library:
   source-dirs: src
@@ -38,6 +39,15 @@ executables:
   musicology-musicxml-exe:
     main:                Main.hs
     source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - musicology-musicxml
+  musicxml2json:
+    main:                Main.hs
+    source-dirs:         app/tojson
     ghc-options:
     - -threaded
     - -rtsopts

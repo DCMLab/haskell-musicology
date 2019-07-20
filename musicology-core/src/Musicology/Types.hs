@@ -27,6 +27,7 @@ module Musicology.Types
   , Timed(..), HasTime(..)
   , Pitched(..), HasInterval(..), HasPitch(..)
   , Identifiable(..)
+  , Notation(..)
   , transpose, embedI, embedP, embed, embed'
   -- , PitchClassContainer(..), PitchContainer(..), embed, embed'
   -- , AbsPitchContainer(..)
@@ -36,6 +37,7 @@ module Musicology.Types
   ) where
 
 import Data.Monoid ((<>))
+import Control.Applicative ((<|>))
 import Data.Functor.Identity (Identity(..))
 
 import GHC.Generics (Generic)
@@ -45,6 +47,12 @@ import Data.VectorSpace
 
 import qualified Euterpea.Music as EM
 import Data.Aeson
+import qualified Data.Text as T
+import Text.Read (readMaybe)
+import qualified Text.ParserCombinators.ReadP as R
+import Data.Maybe (listToMaybe, maybe)
+import Data.Char (isDigit)
+import qualified Data.List as L
 
 ---------------
 -- Intervals --
@@ -91,17 +99,28 @@ dim = (^-^chromaticSemitone)
 aug :: Chromatic i => i -> i
 aug = (^+^chromaticSemitone)
 
+class Notation i where
+  showNotation  :: i -> String
+  showNotationT :: i -> T.Text
+  showNotationT = T.pack . showNotation
+  parseNotation :: R.ReadP i
+  readNotation  :: String -> Maybe i
+  readNotation str = fst <$> (listToMaybe $ R.readP_to_S parseFull str)
+    where parseFull = do
+            result <- parseNotation
+            R.eof
+            pure result
+  readNotationT :: T.Text -> Maybe i
+  readNotationT = readNotation . T.unpack
+
 -- MidiInterval
 ---------------
 
 newtype MidiIC = MidiIC Int
-  deriving (Eq, Ord, NFData, ToJSON, FromJSON)
+  deriving (Eq, Ord, NFData, Show)
 
 mic :: Int -> MidiIC
 mic = MidiIC . flip mod 12
-
-instance Show MidiIC where
-  show (MidiIC i) = show i
 
 instance AdditiveGroup MidiIC where
   zeroV = MidiIC 0
@@ -134,8 +153,31 @@ instance Diatonic MidiIC where
 instance Chromatic MidiIC where
   chromaticSemitone = MidiIC 1
 
-instance EM.ToMusic1 (MidiIC) where
+instance EM.ToMusic1 MidiIC where
   toMusic1 = EM.toMusic1 . EM.mMap (\i -> (emb i + 60))
+
+-- helper
+parseInt :: R.ReadP Int
+parseInt = do
+  sign <- R.option "" $ R.string "-"
+  dgts <- R.munch1 isDigit
+  pure $ read $ sign <> dgts
+
+parseInt' :: R.ReadP Int
+parseInt' = read <$> R.munch isDigit
+
+munchChar :: Char -> R.ReadP String
+munchChar c = R.munch (==c)
+
+munchChar1 :: Char -> R.ReadP String
+munchChar1 c = R.munch1 (==c)
+
+anyChar :: [Char] -> R.ReadP Char
+anyChar chars = R.satisfy (`elem` chars)
+
+instance Notation MidiIC where
+  showNotation (MidiIC i) = "ic" <> show i
+  parseNotation = R.string "ic" >> mic <$> parseInt
 
 type MidiInterval = Int
 --  deriving (Eq, Ord, Show, Enum, Num, Real, Integral)
@@ -158,28 +200,46 @@ instance Diatonic Int where
 instance Chromatic Int where
   chromaticSemitone = 1
 
+instance Notation MidiInterval where
+  showNotation = show
+  parseNotation = parseInt
+  readNotation = readMaybe
+
+
 -- Spelled Interval
 -------------------
 
 -- data NoteNames = A | B | C | D | E | F | G
 --   deriving (Eq, Ord, Show)
 
--- spelled pitch type and instances
+-- spelled interval type and instances
 
 diachrom = [0, 2, 4, 5, 7, 9, 11]
 dia2chrom d = (diachrom !! (mod d 7)) + 12 * (div d 7)
-dianames = ["c", "d", "e", "f", "g", "a", "b"]
-diaints  = ["uni", "2nd", "3rd", "4th", "5th", "6th", "7th"]
+dianames = ["C", "D", "E", "F", "G", "A", "B"]
+-- diaints  = ["uni", "2nd", "3rd", "4th", "5th", "6th", "7th"]
+diafifths = [0,2,4,-1,1,3,5]
 diaget lst  = (lst!!) . (flip mod 7)
+perfectdia = [0,3,4]
 accstr 0 _ _ = ""
 accstr n u d | n > 0     = take n $ repeat u
              | otherwise = take (abs n) $ repeat d
+qualpf n a p d | n > 0     = take n $ repeat a
+               | n == 0    = [p]
+               | otherwise = take (-n) $ repeat d
+qualimpf n a mj mn d | n > 0     = take n $ repeat a
+                     | n == 0    = [mj]
+                     | n == (-1) = [mn]
+                     | otherwise = take ((-n)-1) $ repeat d
 
 data SInterval = SInterval
                  { dSteps :: Int
                  , cSteps :: Int
                  }
-  deriving (Ord, Eq, Generic)
+  deriving (Ord, Eq, Generic, Show)
+
+instance ToJSON SInterval -- TODO make more specific
+instance FromJSON SInterval
 
 down x = negateV x
 
@@ -197,9 +257,10 @@ seventh x = SInterval 6 (10+x)
 
 instance NFData SInterval
 
-instance Show SInterval where
-  show (SInterval d c) = diaget diaints d <> accstr augs '+' '-' <> show (div d 7)
-    where augs = c - dia2chrom d
+-- instance Show SInterval where
+--   -- show (SInterval d c) = diaget diaints d <> accstr augs '+' '-' <> show (div d 7)
+--   --   where augs = c - dia2chrom d
+--   show (SInterval d c) = "SInterval " <> show d <> " " <> show c
 
 instance AdditiveGroup SInterval where
   zeroV = SInterval 0 0
@@ -216,7 +277,7 @@ instance Interval SInterval where
   ic (SInterval d c) = sic d c
   toMidi (SInterval d c) = c + 12
   octave n = SInterval (7*n) (12*n)
---  direction (SInterval d _) = compare d 0 -- is this a good idea?
+  direction (SInterval d _) = compare d 0 -- is this a good idea?
 
 -- instance ClassyInterval SInterval where
 --   type ICOf SInterval = SIC
@@ -230,12 +291,61 @@ instance Chromatic SInterval where
 instance EM.ToMusic1 (SInterval) where
   toMusic1 = EM.toMusic1 . EM.mMap toMidi
 
--- spelled pitch class type and instances
+-- helpers:
 
-data SIC = SIC Int Int
-  deriving (Ord, Eq, Generic)
+diffAug :: R.ReadP (Bool -> R.ReadP Int)
+diffAug = do
+  as <- R.munch1 (=='a')
+  pure $ \_ -> pure $ length as
 
-sic d c = SIC (mod d 7) (mod c 12)
+diffDim :: R.ReadP (Bool -> R.ReadP Int)
+diffDim = do
+  ds <- R.munch1 (=='d')
+  pure $ \pf -> pure $ (0 - length ds) - if pf then 0 else 1
+
+diffQual :: R.ReadP (Bool -> R.ReadP Int)
+diffQual = do
+  qual <- anyChar "MPm"
+  case qual of
+    'P' -> pure $ \pf -> if pf then pure 0 else R.pfail
+    'M' -> pure $ \pf -> if pf then R.pfail else pure 0
+    'm' -> pure $ \pf -> if pf then R.pfail else pure (-1)
+
+instance Notation SInterval where
+  showNotation i@(SInterval d c)
+    | direction i == LT = "-" <> showNotation (negateV i)
+    | otherwise = qual <> show (dia+1) <> octstr
+    where dia = mod d 7
+          diff = c - dia2chrom d
+          qual = if dia `elem` perfectdia
+                 then qualpf diff 'a' 'P' 'd'
+                 else qualimpf diff 'a' 'M' 'm' 'd'
+          oct = div d 7
+          octstr = (if oct >= 0 then "+" else "") <> show oct
+  parseNotation = do
+    sign <- R.option '+' (R.char '-')
+    fdif <- diffQual <|> diffAug <|> diffDim
+    dia  <- (\x -> x-1) <$> parseInt'
+    diff <- fdif (dia `elem` perfectdia)
+    let chrom = dia2chrom dia + diff
+    osgn <- R.char '+' <|> R.char '-'
+    octi <- parseInt'
+    let octs = if osgn == '-' then -octi else octi
+        intv = SInterval (dia + 7*octs) (chrom + 12*octs)
+    pure $ if sign == '-' then negateV intv else intv
+
+-- spelled pitch class (aka tonal pc) type and instances
+-- spc are based on the line of fifth
+
+data SIC = SIC { sFifth :: Int }
+  deriving (Ord, Eq, Show, Generic)
+
+instance ToJSON SIC -- TODO: better keys in object
+instance FromJSON SIC
+
+-- sic d c = SIC (mod d 7) (mod c 12)
+sic d c = SIC $ (diaget diafifths d) + 7*diff
+  where diff = c - dia2chrom d
 
 unison'    = sic 0 0
 second'  x = sic 1 (1+x)
@@ -248,30 +358,32 @@ seventh' x = sic 6 (10+x)
 
 instance NFData SIC
 
-instance Show SIC where
-  show (SIC d c) = diaget diaints d <> accstr augs '+' '-'
-    where augs = c - dia2chrom d
+-- instance Show SIC where
+--   show (SIC d c) = diaget diaints d <> accstr augs '+' '-'
+--     where augs = c - dia2chrom d
 
 instance AdditiveGroup SIC where
-  zeroV = sic 0 0
-  negateV (SIC d c) = sic (-d) (-c)
-  (SIC d1 c1) ^+^ (SIC d2 c2) = sic (d1+d2) (c1+c2)
-  (SIC d1 c1) ^-^ (SIC d2 c2) = sic (d1-d2) (c1-c2)
+  zeroV = SIC 0
+  negateV (SIC f) = SIC (-f)
+  (SIC f1) ^+^ (SIC f2) = SIC $ f1 + f2
+  (SIC f1) ^-^ (SIC f2) = SIC $ f1 - f2
 
 instance VectorSpace SIC where
   type Scalar SIC = Int
-  s *^ (SIC d c) = sic (s*d) (s*c)
+  s *^ (SIC f) = SIC $ f*s
 
 instance Interval SIC where
   type ICOf SIC = SIC
   ic = id
-  toMidi (SIC _ c) = c
+  toMidi (SIC f) = mod (f*7) 12
   octave n = zeroV
-  direction (SIC 0 _) = EQ
-  direction (SIC d _) = if d < 5 then GT else LT
+  direction (SIC 0) = EQ
+  direction i       = if d < 4 then GT else LT
+    where (SInterval d _) = emb i
 
 instance Diatonic SIC where
-  isStep (SIC d _) = d < 2 || d == 6
+  isStep ic = d <= 1
+    where (SInterval d _) = iabs $ emb ic
 
 instance Chromatic SIC where
   chromaticSemitone = sic 0 1
@@ -279,10 +391,28 @@ instance Chromatic SIC where
 instance IntervalClass SIC where
   type IOf SIC = SInterval
   -- ic (SInterval d c) = sic d c
-  emb (SIC d c) = SInterval d c
+  emb (SIC f) = SInterval (dia `mod` 7) (chrom - (12 * (dia `div` 7)))
+    where dia   = f * 4
+          chrom = f * 7
 
 instance EM.ToMusic1 (SIC) where
   toMusic1 = EM.toMusic1 . EM.mMap ((+60) . toMidi)
+
+instance Notation SIC where
+  showNotation i = qual <> show (d+1)
+    where (SInterval d c) = emb i
+          diff = c - dia2chrom d
+          qual = if d `elem` perfectdia
+                 then qualpf diff 'a' 'P' 'd'
+                 else qualimpf diff 'a' 'M' 'm' 'd'
+  parseNotation = do
+    sign <- R.option '+' (R.char '-')
+    fdif <- diffQual <|> diffAug <|> diffDim
+    dia  <- (\x -> x-1) <$> parseInt'
+    diff <- fdif (dia `elem` perfectdia)
+    let chrom = dia2chrom dia + diff
+    let intv = sic dia chrom
+    pure $ if sign == '-' then negateV intv else intv
 
 -------------
 -- Pitches --
@@ -290,7 +420,7 @@ instance EM.ToMusic1 (SIC) where
 
 -- wrapper type: turn intervals into pitches
 newtype Pitch a = Pitch a
-  deriving (Eq, Ord, Generic)
+  deriving (Eq, Ord, Generic, Show, ToJSON, FromJSON)
 
 instance NFData a => NFData (Pitch a)
 
@@ -311,23 +441,26 @@ i ^+ (Pitch p) = Pitch (p ^+^ i)
 pc :: (Interval p) => Pitch p -> Pitch (ICOf p)
 pc = fmap ic
 
--- this needs FlexibleInstances
--- instance Show (Pitch SInterval) where
---   show (Pitch i) = ""
-
--- instance Show (Pitch MidiInterval)
-
 -- midi pitch
 -------------
 
 type MidiPitch = Pitch MidiInterval
 type MidiPC    = Pitch MidiIC
 
-instance Show (Pitch MidiInterval) where
-  show (Pitch i) = "p" <> show i
+midip  :: Int -> MidiPitch
+midip = Pitch
 
-instance Show (Pitch MidiIC) where
-  show (Pitch i) = "pc" <> show i
+midipc :: Int -> MidiPC
+midipc = Pitch . mic
+
+instance Notation MidiPitch where
+  showNotation (Pitch i) = "p" <> showNotation i
+  parseNotation = R.char 'p' >> (midip <$> parseInt)
+
+instance Notation MidiPC where
+  showNotation (Pitch i) = "pc" <> showNotation i
+  parseNotation = R.string "pc" >> (midipc <$> parseInt)
+
 
 -- spelled pitch / pitch class
 ------------------------------
@@ -335,12 +468,14 @@ instance Show (Pitch MidiIC) where
 type SPitch = Pitch SInterval
 type SPC    = Pitch SIC
 
-instance Show (Pitch SInterval) where
-  show (Pitch (SInterval d c)) = diaget dianames d <> accstr accs '♯' '♭' <> show (div d 7)
-    where accs = c - dia2chrom d
-
 spelled :: Int -> Int -> SPitch
 spelled d c = Pitch $ SInterval d c
+
+-- helper
+parseAccs :: R.ReadP Int
+parseAccs = R.option 0 $ sharps <|> flats
+  where sharps = length <$> (munchChar1 '♯' <|> munchChar1 '#')
+        flats  = negate . length <$> (munchChar1 '♭' <|> munchChar1 'b')
 
 newtype Accidental = Acc Int
 runAcc (Acc x) = x
@@ -361,9 +496,17 @@ g = toSpelled 4 7
 a = toSpelled 5 9
 b = toSpelled 6 11
 
-instance Show (Pitch SIC) where
-  show (Pitch (SIC d c)) = diaget dianames d <> accstr accs '♯' '♭'
+instance Notation SPitch where
+  showNotation (Pitch (SInterval d c)) =
+    diaget dianames d <> accstr accs '♯' '♭' <> show (div d 7)
     where accs = c - dia2chrom d
+  parseNotation = do
+    name <- anyChar "ABCDEFG"
+    dia  <- maybe R.pfail pure (L.elemIndex [name] dianames)
+    diff <- parseAccs
+    let chrom = dia2chrom dia + diff
+    octs <- parseInt
+    pure $ spelled (dia + 7*octs) (chrom + 12*octs)
 
 spc :: Int -> Int -> SPC
 spc d c = Pitch $ sic d c
@@ -378,6 +521,18 @@ f' = toSPC 3 5
 g' = toSPC 4 7
 a' = toSPC 5 9
 b' = toSPC 6 11
+
+instance Notation SPC where
+  showNotation (Pitch i) =
+    diaget dianames d <> accstr accs '♯' '♭'
+    where (SInterval d c) = emb i
+          accs = c - dia2chrom d
+  parseNotation = do
+    name <- anyChar "ABCDEFG"
+    dia  <- maybe R.pfail pure (L.elemIndex [name] dianames)
+    diff <- parseAccs
+    let chrom = dia2chrom dia + diff
+    pure $ spc dia chrom
 
 ----------------
 -- Containers --
