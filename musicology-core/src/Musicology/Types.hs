@@ -378,7 +378,7 @@ instance Interval SIC where
   toMidi (SIC f) = mod (f*7) 12
   octave n = zeroV
   direction (SIC 0) = EQ
-  direction i       = if d < 4 then GT else LT
+  direction i       = if d == 0 then EQ else if d < 4 then GT else LT
     where (SInterval d _) = emb i
 
 instance Diatonic SIC where
