@@ -4,6 +4,31 @@ A library for computational modeling of musical structure.
 
 ## Installation
 
+### Tools
+
+Clone this repo, enter it and run `stack build`.
+After that, you will be able to run the included binaries using `stack exec <tool>` from the repo directory or below.
+Alternatively, run `stack install` to install the binaries to `~/.local/bin` (on Linux).
+Check the output of `stack install` for the exact location and make sure it is on your path.
+
+``` shell
+$ git clone https://github.com/DCMLab/haskell-musicology.git
+$ cd haskell-musicology
+$ stack build
+$ stack exec musicxml2json # for example
+```
+
+or
+
+``` shell
+$ stack install
+$ musicxml2json
+```
+
+Remember to rerun `stack install` everytime you update the repository or make changes to the code.
+
+### Library (as a Dependency)
+
 This library is currently not on Hackage,
 but you can easily use the GitHub repository with `stack`.
 Add `musicology-core` and/or all sub-packages that you need as dependencies
