@@ -45,6 +45,9 @@ import Control.DeepSeq (NFData)
 
 import Data.VectorSpace
 
+import Lens.Micro
+import Lens.Micro.Extras
+
 import qualified Euterpea.Music as EM
 import Data.Aeson
 import qualified Data.Text as T
@@ -542,21 +545,37 @@ class (Num (TimeOf a), Ord (TimeOf a)) => Timed a where
   type TimeOf a
 
 class Timed a => HasTime a where
+  onsetL :: Lens' a (TimeOf a)
+  onsetL = lens onset (flip setOnset)
+  offsetL :: Lens' a (TimeOf a)
+  offsetL = lens offset (flip setOffset)
   onset :: a -> TimeOf a
-  onset x = offset x - duration x
+  onset = view onsetL
   offset :: a -> TimeOf a
-  offset x = onset x + duration x
-  duration :: a -> TimeOf a
-  duration x = offset x - onset x
+  offset = view offsetL
+  setOnset :: TimeOf a -> a -> a
+  setOnset = set onsetL
+  setOffset :: TimeOf a -> a -> a
+  setOffset = set offsetL
 
 class (Interval (IntervalOf a)) => Pitched a where
   type IntervalOf a
 
 class Pitched a => HasInterval a where
+  intervalL :: Lens' a (IntervalOf a)
+  intervalL = lens interval (flip setInterval)
   interval :: a -> IntervalOf a
+  interval = view intervalL
+  setInterval :: IntervalOf a -> a -> a
+  setInterval = set intervalL
 
 class Pitched a => HasPitch a where
+  pitchL :: Lens' a (Pitch (IntervalOf a))
+  pitchL = lens pitch (flip setPitch)
   pitch :: a -> Pitch (IntervalOf a)
+  pitch = view pitchL
+  setPitch :: Pitch (IntervalOf a) -> a -> a
+  setPitch = set pitchL
 
 -- some container helpers (put in separate module?)
 
@@ -608,8 +627,8 @@ instance (Num t, Ord t) => Timed (TimedEvent p t) where
   type TimeOf (TimedEvent p t) = t
 
 instance (Num t, Ord t) => HasTime (TimedEvent p t) where
-  onset (TimedEvent _ on _) = on
-  offset (TimedEvent _ _ off) = off
+  onsetL f (TimedEvent e on off) = fmap (\on' -> TimedEvent e on' off) (f on)
+  offsetL f (TimedEvent e on off) = fmap (\off' -> TimedEvent e on off') (f off)
 
 instance Pitched c => Pitched (TimedEvent c t) where
   type IntervalOf (TimedEvent c t) = IntervalOf c
@@ -637,14 +656,14 @@ instance (Num t, Ord t) => Timed (Note p t) where
   type TimeOf (Note p t) = t
 
 instance (Num t, Ord t) => HasTime (Note p t) where
-  onset (Note _ on _) = on
-  offset (Note _ _ off) = off
+  onsetL f (Note p on off) = fmap (\on' -> Note p on' off) (f on)
+  offsetL f (Note p on off) = fmap (\off' -> Note p on off') (f off)
 
 instance Interval p => Pitched (Note p t) where
   type IntervalOf (Note p t) = p
 
 instance Interval p => HasPitch (Note p t) where
-  pitch (Note p _ _) = p
+  pitchL f (Note p on off) = fmap (\p' -> Note p' on off) (f p)
 
 instance (ToJSON p, ToJSON t) => ToJSON (Note p t) where
   toJSON (Note (Pitch p) on off) =
@@ -673,14 +692,14 @@ instance (Num t, Ord t) => Timed (NoteId p t i) where
   type TimeOf (NoteId p t i) = t
 
 instance (Num t, Ord t) => HasTime (NoteId p t i) where
-  onset (NoteId _ on _ _) = on
-  offset (NoteId _ _ off _) = off
+  onsetL f (NoteId p on off id) = fmap (\on' -> NoteId p on' off id) (f on)
+  offsetL f (NoteId p on off id) = fmap (\off' -> NoteId p on off' id) (f off)
 
 instance Interval p => Pitched (NoteId p t i) where
   type IntervalOf (NoteId p t i) = p
 
 instance Interval p => HasPitch (NoteId p t i) where
-  pitch (NoteId p _ _ _) = p
+  pitchL f (NoteId p on off id) = fmap (\p' -> NoteId p' on off id) (f p)
 
 instance Identifiable (NoteId p t i) where
   type IdOf (NoteId p t i) = i
@@ -714,25 +733,26 @@ isOn (Offset _ _) = False
 ifOff (Onset _ _) = False
 isOff (Offset _ _) = True
 
+onOffContent :: Lens' (OnOff c t) c
+onOffContent f (Onset c t) = fmap (\c' -> Onset c' t) (f c)
+onOffContent f (Offset c t) = fmap (\c' -> Offset c' t) (f c)
+
 instance (Num t, Ord t) => Timed (OnOff c t) where
   type TimeOf (OnOff c t) = t
 
 instance (Num t, Ord t) => HasTime (OnOff p t) where
-  onset (Onset _ t) = t
-  onset (Offset _ t) = t
-  offset (Onset _ t) = t
-  offset (Offset _ t) = t
+  onsetL f (Onset p t) = fmap (\t' -> Onset p t') (f t)
+  onsetL f (Offset p t) = fmap (\t' -> Offset p t') (f t)
+  offsetL = onsetL
 
 instance Pitched c => Pitched (OnOff c t) where
   type IntervalOf (OnOff c t) = IntervalOf c
 
 instance HasInterval c => HasInterval (OnOff c t) where
-  interval (Onset c _) = interval c
-  interval (Offset c _) = interval c
+  intervalL = onOffContent . intervalL
 
 instance HasPitch c => HasPitch (OnOff c t) where
-  pitch (Onset c _) = pitch c
-  pitch (Offset c _) = pitch c
+  pitchL = onOffContent . pitchL
 
 ---------------------------------
 -- contextual note: held over? --
