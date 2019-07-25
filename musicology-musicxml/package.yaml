@@ -31,6 +31,8 @@ dependencies:
 - pipes
 - text
 - aeson
+- containers
+- microlens
 
 library:
   source-dirs: src
