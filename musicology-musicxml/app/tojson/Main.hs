@@ -11,4 +11,4 @@ notateNoteId (NoteId (Pitch p) on off id) = NoteId (Pitch (showNotation p)) on o
 
 main = do
   xml <- getContents
-  B.putStr $ encode $ (notateNoteId <$> asNoteWithId <$> xmlNotes xml)
+  B.putStr $ encode $ (notateNoteId <$> asNoteWithId <$> xmlNotesHeard xml)

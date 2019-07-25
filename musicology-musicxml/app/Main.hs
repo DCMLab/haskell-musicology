@@ -25,4 +25,4 @@ main = do
   let input = getContents
       output = putStrLn
   txt <- input
-  P.runEffect $ P.for (produceCSV $ notesToFrame $ xmlNotes txt) (P.lift . output)
+  P.runEffect $ P.for (produceCSV $ notesToFrame $ xmlNotesHeard txt) (P.lift . output)
