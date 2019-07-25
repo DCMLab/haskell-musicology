@@ -149,7 +149,7 @@ data FlowMarker t = FM t FlowCommand -- (Maybe [Int])
 -- order: closing low, closing high, opening high, opening low
 data FlowCommand = BwRepeat Int
                  | StopEnding
-                 | Fine
+                 | Fine (Maybe [Int])
                  | DaCapo (Maybe [Int])
                  | DalSegno String (Maybe [Int])
                  | ToCoda String (Maybe [Int])
@@ -211,11 +211,15 @@ unfoldFlow end markers = foldJumps $ fsJumps $ snd $ runState doFlow init
           modify $ \st -> st { fsMarkers = rest, fsNow = t 
                              , fsJumps = Jump (fsNow st) t : fsJumps st }
         currentRep = maybe 1 (\(_, n, _) -> n) . listToMaybe . fsStack <$> get
-        checkTimes Nothing _ action = action
+        pass counts marker = M.findWithDefault 1 marker counts
+        checkTimes Nothing _ action = action -- no times? always run
         checkTimes (Just times) marker action = do
           gc <- fsGCount <$> get
-          when (passes gc) action
-          where passes counts = M.findWithDefault 1 marker counts `elem` times
+          when (pass gc marker `elem` times) action
+        checkTimes' Nothing marker action = do -- no times? only run on second pass or higher
+          gc <- fsGCount <$> get
+          when (pass gc marker > 1) action
+        checkTimes' (Just times) m a = checkTimes (Just times) m a
         doFlow = do
           -- get >>= D.traceM . show
           mm <- nextMarker
@@ -229,7 +233,8 @@ unfoldFlow end markers = foldJumps $ fsJumps $ snd $ runState doFlow init
                 n <- currentRep
                 if n `elem` ns then pure () else skipUntil StopEnding
               StopEnding     -> pure ()
-              Fine           -> modify $ \st -> st { fsMarkers = [] -- stops recursion
+              Fine times     -> checkTimes' times marker $
+                                modify $ \st -> st { fsMarkers = [] -- stops recursion
                                                    , fsJumps = End (fsNow st) : fsJumps st }
               DaCapo times   -> checkTimes times marker $ reenter markersSorted (0%1)
               Segno name     -> modify $ \st ->
@@ -339,7 +344,7 @@ doDirection elt = mapM_ doSound (namedChildren elt "sound")
               pushFlow flow = modify $
                 \st -> st { psFlow = FM (psTime st) flow : psFlow st }
           for_ (attr "dacapo")   $ \_    -> pushFlow $ DaCapo only
-          for_ (attr "fine")     $ \_    -> pushFlow Fine
+          for_ (attr "fine")     $ \_    -> pushFlow $ Fine only
           for_ (attr "segno")    $ \sgn  -> pushFlow $ Segno sgn
           for_ (attr "dalsegno") $ \sgn  -> pushFlow $ DalSegno sgn only
           for_ (attr "coda")     $ \coda -> pushFlow $ Coda coda
