@@ -192,11 +192,10 @@ unfoldFlow end markers = foldJumps $ fsJumps $ snd $ runState doFlow init
         fj t (Jump t1 t2:rst) acc = fj t1 rst ((t2,t) : acc)
         markersSorted = sort markers -- sort respects marker precedence (see above)
         init = FS (0%1) markersSorted M.empty [] M.empty []
-        restore markers t stack = do
+        restore markers t stack =
           modify (\st -> st { fsMarkers = markers, fsNow = t, fsStack = stack
                             , fsJumps = Jump (fsNow st) t : fsJumps st })
-        reenter markers t = modify $ \st -> st { fsMarkers = markers, fsNow = t, fsStack = []
-                                               , fsJumps = Jump (fsNow st) t : fsJumps st }
+        reenter markers t = restore markers t []
         pushRepeat = modify $ \st -> st { fsStack = (fsNow st, 1, fsMarkers st) : fsStack st }
         popRepeat = modify $ \st -> st { fsStack = maybe [] snd $ uncons $ fsStack st }
         goRepeat = do
@@ -206,9 +205,9 @@ unfoldFlow end markers = foldJumps $ fsJumps $ snd $ runState doFlow init
             Nothing -> restore markersSorted (0%1) [(0%1, 2, markersSorted)]
         skipUntil com = do
           markers <- fsMarkers <$> get
-          let dropped = dropWhile (\(FM _ c) -> c /= com) markers
-              (FM t _, rest) = maybe (FM (0%1) com, []) id $ uncons dropped
-          modify $ \st -> st { fsMarkers = rest, fsNow = t 
+          let remaining = dropWhile (\(FM _ c) -> c /= com) markers
+              (FM t _) = maybe (FM end com) id $ listToMaybe remaining
+          modify $ \st -> st { fsMarkers = remaining, fsNow = t 
                              , fsJumps = Jump (fsNow st) t : fsJumps st }
         currentRep = maybe 1 (\(_, n, _) -> n) . listToMaybe . fsStack <$> get
         pass counts marker = M.findWithDefault 1 marker counts
@@ -240,12 +239,13 @@ unfoldFlow end markers = foldJumps $ fsJumps $ snd $ runState doFlow init
               Segno name     -> modify $ \st ->
                 let now = fsNow st
                     stack = fsStack st
+                    markers = fsMarkers st
                     segnos = M.insert name (markers, now, stack) $ fsSegno st
                 in st { fsSegno = segnos }
               DalSegno name t -> checkTimes t marker $ get >>= \st ->
                 for_ (M.lookup name $ fsSegno st) $ \(m, t, s) -> restore m t s 
               Coda name      -> pure ()
-              ToCoda name t  -> checkTimes t marker $ skipUntil $ Coda name
+              ToCoda name t  -> checkTimes' t marker $ skipUntil $ Coda name
             doFlow
 
 runFlow :: (HasTime n, TimeOf n ~ t, Num t, Ord t) => [(t,t)] -> [n] -> [n]
