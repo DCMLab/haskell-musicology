@@ -117,10 +117,13 @@ groupsToSlices groups = processFoldable groups $ construct $ do
           slices nxt
 
 -- groupsToPitches :: (Foldable t, Pitched a, Timed a, Eq p, p ~ PitchOf a) => t [OnOff a (TimeOf a)] -> [p]
-groupsToPitches groups = processFoldable groups $ construct $ go []
+groupsToPitches groups = processFoldable groups $ construct $ do
+  grp1 <- await
+  let init = newPitches [] grp1
+  go init
   where go curr = do
-          ps <- newPitches curr <$> await
-          yield ps
+          ps <- newPitches curr <$> await <|> when (not $ null curr) (yield curr) *> stop
+          yield curr
           go ps
   
   
