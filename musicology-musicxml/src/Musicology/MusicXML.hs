@@ -191,18 +191,20 @@ unfoldFlow end markers = foldJumps $ fsJumps $ snd $ runState doFlow init
         fj t (End e:rst) acc = fj e rst acc
         fj t (Jump t1 t2:rst) acc = fj t1 rst ((t2,t) : acc)
         markersSorted = sort markers -- sort respects marker precedence (see above)
-        init = FS (0%1) markersSorted M.empty [] M.empty []
+        beginning = (0%1, 1, markersSorted) -- rep stack item for beginning of the piece
+        init = FS (0%1) markersSorted M.empty [beginning] M.empty []
         restore markers t stack =
           modify (\st -> st { fsMarkers = markers, fsNow = t, fsStack = stack
                             , fsJumps = Jump (fsNow st) t : fsJumps st })
-        reenter markers t = restore markers t []
+        reenter = restore markersSorted (0%1) [beginning]
         pushRepeat = modify $ \st -> st { fsStack = (fsNow st, 1, fsMarkers st) : fsStack st }
         popRepeat = modify $ \st -> st { fsStack = maybe [] snd $ uncons $ fsStack st }
         goRepeat = do
           stack <- fsStack <$> get
           case (uncons stack) of -- repeat from repeat sign or beginning?
             Just ((t, n, markers), rst) -> restore markers t ((t, n+1, markers) : rst)
-            Nothing -> restore markersSorted (0%1) [(0%1, 2, markersSorted)]
+            Nothing -> D.traceM "Warning: Don't know where to repeat from. Missing forward repeat?"
+              --  restore markersSorted (0%1) [(0%1, 2, markersSorted)]
         skipUntil com = do
           markers <- fsMarkers <$> get
           let remaining = dropWhile (\(FM _ c) -> c /= com) markers
@@ -235,7 +237,7 @@ unfoldFlow end markers = foldJumps $ fsJumps $ snd $ runState doFlow init
               Fine times     -> checkTimes' times marker $
                                 modify $ \st -> st { fsMarkers = [] -- stops recursion
                                                    , fsJumps = End (fsNow st) : fsJumps st }
-              DaCapo times   -> checkTimes times marker $ reenter markersSorted (0%1)
+              DaCapo times   -> checkTimes times marker reenter
               Segno name     -> modify $ \st ->
                 let now = fsNow st
                     stack = fsStack st
