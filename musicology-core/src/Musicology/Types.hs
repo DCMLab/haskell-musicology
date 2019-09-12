@@ -385,8 +385,8 @@ instance Interval SIC where
     where (SInterval d _) = emb i
 
 instance Diatonic SIC where
-  isStep ic = d <= 1
-    where (SInterval d _) = iabs $ emb ic
+  isStep ic = abs d < 2
+    where (SInterval d _) = embedI fifth' (down fifth) ic
 
 instance Chromatic SIC where
   chromaticSemitone = sic 0 1
