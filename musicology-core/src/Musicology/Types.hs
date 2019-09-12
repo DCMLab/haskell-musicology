@@ -423,7 +423,7 @@ instance Notation SIC where
 
 -- wrapper type: turn intervals into pitches
 newtype Pitch a = Pitch a
-  deriving (Eq, Ord, Generic, Show, ToJSON, FromJSON)
+  deriving (Eq, Ord, Generic, ToJSON, FromJSON)
 
 instance NFData a => NFData (Pitch a)
 
@@ -460,10 +460,15 @@ instance Notation MidiPitch where
   showNotation (Pitch i) = "p" <> showNotation i
   parseNotation = R.char 'p' >> (midip <$> parseInt)
 
+instance Show MidiPitch where
+  show = showNotation
+
 instance Notation MidiPC where
   showNotation (Pitch i) = "pc" <> showNotation i
   parseNotation = R.string "pc" >> (midipc <$> parseInt)
 
+instance Show MidiPC where
+  show = showNotation
 
 -- spelled pitch / pitch class
 ------------------------------
@@ -499,6 +504,9 @@ g = toSpelled 4 7
 a = toSpelled 5 9
 b = toSpelled 6 11
 
+instance Show SPitch where
+  show = showNotation
+
 instance Notation SPitch where
   showNotation (Pitch (SInterval d c)) =
     diaget dianames d <> accstr accs '♯' '♭' <> show (div d 7)
@@ -524,6 +532,9 @@ f' = toSPC 3 5
 g' = toSPC 4 7
 a' = toSPC 5 9
 b' = toSPC 6 11
+
+instance Show SPC where
+  show = showNotation
 
 instance Notation SPC where
   showNotation (Pitch i) =
