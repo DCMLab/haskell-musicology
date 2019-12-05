@@ -102,35 +102,51 @@ packages:
 - completed:
     subdir: .
     cabal-file:
-      size: 6583
-      sha256: 54fb7c15a2f6a916514203b236869c1592f337429cb8f24c8d24eb4f5aa996e2
+      size: 6486
+      sha256: e6717b3e1cefbe3620029832a38aee2f1ab2fd6c2d06184f2631ddb06f6225fe
     name: ihaskell
-    version: 0.9.1.0
+    version: 0.10.0.2
     git: git@github.com:gibiansky/IHaskell.git
     pantry-tree:
-      size: 18019
-      sha256: a79ae097a69522d2bbd94178afd7fc80e703f9ae1aa0211ac6ab527789033f75
-    commit: 5086d0821e1677077d0ebbcaa5c044fa819b40a5
+      size: 17140
+      sha256: 157f3153909562096d799ffb1f7407fa277c5d90005d653c099a05a92acd79af
+    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
   original:
     subdir: .
     git: git@github.com:gibiansky/IHaskell.git
-    commit: 5086d0821e1677077d0ebbcaa5c044fa819b40a5
+    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
+- completed:
+    subdir: ghc-parser
+    cabal-file:
+      size: 1092
+      sha256: f52725ceaf25fc595ad61df86329065b039dd27ac3f88ba6f9df5f181e9e33a6
+    name: ghc-parser
+    version: 0.2.1.0
+    git: git@github.com:gibiansky/IHaskell.git
+    pantry-tree:
+      size: 404
+      sha256: b5538afa1cb5bed0e7035c073270e47ec6ba42837d617d8ead5498016694f55c
+    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
+  original:
+    subdir: ghc-parser
+    git: git@github.com:gibiansky/IHaskell.git
+    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
 - completed:
     subdir: ipython-kernel
     cabal-file:
       size: 2802
-      sha256: 47de9a6de7a8c3f139176ae1ef48a1acd851164d9fa9f8212b31335bace62ad5
+      sha256: 4c7752cfbb551467f77b8777df9bdb02df06b6b8a0fc55b9b1c20debc117922c
     name: ipython-kernel
-    version: 0.10.0.0
+    version: 0.10.1.0
     git: git@github.com:gibiansky/IHaskell.git
     pantry-tree:
       size: 792
-      sha256: 14068c455981534738eaffad5d9f06ff7d6a8626eab5e7357d4a7e53490e6211
-    commit: 5086d0821e1677077d0ebbcaa5c044fa819b40a5
+      sha256: af94ee2ab24fb719ed1e3aff9d84802dfa8b4be4e4db069d6da12aa55dc75a47
+    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
   original:
     subdir: ipython-kernel
     git: git@github.com:gibiansky/IHaskell.git
-    commit: 5086d0821e1677077d0ebbcaa5c044fa819b40a5
+    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
 - completed:
     subdir: ihaskell-display/ihaskell-charts
     cabal-file:
@@ -140,23 +156,16 @@ packages:
     version: 0.3.0.1
     git: git@github.com:gibiansky/IHaskell.git
     pantry-tree:
-      size: 327
-      sha256: c46df4d5614a8d88d23a8297cdeef360b32fc7a2063a365727c7d37f17f69a88
-    commit: 5086d0821e1677077d0ebbcaa5c044fa819b40a5
+      size: 278
+      sha256: 8ee62bd14f3f67672d64f4890ddd12954ebb3978938e9b8a6f94d16b2ab88da0
+    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
   original:
     subdir: ihaskell-display/ihaskell-charts
     git: git@github.com:gibiansky/IHaskell.git
-    commit: 5086d0821e1677077d0ebbcaa5c044fa819b40a5
-- completed:
-    hackage: ghc-parser-0.2.0.2@sha256:c50c597520d402cde78a43363571e6c98da26a71ce186862eb4a73583f7447dc,1842
-    pantry-tree:
-      size: 942
-      sha256: 4869e6aaa5735efd705d0ae3ce16c1fd151c1466850e972970b45c0a3bb786ae
-  original:
-    hackage: ghc-parser-0.2.0.2
+    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
 snapshots:
 - completed:
-    size: 495200
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/13/6.yaml
-    sha256: 3baf62db5746f24561641bc15aadddbf5c973a5a1d587beb9eb9ddb4cf5628eb
-  original: lts-13.6
+    size: 525662
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/14/15.yaml
+    sha256: c5e673e5723931b64ef2eb5004f6d9ea3c95b58d48388dbc4de6f66b97c81f7a
+  original: lts-14.15
