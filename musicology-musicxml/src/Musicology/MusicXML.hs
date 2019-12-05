@@ -119,6 +119,14 @@ instance HasTime XmlNote where
   onsetL f note = fmap (\on' -> note { _onset = on' }) (f $ _onset note)
   offsetL f note = fmap (\off' -> note { _offset = off' }) (f $ _offset note)
 
+instance Pitched XmlNote where
+  type IntervalOf XmlNote = SInterval
+
+instance HasPitch XmlNote where
+  pitchL f note = fmap updatePitch (f $ spelled (_dia note) (_chrom note))
+    where updatePitch (Pitch p) = note { _dia   = dSteps p
+                                       , _chrom = cSteps p }
+
 type instance VectorFor (Ratio Int) = V.Vector
 type instance VectorFor (Maybe String) = V.Vector
 
