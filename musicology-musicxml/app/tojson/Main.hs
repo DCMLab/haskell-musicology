@@ -40,7 +40,7 @@ main = do
     Nothing -> B.getContents
   let
     notes  = if unfold opts then xmlNotesHeard xml else xmlNotesWritten xml
-    jnotes = noteToJSON <$> asNoteWithId <$> notes
+    jnotes = noteToJSON . asNoteWithId <$> notes
     str =
       if pretty opts then P.encodePretty' prettyCfg jnotes else encode jnotes
   case outFile opts of
