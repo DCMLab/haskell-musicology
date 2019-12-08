@@ -1,5 +1,5 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE FlexibleContexts #-}
 module Musicology.Polygrams where
 
 import Musicology.Types
@@ -11,6 +11,15 @@ import Musicology.Internal.Helpers (processFoldable)
 
 -- debugging
 import Musicology.IO.MidiFile
+
+import qualified Streamly as SY
+import qualified Streamly.Prelude as SY
+import qualified Musicology.GramsStreamly as GSY
+import System.IO.Unsafe (unsafePerformIO)
+
+import qualified Streaming as SG
+import qualified Streaming.Prelude as SG
+import qualified Musicology.GramsStreaming as GSG
 
 onsetdist :: HasTime a => a -> a -> TimeOf a
 onsetdist x y = onset y - onset x
@@ -36,8 +45,8 @@ verticals notes = skipgramsS notes (const True) onsetdist
 
 verticalsR :: (HasTime a, Foldable t, Integral n, PrimMonad m) =>
              t a -> Double -> Gen (PrimState m) -> n -> TimeOf a -> m [[a]]
-verticalsR notes p gen n k =
-  skipgramsRS notes p gen (const True) onsetdist n k
+verticalsR notes p gen =
+  skipgramsRS notes p gen (const True) onsetdist
 
 horizontals :: (HasTime a, Foldable t, Integral n) =>
                t [a] -> n -> TimeOf a -> [[[a]]]
@@ -49,8 +58,8 @@ horizontalsR verts p gen n k =
   skipgramsR verts p gen nooverlap (groupdist k) n k
 
 polygrams :: (HasTime a, Foldable t, Integral n) =>
-             t a -> n -> n -> TimeOf a -> [[[a]]]
-polygrams notes nv ns barlen =
+             n -> n -> TimeOf a -> t a -> [[[a]]]
+polygrams nv ns barlen notes =
   horizontals verts ns barlen
   where verts = verticals notes nv barlen
 
@@ -73,5 +82,45 @@ polygramsMach :: (HasTime a, Integral n) =>
 polygramsMach = polygramsMachR (return True) (return True)
 
 polygrams' :: (HasTime a, Foldable t, Integral n) =>
-             t a -> n -> n -> TimeOf a -> [[[a]]]
-polygrams' notes nv ns barlen = processFoldable notes $ polygramsMach nv ns barlen barlen
+              n -> n -> TimeOf a -> t a -> [[[a]]]
+polygrams' nv ns barlen notes = processFoldable notes $ polygramsMach nv ns barlen barlen
+
+-- with streamly
+
+verticalsStreamly coin = GSY.skipgramsRS coin (const True) onsetdist
+
+horizontalsStreamly coin n k = GSY.skipgramsR coin nooverlap (groupdist k) n k
+
+polygramsStreamlyR cv cs nv ns kv ks = horizontalsStreamly cs ns ks . verticalsStreamly cv nv kv
+
+polygramsStreamly :: (HasTime a, Integral n, SY.MonadAsync m, SY.IsStream t) =>
+                n -> n -> TimeOf a -> TimeOf a -> t m a -> t m [[a]]
+polygramsStreamly = polygramsStreamlyR (return True) (return True)
+
+polygrams'' :: (HasTime a, Foldable t, Integral n) =>
+               n -> n -> TimeOf a -> t a -> [[[a]]]
+polygrams'' nv ns barlen = unsafePerformIO . SY.toList . polygramsStreamly nv ns barlen barlen . SY.fromFoldable
+
+verticals'' :: (HasTime a, Foldable t, Integral n) =>
+               n -> (TimeOf a) -> t a -> [[a]]
+verticals'' nv barlen = unsafePerformIO . SY.toList . verticalsStreamly (return True) nv barlen . SY.fromFoldable
+
+-- with streaming
+
+verticalsStreaming coin = GSG.skipgramsRS coin (const True) onsetdist
+
+horizontalsStreaming coin n k = GSG.skipgramsR coin nooverlap (groupdist k) n k
+
+polygramsStreamingR cv cs nv ns kv ks = horizontalsStreaming cs ns ks . verticalsStreaming cv nv kv
+
+polygramsStreaming :: (HasTime a, Integral n, Monad m) =>
+                n -> n -> TimeOf a -> TimeOf a -> SG.Stream (SG.Of a) m r -> SG.Stream (SG.Of [[a]]) m r
+polygramsStreaming = polygramsStreamingR (return True) (return True)
+
+polygrams''' :: (HasTime a, Foldable t, Integral n) =>
+               n -> n -> TimeOf a -> t a -> [[[a]]]
+polygrams''' nv ns barlen = SG.runIdentity . SG.toList_ . polygramsStreaming nv ns barlen barlen . SG.each
+
+verticals''' :: (HasTime a, Foldable t, Integral n) =>
+               n -> (TimeOf a) -> t a -> [[a]]
+verticals''' nv barlen = SG.runIdentity . SG.toList_ . verticalsStreaming (return True) nv barlen . SG.each

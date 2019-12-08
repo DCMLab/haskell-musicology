@@ -49,6 +49,7 @@ extra-deps:
 - lazysmallcheck-0.6
 - Frames-0.6.1
 - discrimination-0.3
+- streamly-0.7.0@sha256:2a510275b3a41f1e50d8f45f8dac879933139652509dd6cd98b69a5d24e9c55d,31563
 # charts stuff
 - git: git@github.com:timbod7/haskell-chart.git
   commit: 23e9739b80ecbb6fe70c4a7989714414f9f915c7
