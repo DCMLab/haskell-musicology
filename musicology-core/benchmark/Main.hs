@@ -52,8 +52,9 @@ mainCrit = do
         Crit.bench "verts (streaming)" $ Crit.nf (verticals''' 2 barlen) notes
         ],
     Crit.bgroup "polygrams" [
-        Crit.bench "2x2" $ Crit.nf (length . polygrams' 2 2 barlen) notes',
-        Crit.bench "2x2 (non-mach)" $ Crit.nf (length . polygrams 2 2 barlen) notes',
+        Crit.bench "2x2 (machines)" $ Crit.nf (length . polygrams' 2 2 barlen) notes',
+        Crit.bench "2x2 (machines intermediate lists)"
+          $ Crit.nf (length . polygrams 2 2 barlen) notes',
         Crit.bench "2x2 (streamly)" $ Crit.nf (length . polygrams'' 2 2 barlen) notes',
         Crit.bench "2x2 (streaming)" $ Crit.nf (length . polygrams''' 2 2 barlen) notes'
         ]
