@@ -5,15 +5,15 @@
 
 % \displayNotationFonts
 
-#(set-global-staff-size 16)
+#(set-global-staff-size 20)
 
 
 \paper {
-  #(set-paper-size "a4" 'landscape)
-  top-margin = 2.5\cm
-  bottom-margin = 2.5\cm
-  left-margin = 2.5\cm
-  right-margin = 2.5\cm
+  #(set-paper-size "a2" 'landscape)
+  top-margin = 105\mm
+  bottom-margin = 105\mm
+  left-margin = 147\mm
+  right-margin = 147\mm
   indent = 0
   ragged-last-bottom = ##f
 }
