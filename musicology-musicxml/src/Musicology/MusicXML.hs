@@ -3,7 +3,6 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Musicology.MusicXML
   ( parseWithIds, idfy
@@ -24,7 +23,7 @@ import qualified Data.Map as M
 -- import Data.ByteString
 import Data.Foldable (for_)
 import Data.List (sort, find, sortOn, uncons)
-import Data.Maybe (isJust, catMaybes, listToMaybe)
+import Data.Maybe (isJust, catMaybes, listToMaybe, fromMaybe)
 import Data.Ratio
 import Control.Applicative ((<|>))
 import Control.Monad.State
@@ -44,7 +43,7 @@ hasAttrib el k = any ((==k) . attrKey) (elAttribs el)
 
 setAttrib :: Element -> QName -> String -> Element
 setAttrib el k v = el { elAttribs = attr' }
-  where attr' = (Attr k v) : filter ((/=k) . attrKey) (elAttribs el)
+  where attr' = Attr k v : filter ((/=k) . attrKey) (elAttribs el)
 
 ename :: Element -> String
 ename = qName . elName
@@ -55,7 +54,7 @@ firstInt elt subname = do
   readMaybe (strContent sub)
 
 firstInt' :: Element -> String -> Int -> Int
-firstInt' elt subname def = maybe def id $ firstInt elt subname
+firstInt' elt subname def = fromMaybe def $ firstInt elt subname
 
 hasChild :: Element -> String -> Bool
 hasChild elt name = isJust $ findChild (unqual name) elt
@@ -67,7 +66,7 @@ namedChildren :: Element -> String -> [Element]
 namedChildren elt name = findChildren (unqual name) elt
 
 attrIs :: Element -> String -> String -> Bool
-attrIs elt name val = maybe False (==val) $ findAttr (unqual name) elt
+attrIs elt name val = (== Just val) $ findAttr (unqual name) elt
 
 readIntList :: String -> Maybe [Int]
 readIntList str = readMaybe $ "[" <> str <> "]"
@@ -78,7 +77,7 @@ readIntList str = readMaybe $ "[" <> str <> "]"
 parseWithIds :: XmlSource s => Bool -> s -> Maybe Element
 parseWithIds keep input = do
   root <- parseXMLDoc input
-  pure $ fst $ runState (addIds root) 0
+  pure $ evalState (addIds root) 0
   where next :: State Int Int
         next = get >>= \n -> put (n+1) >> pure n
         qID = QName "id" Nothing (Just "xml")
@@ -95,9 +94,7 @@ parseWithIds keep input = do
         contentIds c@(CRef _) = pure c
 
 idfy :: Bool -> String -> String
-idfy keep input = case parseWithIds keep input of
-                    Nothing -> ""
-                    Just elt -> showTopElement elt
+idfy keep input = maybe "" showTopElement $ parseWithIds keep input
 
 -- note list
 ------------
@@ -146,7 +143,7 @@ asNote :: XmlNote -> Note SInterval (Ratio Int)
 asNote (XmlNote on off dia chrom _ _) = Note (spelled dia chrom) on off
 
 asNoteWithId :: XmlNote -> NoteId SInterval (Ratio Int) (Maybe String)
-asNoteWithId (XmlNote on off dia chrom _ id) = NoteId (spelled dia chrom) on off id 
+asNoteWithId (XmlNote on off dia chrom _ id) = NoteId (spelled dia chrom) on off id
 
 -- musical control flow
 -----------------------
@@ -193,7 +190,7 @@ nextMarker = do
     Nothing -> pure Nothing
 
 unfoldFlow :: Ratio Int -> [FlowMarker (Ratio Int)] -> [(Ratio Int, Ratio Int)]
-unfoldFlow end markers = foldJumps $ fsJumps $ snd $ runState doFlow init
+unfoldFlow end markers = foldJumps $ fsJumps $ execState doFlow init
   where foldJumps lst = fj end lst []
         fj t [] acc = (0%1, t) : acc
         fj t (End e:rst) acc = fj e rst acc
@@ -208,31 +205,31 @@ unfoldFlow end markers = foldJumps $ fsJumps $ snd $ runState doFlow init
         pushRepeat = modify $ \st -> st { fsStack = (fsNow st, 1, fsMarkers st) : fsStack st }
         popRepeat = modify $ \st -> st { fsStack = maybe [] snd $ uncons $ fsStack st }
         goRepeat = do
-          stack <- fsStack <$> get
-          case (uncons stack) of -- repeat from repeat sign or beginning?
+          stack <- gets fsStack
+          case uncons stack of -- repeat from repeat sign or beginning?
             Just ((t, n, markers), rst) -> restore markers t ((t, n+1, markers) : rst)
             Nothing -> D.traceM "Warning: Don't know where to repeat from. Missing forward repeat?"
               --  restore markersSorted (0%1) [(0%1, 2, markersSorted)]
         skipUntil com = do
-          markers <- fsMarkers <$> get
+          markers <- gets fsMarkers
           let remaining = dropWhile (\(FM _ c) -> c /= com) markers
-              (FM t _) = maybe (FM end com) id $ listToMaybe remaining
-          modify $ \st -> st { fsMarkers = remaining, fsNow = t 
+              (FM t _) = fromMaybe (FM end com) $ listToMaybe remaining
+          modify $ \st -> st { fsMarkers = remaining, fsNow = t
                              , fsJumps = Jump (fsNow st) t : fsJumps st }
-        currentRep = maybe 1 (\(_, n, _) -> n) . listToMaybe . fsStack <$> get
+        currentRep = gets $ maybe 1 (\(_, n, _) -> n) . listToMaybe . fsStack
         pass counts marker = M.findWithDefault 1 marker counts
         checkTimes Nothing _ action = action -- no times? always run
         checkTimes (Just times) marker action = do
-          gc <- fsGCount <$> get
+          gc <- gets fsGCount
           when (pass gc marker `elem` times) action
         checkTimes' Nothing marker action = do -- no times? only run on second pass or higher
-          gc <- fsGCount <$> get
+          gc <- gets fsGCount
           when (pass gc marker > 1) action
         checkTimes' (Just times) m a = checkTimes (Just times) m a
         doFlow = do
           -- get >>= D.traceM . show
           mm <- nextMarker
-          for_ mm $ \(marker@(FM t com)) -> do
+          for_ mm $ \marker@(FM t com) -> do
             case com of
               FwRepeat       -> pushRepeat
               BwRepeat n     -> do
@@ -253,7 +250,7 @@ unfoldFlow end markers = foldJumps $ fsJumps $ snd $ runState doFlow init
                     segnos = M.insert name (markers, now, stack) $ fsSegno st
                 in st { fsSegno = segnos }
               DalSegno name t -> checkTimes t marker $ get >>= \st ->
-                for_ (M.lookup name $ fsSegno st) $ \(m, t, s) -> restore m t s 
+                for_ (M.lookup name $ fsSegno st) $ \(m, t, s) -> restore m t s
               Coda name      -> pure ()
               ToCoda name t  -> checkTimes' t marker $ skipUntil $ Coda name
             doFlow
@@ -296,7 +293,7 @@ scoreNotes unfoldReps root = sortOn _onset $ reverse notes
                 else []
 
 partNotes :: Bool -> Element -> Int -> [XmlNote]
-partNotes unfold part parti = psNotes $ snd $ runState doPart init
+partNotes unfold part parti = psNotes $ execState doPart init
   where init = PS [] 1 (0%1) (0%1) 0 0 [] []
         doPart = do
           mapM_ doMeasure $ namedChildren part "measure"
@@ -317,22 +314,22 @@ doBarLine :: Element -> State ParsingState ()
 doBarLine elt = do
   for_ (firstChild elt "repeat") $ \rep ->
     case attr rep "direction" of
-      (Just "forward")  -> pushFlow $ FwRepeat
+      (Just "forward")  -> pushFlow FwRepeat
       (Just "backward") -> pushFlow $ BwRepeat $
-        maybe 2 id (attr rep "times" >>= readMaybe)
+        fromMaybe 2 (attr rep "times" >>= readMaybe)
       _ -> pure ()
   for_ (firstChild elt "ending") $ \end ->
     case attr end "type" of
       (Just "start") -> for_ (attr end "number" >>= readIntList) $
         \nums -> pushFlow $ StartEnding nums
-      (Just "stop") -> pushFlow $ StopEnding
+      (Just "stop") -> pushFlow StopEnding
       _ -> pure () -- includes "discontinue"
   where attr child name = findAttr (unqual name) child
         pushFlow flow = modify $
           \st -> st { psFlow = FM (psTime st) flow : psFlow st }
 
 doAttribs :: Element -> State ParsingState ()
-doAttribs elt = forM_ (elChildren elt) $ \att -> do
+doAttribs elt = forM_ (elChildren elt) $ \att ->
   case ename att of
     "divisions" -> for_ (readMaybe $ strContent att) $
                    \div -> modify $ \st -> st { psDiv = div }
@@ -350,7 +347,7 @@ doDirection :: Element -> State ParsingState ()
 doDirection elt = mapM_ doSound (namedChildren elt "sound")
   where doSound sound = do
           let attr name = findAttr (unqual name) sound
-              only = (attr "time-only") >>= readIntList
+              only = attr "time-only" >>= readIntList
               pushFlow flow = modify $
                 \st -> st { psFlow = FM (psTime st) flow : psFlow st }
           for_ (attr "dacapo")   $ \_    -> pushFlow $ DaCapo only
@@ -420,7 +417,7 @@ doNote note parti = do
 
     -- tie start?
     let newNote = XmlNote onset' offset dia chrom parti id'
-    if (anyTieOfType "start")
+    if anyTieOfType "start"
       then pure $ modify $ \st -> st { psTied = newNote : tied }
       else pure $ modify $ \st -> st { psNotes = newNote : psNotes st, psTied = tied }
     -- let newNote = XmlNote onset offset dia chrom parti id
