@@ -6,10 +6,12 @@ import           Data.Aeson
 import qualified Data.Aeson.Encoding           as E
 import qualified Data.Aeson.Encode.Pretty      as P
 import qualified Data.ByteString.Lazy          as B
+
 import           Options.Applicative
 
 import           Musicology.MusicXML
 import           Musicology.Types
+import           Data.Ratio
 
 data Opts = Opts
   { inFile :: Maybe String
@@ -26,18 +28,17 @@ optParser =
     <*> switch (long "unfold" <> short 'u' <> help "Unfold repetitions")
     <*> switch (long "pretty" <> short 'p' <> help "Pretty-print JSON")
 
-noteToJSON
-  :: (Notation (Pitch p), ToJSON p, ToJSON t, ToJSON i) => NoteId p t i -> Value
-noteToJSON (NoteId p on off id) = object
-  ["pitch" .= showNotationT p, "onset" .= on, "offset" .= off, "id" .= id]
+noteToJSON :: (Notation (Pitch p), ToJSON i) => NoteId p (Ratio Int) i -> Value
+noteToJSON (NoteId p on off noteid) = object
+  ["p" .= showNotationT p, "on" .= lower on, "off" .= lower off, "id" .= noteid]
+  where lower r = object ["n" .= numerator r, "d" .= denominator r]
 
+main :: IO ()
 main = do
   let getOpts   = info (optParser <**> helper) fullDesc
       prettyCfg = P.defConfig { P.confIndent = P.Spaces 1 }
   opts <- execParser getOpts
-  xml  <- case inFile opts of
-    Just fn -> B.readFile fn
-    Nothing -> B.getContents
+  xml  <- maybe B.getContents B.readFile $ inFile opts
   let
     notes  = if unfold opts then xmlNotesHeard xml else xmlNotesWritten xml
     jnotes = noteToJSON . asNoteWithId <$> notes
