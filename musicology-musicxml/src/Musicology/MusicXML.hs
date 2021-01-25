@@ -31,7 +31,7 @@ import Control.Monad (mapM_)
 import Text.Read (readMaybe)
 import Lens.Micro
 
-import Musicology.Types
+import Musicology.Core
 
 import qualified Debug.Trace as D
 

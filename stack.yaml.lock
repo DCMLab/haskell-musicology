@@ -5,167 +5,57 @@
 
 packages:
 - completed:
-    hackage: Euterpea-2.0.6@sha256:3959e6ebb30de9a55f3c7ff5859c3e315f5ae85794c858d10e310bb1390a39fb,2676
+    hackage: Frames-0.7.0@sha256:a7f68646ab369e6940143f2ed233e61c910158fc4018bac65580534dbd19e99e,8898
     pantry-tree:
-      size: 4152
-      sha256: fb2d9799d3b13dd05ae441f323b4d5670800c6ebd9b4498bbb3043b28b46747f
+      size: 4069
+      sha256: 6f2c3d26700905d18fa7e4d0f577cf27e2a529f8128546b0fb8724cf616af445
   original:
-    hackage: Euterpea-2.0.6
+    hackage: Frames-0.7.0@sha256:a7f68646ab369e6940143f2ed233e61c910158fc4018bac65580534dbd19e99e,8898
 - completed:
-    hackage: PortMidi-0.1.6.1@sha256:27c6d3abd251c6bd75016fe782a74bc41e49ec7cd03288cfac4b8fa17dc307e6,2258
+    hackage: discrimination-0.4.1@sha256:2870c50b9582610a7f20b8b9a7f3b8dc5d37e5ba0082dee22107c6aeb2405a6a,3482
     pantry-tree:
-      size: 1817
-      sha256: a412c2550ac470d6466f557ae2024db07d475bfafb9fe0061c7fd1c1e689d177
+      size: 1050
+      sha256: 1636800cd5e9f38dd2cf47ee2f8904831b21fd3f03b502f3056cc2f2e1fe436e
   original:
-    hackage: PortMidi-0.1.6.1
+    hackage: discrimination-0.4.1@sha256:2870c50b9582610a7f20b8b9a7f3b8dc5d37e5ba0082dee22107c6aeb2405a6a,3482
+- completed:
+    hackage: Euterpea-2.0.7@sha256:81d583a47d483bf83ac07df7b764138f1aa52a56db4e7c7f685d070dbac4b388,2661
+    pantry-tree:
+      size: 1603
+      sha256: a1347f151792305d59844270d6e4e9ec0958873a9bf17430aee57c8940d6f902
+  original:
+    hackage: Euterpea-2.0.7@sha256:81d583a47d483bf83ac07df7b764138f1aa52a56db4e7c7f685d070dbac4b388,2661
+- completed:
+    hackage: PortMidi-0.2.0.0@sha256:0671e36ec72e95138bf396234b205864a8a6d0ee353e09e01cbfd57004c56f40,2383
+    pantry-tree:
+      size: 1818
+      sha256: c9936666afc390560319024c25ecb184e2518ae4d3be5ae14081231091c1f073
+  original:
+    hackage: PortMidi-0.2.0.0@sha256:0671e36ec72e95138bf396234b205864a8a6d0ee353e09e01cbfd57004c56f40,2383
 - completed:
     hackage: arrows-0.4.4.2@sha256:a260222b766da922657e302aa7c0409451913e1e503798a47a213a61ba382460,1235
     pantry-tree:
       size: 1035
       sha256: 153eac3a26d5922d3be968368125e5a31cc4347049732ef3a75920c4b9fda417
   original:
-    hackage: arrows-0.4.4.2
+    hackage: arrows-0.4.4.2@sha256:a260222b766da922657e302aa7c0409451913e1e503798a47a213a61ba382460,1235
 - completed:
     hackage: Stream-0.4.7.2@sha256:ed78165aa34c4e23dc53c9072f8715d414a585037f2145ea0eb2b38300354c53,1009
     pantry-tree:
       size: 207
       sha256: 009fe33c4779bd1705a26f9b036f0996e9fc85df06418aec3dda967554e6ef83
   original:
-    hackage: Stream-0.4.7.2
+    hackage: Stream-0.4.7.2@sha256:ed78165aa34c4e23dc53c9072f8715d414a585037f2145ea0eb2b38300354c53,1009
 - completed:
     hackage: lazysmallcheck-0.6@sha256:dac7a1e4877681f1260309e863e896674dd6efc1159897b7945893e693f2a6bc,1696
     pantry-tree:
       size: 2008
       sha256: aea6b83dd91703fd130d98ecfed88b8f16841b22990c837c8fde89f9f6cca809
   original:
-    hackage: lazysmallcheck-0.6
-- completed:
-    hackage: Frames-0.6.1@sha256:9d628962ed6d1e835ab2b4d309d7909dc477acf6fa270879b6085621546dccaa,8595
-    pantry-tree:
-      size: 3834
-      sha256: 67882fddb19d599cadbdd30c558dcefa19d5e697b1dfc786b293d01df20c296c
-  original:
-    hackage: Frames-0.6.1
-- completed:
-    hackage: discrimination-0.3@sha256:6f88488e62fd4aca71497a4909371476eb18720b3c113869e769a65d1bdb69dc,2525
-    pantry-tree:
-      size: 969
-      sha256: 1699bf5b1f5b4fdc4700069b22da80fa2cf211cdc16762fe170c2cfe098e019d
-  original:
-    hackage: discrimination-0.3
-- completed:
-    subdir: chart
-    cabal-file:
-      size: 2855
-      sha256: fbb7461f1d2ac830cfdff057bead605671b5cf72ef691139622697036dc24b0f
-    name: Chart
-    version: '1.9'
-    git: git@github.com:timbod7/haskell-chart.git
-    pantry-tree:
-      size: 3031
-      sha256: 09e059f5d8e616486fa671327e4cedde34bc8f776433ecc8085791ff1708536a
-    commit: 23e9739b80ecbb6fe70c4a7989714414f9f915c7
-  original:
-    subdir: chart
-    git: git@github.com:timbod7/haskell-chart.git
-    commit: 23e9739b80ecbb6fe70c4a7989714414f9f915c7
-- completed:
-    subdir: chart-cairo
-    cabal-file:
-      size: 877
-      sha256: e20d124c44286b67beab1bdaf44685c80e2c9e0b687319ec205eeac85dcc85d4
-    name: Chart-cairo
-    version: '1.9'
-    git: git@github.com:timbod7/haskell-chart.git
-    pantry-tree:
-      size: 238
-      sha256: 2cec1b797cc57114ef2476836dc7c5810588a963ca54cba6c519878e32051c3b
-    commit: 23e9739b80ecbb6fe70c4a7989714414f9f915c7
-  original:
-    subdir: chart-cairo
-    git: git@github.com:timbod7/haskell-chart.git
-    commit: 23e9739b80ecbb6fe70c4a7989714414f9f915c7
-- completed:
-    hackage: cairo-0.13.6.0@sha256:a9122d48957a2dbb5a177e5068b850efa1e99bb22c68eb2571165c3c945a8dd6,4187
-    pantry-tree:
-      size: 2830
-      sha256: 180df55408086398e9901a6bcb2720da6fcecac5f57abcdb4df1251a686f1bb7
-  original:
-    hackage: cairo-0.13.6.0
-- completed:
-    hackage: gtk2hs-buildtools-0.13.5.0@sha256:a765766c4208a3e4def319ebf280fbb9e7d0a3f28d15922db36970404fb1daee,5238
-    pantry-tree:
-      size: 3588
-      sha256: bcc65d134ad8b4ceb31166eb5d6082575284fe069f28a1dfae43ee968f55461d
-  original:
-    hackage: gtk2hs-buildtools-0.13.5.0
-- completed:
-    subdir: .
-    cabal-file:
-      size: 6486
-      sha256: e6717b3e1cefbe3620029832a38aee2f1ab2fd6c2d06184f2631ddb06f6225fe
-    name: ihaskell
-    version: 0.10.0.2
-    git: git@github.com:gibiansky/IHaskell.git
-    pantry-tree:
-      size: 17140
-      sha256: 157f3153909562096d799ffb1f7407fa277c5d90005d653c099a05a92acd79af
-    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
-  original:
-    subdir: .
-    git: git@github.com:gibiansky/IHaskell.git
-    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
-- completed:
-    subdir: ghc-parser
-    cabal-file:
-      size: 1092
-      sha256: f52725ceaf25fc595ad61df86329065b039dd27ac3f88ba6f9df5f181e9e33a6
-    name: ghc-parser
-    version: 0.2.1.0
-    git: git@github.com:gibiansky/IHaskell.git
-    pantry-tree:
-      size: 404
-      sha256: b5538afa1cb5bed0e7035c073270e47ec6ba42837d617d8ead5498016694f55c
-    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
-  original:
-    subdir: ghc-parser
-    git: git@github.com:gibiansky/IHaskell.git
-    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
-- completed:
-    subdir: ipython-kernel
-    cabal-file:
-      size: 2802
-      sha256: 4c7752cfbb551467f77b8777df9bdb02df06b6b8a0fc55b9b1c20debc117922c
-    name: ipython-kernel
-    version: 0.10.1.0
-    git: git@github.com:gibiansky/IHaskell.git
-    pantry-tree:
-      size: 792
-      sha256: af94ee2ab24fb719ed1e3aff9d84802dfa8b4be4e4db069d6da12aa55dc75a47
-    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
-  original:
-    subdir: ipython-kernel
-    git: git@github.com:gibiansky/IHaskell.git
-    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
-- completed:
-    subdir: ihaskell-display/ihaskell-charts
-    cabal-file:
-      size: 2068
-      sha256: ab6632e6b8ee0dbe99e14f90b0021d1d7aa257e7a906cda15df67079dafbaf95
-    name: ihaskell-charts
-    version: 0.3.0.1
-    git: git@github.com:gibiansky/IHaskell.git
-    pantry-tree:
-      size: 278
-      sha256: 8ee62bd14f3f67672d64f4890ddd12954ebb3978938e9b8a6f94d16b2ab88da0
-    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
-  original:
-    subdir: ihaskell-display/ihaskell-charts
-    git: git@github.com:gibiansky/IHaskell.git
-    commit: a442c0b6d4cf1fb17eaa3bf2827f04b21ad334bf
+    hackage: lazysmallcheck-0.6@sha256:dac7a1e4877681f1260309e863e896674dd6efc1159897b7945893e693f2a6bc,1696
 snapshots:
 - completed:
-    size: 525662
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/14/15.yaml
-    sha256: c5e673e5723931b64ef2eb5004f6d9ea3c95b58d48388dbc4de6f66b97c81f7a
-  original: lts-14.15
+    size: 563100
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/17/0.yaml
+    sha256: e93a85871577ea3423d5f3454b2b6bd37c2c2123c79faf511dfb64f5b49a9f8b
+  original: lts-17.0

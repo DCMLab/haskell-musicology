@@ -1,0 +1,52 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: de6439495bdd9f752cd1df6b75249d38576f320f942e015bacda6d2fb839e10d
+
+name:           musicology-euterpea
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/chfin/musicology-euterpea#readme>
+homepage:       https://github.com/chfin/musicology-euterpea#readme
+bug-reports:    https://github.com/chfin/musicology-euterpea/issues
+author:         Christoph Finkensiep
+maintainer:     chfin@chfin.de
+copyright:      Christoph Finkensiep
+license:        BSD3
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/chfin/musicology-euterpea
+
+library
+  exposed-modules:
+      Musicology.Euterpea
+  other-modules:
+      Paths_musicology_euterpea
+  hs-source-dirs:
+      src
+  build-depends:
+      Euterpea
+    , base >=4.7 && <5
+    , musicology-pitch
+  default-language: Haskell2010
+
+test-suite musicology-euterpea-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_musicology_euterpea
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Euterpea
+    , base >=4.7 && <5
+    , musicology-euterpea
+    , musicology-pitch
+  default-language: Haskell2010

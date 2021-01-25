@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Musicology.Internal.Helpers where
 
-import Musicology.Types
+import Musicology.Core
 
 import Frames
 import qualified Data.Vinyl.Functor
@@ -13,7 +13,7 @@ import Data.Vinyl.Class.Method (RecMapMethod)
 import Data.Vinyl.Core (RecordToList)
 import Data.Proxy
 
-import Data.VectorSpace
+-- import Data.VectorSpace
 
 -- import qualified Data.Sequence as S
 import qualified Data.List as L

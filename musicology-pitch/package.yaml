@@ -1,4 +1,4 @@
-name:                musicology-core
+name:                musicology-pitch
 version:             0.1.0.0
 github:              "DCMLab/haskell-musicology"
 license:             BSD3
@@ -16,20 +16,20 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/chfin/musicology-core#readme>
+description:         Please see the README on GitHub at <https://github.com/DCMLab/musicology-pitch#readme>
 
 dependencies:
 - base >= 4.7 && < 5
-- musicology-pitch
-- aeson
-- microlens
 - deepseq
+- vector-space
+- aeson
+- text
 
 library:
   source-dirs: src
 
 tests:
-  musicology-core-test:
+  musicology-pitch-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -37,4 +37,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - musicology-core
+    - musicology-pitch

@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Musicology.MidiNumInstances where
 
-import Musicology.Types
+import Musicology.Pitch
 
 instance Num (Pitch MidiInterval) where
   fromInteger = Pitch . fromInteger

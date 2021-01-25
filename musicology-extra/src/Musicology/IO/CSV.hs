@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts, DataKinds, TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Musicology.IO.CSV where
 
@@ -10,7 +11,7 @@ import qualified Data.Foldable as F
 import Language.Haskell.TH
 import System.FilePath
 
-import Musicology.Types as Mus hiding (onset, offset, pitch)
+import Musicology.Core as Mus hiding (onset, offset, pitch)
 
 -- fn = "/home/chfin/Uni/phd/data/midi_archive/notes/s/k555.tsv"
 fn = $(do file <- loc_filename <$> location

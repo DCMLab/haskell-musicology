@@ -2,7 +2,7 @@
 {-# LANGUAGE RankNTypes #-}
 module Musicology.Polygrams where
 
-import Musicology.Types
+import Musicology.Core
 import Musicology.Grams
 import Data.Machine ((~>), Process)
 import Control.Monad.Primitive (PrimMonad, PrimState)

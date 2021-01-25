@@ -8,8 +8,7 @@ import Graphics.Rendering.Chart.Geometry -- hiding (x0, y0)
 import Data.Colour
 import qualified Graphics.Rendering.Chart.Easy as CE
 
-import Musicology.Types
-import Musicology.Internal.Helpers (whenJust)
+import Musicology.Core
 
 import Control.Monad (forM_)
 
@@ -47,3 +46,5 @@ renderPianoRoll notes style pmap = forM_ notes renderNote
           withFillStyle fStyle $ alignFillPath (nPath note) >>= fillPath
           whenJust lStyle $ \lst ->
             withLineStyle lst $ alignStrokePath (nPath note) >>= strokePath
+        whenJust (Just a) f = f a
+        whenJust _        _ = return ()

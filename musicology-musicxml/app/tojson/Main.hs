@@ -10,7 +10,7 @@ import qualified Data.ByteString.Lazy          as B
 import           Options.Applicative
 
 import           Musicology.MusicXML
-import           Musicology.Types
+import           Musicology.Core
 import           Data.Ratio
 
 data Opts = Opts

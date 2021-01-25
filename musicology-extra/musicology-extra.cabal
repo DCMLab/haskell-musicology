@@ -1,0 +1,88 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 6d86985130929b13dedec77e8665db5ef4520d5d525b96bbe081d37c437b3acc
+
+name:           musicology-extra
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/DCMLab/haskell-musicology#readme>
+homepage:       https://github.com/DCMLab/haskell-musicology#readme
+bug-reports:    https://github.com/DCMLab/haskell-musicology/issues
+author:         Christoph Finkensiep
+maintainer:     chfin@chfin.de
+copyright:      2019 Christoph Finkensiep
+license:        BSD3
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/DCMLab/haskell-musicology
+
+library
+  exposed-modules:
+      Musicology.Grams
+      Musicology.Internal.GatedQueue
+      Musicology.Internal.Helpers
+      Musicology.IO.CSV
+      Musicology.IO.MidiFile
+      Musicology.Polygrams
+  other-modules:
+      Paths_musicology_extra
+  hs-source-dirs:
+      src
+  build-depends:
+      Frames
+    , HCodecs
+    , base >=4.7 && <5
+    , containers
+    , deepseq
+    , directory
+    , filepath
+    , machines
+    , microlens
+    , mtl
+    , musicology-core
+    , mwc-random
+    , primitive
+    , safe
+    , template-haskell
+    , unordered-containers
+    , vector
+    , vinyl
+  default-language: Haskell2010
+
+test-suite musicology-core-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_musicology_extra
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Frames
+    , HCodecs
+    , QuickCheck
+    , base >=4.7 && <5
+    , containers
+    , deepseq
+    , directory
+    , filepath
+    , hspec
+    , machines
+    , microlens
+    , mtl
+    , musicology-core
+    , mwc-random
+    , primitive
+    , safe
+    , template-haskell
+    , unordered-containers
+    , vector
+    , vinyl
+  default-language: Haskell2010

@@ -1,0 +1,57 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 186f5feb53c6923e845963cdf406ae54229deddc4995cfae8c725724e522d7de
+
+name:           musicology-pitch
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/DCMLab/musicology-pitch#readme>
+homepage:       https://github.com/DCMLab/haskell-musicology#readme
+bug-reports:    https://github.com/DCMLab/haskell-musicology/issues
+author:         Christoph Finkensiep
+maintainer:     chfin@chfin.de
+copyright:      2021 Christoph Finkensiep
+license:        BSD3
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/DCMLab/haskell-musicology
+
+library
+  exposed-modules:
+      Musicology.MidiNumInstances
+      Musicology.Pitch
+  other-modules:
+      Paths_musicology_pitch
+  hs-source-dirs:
+      src
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , deepseq
+    , text
+    , vector-space
+  default-language: Haskell2010
+
+test-suite musicology-pitch-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_musicology_pitch
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , deepseq
+    , musicology-pitch
+    , text
+    , vector-space
+  default-language: Haskell2010

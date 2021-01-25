@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Musicology.Plotting.Plotting where
 
-import Musicology.Types
+import Musicology.Core
 
 import Graphics.Vega.VegaLite
 import Data.Aeson as J
@@ -15,7 +15,7 @@ import Data.Monoid ((<>))
 import System.IO.Temp (emptySystemTempFile)
 import Web.Browser
 import Html
-import qualified Html.Attribute as A
+-- import qualified Html.Attribute as A
 import qualified Data.Text.Lazy.IO as TL
 
 ppSpec = BS8.putStrLn . encodePretty . fromVL
@@ -102,18 +102,16 @@ plotpolys :: (ToJSON p, ToJSON t, Interval p) =>
              [Note p t] -> [[[Note p t]]] -> VegaLite
 plotpolys notes polys = plotpolys' notes $ concat <$> polys
 
-nüx :: T.Text
-nüx = ""
-
-vegaEmbed fn = html_
-  ( head_
-    ( title_ ("Plot"::T.Text) #
-      script_A (A.src_ ("https://cdn.jsdelivr.net/npm/vega@3"::T.Text)) nüx #
-      script_A (A.src_ ("https://cdn.jsdelivr.net/npm/vega-lite@2"::T.Text)) nüx #
-      script_A (A.src_ ("https://cdn.jsdelivr.net/npm/vega-embed@3"::T.Text)) nüx) #
-    body_
-    ( div_A (A.id_ ("vis"::T.Text)) nüx #
-      script_A (A.type_ ("text/javascript"::T.Text)) (Raw (vegaJsText fn))))
+vegaEmbed fn = Html :>
+  ( Head :>
+    ( Title :> ("Plot"::T.Text) #
+      Script :@ (SrcA := ("https://cdn.jsdelivr.net/npm/vega@3"::T.Text)) :> () #
+      Script :@ (SrcA := ("https://cdn.jsdelivr.net/npm/vega-lite@2"::T.Text)) :> () #
+      Script :@ (SrcA := ("https://cdn.jsdelivr.net/npm/vega-embed@3"::T.Text)) :> ()
+    ) #
+    Body :>
+    ( Div :@ (IdA := ("vis"::T.Text)) :> () #
+      Script :@ (TypeA := ("text/javascript"::T.Text)) :> (Raw $ vegaJsText fn)))
 
 vegaJsText :: FilePath -> T.Text
 vegaJsText fn = "var spec = \"" <> T.pack fn <> "\";vegaEmbed('#vis', spec).then(function(result) {}).catch(console.error);"

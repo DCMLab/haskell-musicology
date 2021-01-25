@@ -1,10 +1,10 @@
-name:                musicology-core
+name:                musicology-extra
 version:             0.1.0.0
 github:              "DCMLab/haskell-musicology"
 license:             BSD3
 author:              "Christoph Finkensiep"
 maintainer:          "chfin@chfin.de"
-copyright:           "2021 Christoph Finkensiep"
+copyright:           "2019 Christoph Finkensiep"
 
 extra-source-files:
 - README.md
@@ -16,14 +16,27 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/chfin/musicology-core#readme>
+description: Please see the README on GitHub at <https://github.com/DCMLab/haskell-musicology#readme>
 
 dependencies:
 - base >= 4.7 && < 5
-- musicology-pitch
-- aeson
-- microlens
+- musicology-core
+- safe
+- containers
+- unordered-containers
 - deepseq
+- Frames
+- mtl
+- machines
+- vinyl
+- mwc-random
+- primitive
+- HCodecs
+- vector
+- microlens
+- template-haskell
+- filepath
+- directory
 
 library:
   source-dirs: src
@@ -38,3 +51,5 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - musicology-core
+    - hspec
+    - QuickCheck

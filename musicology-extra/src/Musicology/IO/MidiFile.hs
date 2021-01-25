@@ -2,13 +2,14 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Musicology.IO.MidiFile where
 
-import Musicology.Types hiding (Pitch)
+import Musicology.Core hiding (Pitch)
 import Musicology.Internal.Helpers
 import Codec.Midi hiding (channel, Channel, Velocity)
 
