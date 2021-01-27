@@ -287,7 +287,7 @@ instance Chromatic SIC where
 instance IntervalClass SIC where
   type IOf SIC = SInterval
   -- ic (SInterval d c) = sic d c
-  emb (SIC f) = SInterval f 0
+  emb (SIC f) = SInterval f (negate $ f * 4 `div` 7)
 
 instance ToMidi SIC where
   toMidi (SIC f) = f * 7 `mod` 12

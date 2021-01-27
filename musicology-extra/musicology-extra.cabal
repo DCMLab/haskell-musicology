@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6d86985130929b13dedec77e8665db5ef4520d5d525b96bbe081d37c437b3acc
+-- hash: 4ac119b8f2349760d8eb24eb3fe3da9bd5bbb252411f3b692de6bdc70a91167e
 
 name:           musicology-extra
 version:        0.1.0.0
@@ -47,6 +47,7 @@ library
     , microlens
     , mtl
     , musicology-core
+    , musicology-pitch
     , mwc-random
     , primitive
     , safe
@@ -78,6 +79,7 @@ test-suite musicology-core-test
     , microlens
     , mtl
     , musicology-core
+    , musicology-pitch
     , mwc-random
     , primitive
     , safe

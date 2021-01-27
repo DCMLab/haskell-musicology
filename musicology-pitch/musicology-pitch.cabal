@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1d93f9380bce46dcd63a2ec717c18ca10e3acc41ac5ae725b2a1002c8755c13d
+-- hash: d1b644dbdcf870c23572b3c41865dff3122588fe5596f017e50bf7ed10402f0f
 
 name:           musicology-pitch
 version:        0.1.0.0
@@ -47,6 +47,7 @@ test-suite musicology-pitch-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      TestSpelled
       Paths_musicology_pitch
   hs-source-dirs:
       test

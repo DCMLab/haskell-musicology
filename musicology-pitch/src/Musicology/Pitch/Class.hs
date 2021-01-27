@@ -8,7 +8,6 @@ module Musicology.Pitch.Class
   , IntervalClass(..)
   , Interval(..)
   , oct
-  , iabs
   , unison
   -- , ClassyInterval(..)
   , Diatonic(..)
@@ -70,16 +69,15 @@ class VectorSpace i => Interval i where
   direction :: i -> Ordering
   default direction :: Ord i => i -> Ordering
   direction i = compare i zeroV
+  iabs :: i -> i
+  iabs i | direction i == LT = negateV i
+         | otherwise         = i
 
 oct :: (IntervalClass i, s ~ Scalar (IOf i)) => s -> i -> IOf i
 oct octs ic = emb ic ^+^ (octave ^* octs)
 
 unison :: Interval i => i
 unison = zeroV
-
-iabs :: Interval i => i -> i
-iabs i | direction i == LT = negateV i
-       | otherwise         = i
 
 -- class (Interval i, IntervalClass (PCOf i), IOf (ICOf i) ~ i) => ClassyInterval i where  
 
