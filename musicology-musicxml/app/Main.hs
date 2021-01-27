@@ -4,6 +4,7 @@
 module Main where
 
 import Musicology.MusicXML
+import Musicology.Pitch (SPitch, showNotationT)
 import qualified Pipes as P
 import Frames.CSV (produceCSV)
 import Frames.ShowCSV
@@ -19,6 +20,9 @@ instance ShowCSV String where
 instance ShowCSV a => ShowCSV (Maybe a) where
   showCSV Nothing  = "NA"
   showCSV (Just a) = showCSV a
+
+instance ShowCSV SPitch where
+  showCSV a = showNotationT a
 
 main :: IO ()
 main = do

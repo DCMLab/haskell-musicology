@@ -38,3 +38,5 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - musicology-pitch
+    - QuickCheck
+    - hspec

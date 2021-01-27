@@ -102,8 +102,7 @@ idfy keep input = maybe "" showTopElement $ parseWithIds keep input
 data XmlNote = XmlNote
   { _onset :: Ratio Int
   , _offset :: Ratio Int
-  , _dia :: Int
-  , _chrom :: Int
+  , _pitch :: SPitch
   , _part :: Int
   , _id :: Maybe String
   }
@@ -120,30 +119,32 @@ instance Pitched XmlNote where
   type IntervalOf XmlNote = SInterval
 
 instance HasPitch XmlNote where
-  pitchL f note = fmap updatePitch (f $ spelled (_dia note) (_chrom note))
-    where updatePitch (Pitch p) = note { _dia   = dSteps p
-                                       , _chrom = cSteps p }
+  pitchL f note = fmap updatePitch (f $ _pitch note)
+    where updatePitch p = note { _pitch  = p }
 
 type instance VectorFor (Ratio Int) = V.Vector
 type instance VectorFor (Maybe String) = V.Vector
+type instance VectorFor SPitch = V.Vector
 
-type XmlRecord = Record '[ "onset" :-> Ratio Int, "offset" :-> Ratio Int
-                         , "dia" :-> Int, "chrom" :-> Int
-                         , "part" :-> Int, "id" :-> Maybe String
+type XmlRecord = Record '[ "onset" :-> Ratio Int
+                         , "offset" :-> Ratio Int
+                         , "pitch" :-> SPitch
+                         , "part" :-> Int
+                         , "id" :-> Maybe String
                          ]
 
 xmlNoteToRecord :: XmlNote -> XmlRecord
-xmlNoteToRecord (XmlNote on off dia chrom part id) =
-  on &: off &: dia &: chrom &: part &: id &: RNil
+xmlNoteToRecord (XmlNote on off p part id) =
+  on &: off &: p &: part &: id &: RNil
 
 notesToFrame :: [XmlNote] -> Frame XmlRecord
 notesToFrame notes = toFrame $ map xmlNoteToRecord notes
 
 asNote :: XmlNote -> Note SInterval (Ratio Int)
-asNote (XmlNote on off dia chrom _ _) = Note (spelled dia chrom) on off
+asNote (XmlNote on off p _ _) = Note p on off
 
 asNoteWithId :: XmlNote -> NoteId SInterval (Ratio Int) (Maybe String)
-asNoteWithId (XmlNote on off dia chrom _ id) = NoteId (spelled dia chrom) on off id
+asNoteWithId (XmlNote on off p _ id) = NoteId p on off id
 
 -- musical control flow
 -----------------------
@@ -169,7 +170,7 @@ type RepStack t = [(t, Int, [FlowMarker t])]
 data FlowState t = FS
   { fsNow :: t -- current time
   , fsMarkers :: [FlowMarker t] -- all markers from here to end of piece
-  , fsSegno :: M.Map String ([FlowMarker t], t, (RepStack t)) -- segnos with their repetition stacks
+  , fsSegno :: M.Map String ([FlowMarker t], t, RepStack t) -- segnos with their repetition stacks
   , fsStack :: RepStack t -- repetition stack
   , fsGCount :: M.Map (FlowMarker t) Int -- how often did we depart from this location?
   , fsJumps :: [Jump t] -- output: jumps
@@ -271,8 +272,7 @@ data ParsingState = PS
   , psDiv :: Int
   , psTime :: Ratio Int
   , psPrevTime :: Ratio Int
-  , psTransDia :: Int
-  , psTransChrom :: Int
+  , psTrans :: SInterval
   , psTied :: [XmlNote]
   , psFlow :: [FlowMarker (Ratio Int)]
   } deriving Show
@@ -294,7 +294,7 @@ scoreNotes unfoldReps root = sortOn _onset $ reverse notes
 
 partNotes :: Bool -> Element -> Int -> [XmlNote]
 partNotes unfold part parti = psNotes $ execState doPart init
-  where init = PS [] 1 (0%1) (0%1) 0 0 [] []
+  where init = PS [] 1 (0%1) (0%1) unison [] []
         doPart = do
           mapM_ doMeasure $ namedChildren part "measure"
           modify $ \st -> st { psNotes = psNotes st <> psTied st }
@@ -333,14 +333,13 @@ doAttribs elt = forM_ (elChildren elt) $ \att ->
   case ename att of
     "divisions" -> for_ (readMaybe $ strContent att) $
                    \div -> modify $ \st -> st { psDiv = div }
-    "transpose" -> let chrom = firstInt att "chromatic"
+    "transpose" -> let maybeChrom = firstInt att "chromatic"
                        dia   = firstInt' att "diatonic" 0
                        octs  = firstInt' att "octave-change" 0
-                   in case chrom of
+                   in case maybeChrom of
                         Nothing -> pure ()
-                        Just c  -> modify $
-                          \st -> st { psTransChrom = c + 12 * octs
-                                    , psTransDia   = dia   + 7  * octs}
+                        Just chrom  -> modify $
+                          \st -> st { psTrans = spelledDiaChrom dia chrom ^+^ octs *^ octave}
     _           -> pure ()
 
 doDirection :: Element -> State ParsingState ()
@@ -358,14 +357,14 @@ doDirection elt = mapM_ doSound (namedChildren elt "sound")
           for_ (attr "tocoda")   $ \coda -> pushFlow $ ToCoda coda only
           for_ (attr "forward-repeat") $ \_ -> pushFlow FwRepeat -- does this even make sense?
 
-noteNames :: String -> Maybe (Int, Int)
-noteNames "C" = Just (0,0)
-noteNames "D" = Just (1,2)
-noteNames "E" = Just (2,4)
-noteNames "F" = Just (3,5)
-noteNames "G" = Just (4,7)
-noteNames "A" = Just (5,9)
-noteNames "B" = Just (6,11)
+noteNames :: String -> Maybe (Accidental -> Int -> SPitch)
+noteNames "C" = Just c
+noteNames "D" = Just d
+noteNames "E" = Just e
+noteNames "F" = Just f
+noteNames "G" = Just g
+noteNames "A" = Just a
+noteNames "B" = Just b
 noteNames _   = Nothing
 
 doNote :: Element -> Int -> State ParsingState ()
@@ -390,9 +389,11 @@ doNote note parti = do
     let alt = firstInt' pitch "alter" 0
 
     step <- firstChild pitch "step"
-    (dia', chrom') <- noteNames $ strContent step
-    let dia   = psTransDia   st + dia'   + oct * 7
-        chrom = psTransChrom st + chrom' + oct * 12 + alt
+    pitchName <- noteNames $ strContent step
+    let pitchWritten = pitchName (Acc alt) oct
+        pitch = pitchWritten +^ psTrans st
+        -- dia   = psTransDia   st + dia'   + oct * 7
+        -- chrom = psTransChrom st + chrom' + oct * 12 + alt
 
     -- id
     let id = findAttr (unqual "id") note <|>
@@ -404,19 +405,19 @@ doNote note parti = do
 
     -- tie stop?
     let (tied, onset', id') = if anyTieOfType "stop"
-          then let continued (XmlNote _ toff tdia tchrom _ _) =
-                     toff == onset && tdia == dia && tchrom == chrom
+          then let continued (XmlNote _ toff tpitch _ _) =
+                     toff == onset && tpitch == pitch
                    start = find continued (psTied st) in
                  case start of
                    Nothing -> (psTied st, onset, id)
-                   Just n@(XmlNote ton _ _ _ _ tid) ->
+                   Just n@(XmlNote ton _ _ _ tid) ->
                      ( filter (/=n) (psTied st)
                      , ton
                      , tid <|> id )
           else (psTied st, onset, id)
 
     -- tie start?
-    let newNote = XmlNote onset' offset dia chrom parti id'
+    let newNote = XmlNote onset' offset pitch parti id'
     if anyTieOfType "start"
       then pure $ modify $ \st -> st { psTied = newNote : tied }
       else pure $ modify $ \st -> st { psNotes = newNote : psNotes st, psTied = tied }
