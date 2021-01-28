@@ -34,7 +34,7 @@ jobs:
 
       # Build the package
       - name: Build Packages
-        run: stack build --test --no-run-tests --bench --no-run-benchmarks --only-dependencies
+        run: stack build --test --no-run-tests --bench --no-run-benchmarks
 
       # Run the tests for all sub-packages
       - name: Run Tests
