@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # has stack preinstalled 
+
+    steps:
+      # Checks-out your repository
+      - uses: actions/checkout@v2
+      
+      # sets up a cache for the ~/.stack directory to avoid rebuilding dependencies
+      - uses: actions/cache@v2.1.3
+        name: Cache ~/.stack
+        with:
+          path: ~/.stack
+          key: stack
+
+      # Build the dependencies
+      - name: Build Dependencies
+        run: stack build --test --no-run-tests --bench --no-run-benchmarks --only-dependencies
+
+      # Build the package
+      - name: Build Packages
+        run: stack build --test --no-run-tests --bench --no-run-benchmarks --only-dependencies
+
+      # Run the tests for all sub-packages
+      - name: Run Tests
+        run: stack test
