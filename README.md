@@ -1,6 +1,8 @@
 # haskell-musicology
 
-A library for computational modeling of musical structure.
+![CI](https://github.com/DCMLab/haskell-musicology/workflows/CI/badge.svg)
+
+A set of packages for computational modeling of musical structure.
 
 ## Installation
 
