@@ -23,6 +23,11 @@ jobs:
           path: ~/.stack
           key: stack
 
+      # Install system dependencies for libraries such as PortMidi
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get install libasound2-dev
+
       # Build the dependencies
       - name: Build Dependencies
         run: stack build --test --no-run-tests --bench --no-run-benchmarks --only-dependencies
