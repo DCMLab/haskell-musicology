@@ -84,7 +84,7 @@ instance Interval p => Pitched [p] where
 
 instance Interval p => Pitched (Maybe p) where
   type IntervalOf (Maybe p) = p
-  
+
 instance Interval p => Pitched (Identity p) where
   type IntervalOf (Identity p) = p
 
@@ -129,7 +129,7 @@ instance Pitched c => Pitched (TimedEvent c t) where
 data Note p t = Note !(Pitch p) !t !t
   deriving (Eq, Ord, Generic)
 
-instance (NFData p, NFData t) => NFData (Note p t) 
+instance (NFData p, NFData t) => NFData (Note p t)
 
 deriving instance (Show (Pitch p), Show t) => Show (Note p t)
 deriving instance (Read (Pitch p), Read t) => Read (Note p t)
@@ -139,7 +139,7 @@ instance (Num t, Ord t) => Timed (Note p t) where
 
 instance (Num t, Ord t) => HasTime (Note p t) where
   onsetL f (Note p on off) = fmap (\on' -> Note p on' off) (f on)
-  offsetL f (Note p on off) = fmap (\off' -> Note p on off') (f off)
+  offsetL f (Note p on off) = fmap (Note p on) (f off)
 
 instance Interval p => Pitched (Note p t) where
   type IntervalOf (Note p t) = p
@@ -216,15 +216,15 @@ ifOff (Onset _ _) = False
 isOff (Offset _ _) = True
 
 onOffContent :: Lens' (OnOff c t) c
-onOffContent f (Onset c t) = fmap (\c' -> Onset c' t) (f c)
-onOffContent f (Offset c t) = fmap (\c' -> Offset c' t) (f c)
+onOffContent f (Onset c t) = fmap (`Onset` t) (f c)
+onOffContent f (Offset c t) = fmap (`Offset` t) (f c)
 
 instance (Num t, Ord t) => Timed (OnOff c t) where
   type TimeOf (OnOff c t) = t
 
 instance (Num t, Ord t) => HasTime (OnOff p t) where
-  onsetL f (Onset p t) = fmap (\t' -> Onset p t') (f t)
-  onsetL f (Offset p t) = fmap (\t' -> Offset p t') (f t)
+  onsetL f (Onset p t) = fmap (Onset p) (f t)
+  onsetL f (Offset p t) = fmap (Offset p) (f t)
   offsetL = onsetL
 
 instance Pitched c => Pitched (OnOff c t) where

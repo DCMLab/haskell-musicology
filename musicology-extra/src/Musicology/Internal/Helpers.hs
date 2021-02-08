@@ -40,7 +40,7 @@ processFoldableT xs p = runT $ source xs ~> p
 -- frames helpers
 
 showRow :: (RecMapMethod Show ElField a, RecordToList a)
-         => (Record a) -> String
+         => Record a -> String
 showRow row = L.intercalate "\t" $ showFields row
 
 showHeader :: forall a . (ColumnHeaders a) => Frame (Record a) -> String
@@ -69,7 +69,7 @@ viewFrame frame = do
 mergeBy :: (a -> a -> Ordering) -> [a] -> [a] -> [a]
 mergeBy _cmp [] ys = ys
 mergeBy _cmp xs [] = xs
-mergeBy cmp (allx@(x:xs)) (ally@(y:ys))
+mergeBy cmp allx@(x:xs) ally@(y:ys)
         -- Ordering derives Eq, Ord, so the comparison below is valid.
         -- Explanation left as an exercise for the reader.
         -- Someone please put this code out of its misery.
@@ -89,50 +89,3 @@ intFills pm ph = odir == EQ && pm /= zeroV && pm /= ph ||
 
 rerunStateT :: (m (a, s) -> n (b, t)) -> (t -> s) -> StateT s m a -> StateT t n b
 rerunStateT f r m = StateT $ f . runStateT m . r
-
-onoffGroups :: (Foldable f, HasTime n) => f n -> [[OnOff n (TimeOf n)]]
-onoffGroups notes = L.groupBy eq $ L.sortOn onset $ foldl convert mempty notes
-  where convert onoffs note = (Onset note (onset note))
-                              : (Offset note (offset note))
-                              : onoffs
-        eq a b = onset a == onset b
-
-newPitches :: (Eq p, HasPitch a, IntervalOf a ~ p, HasTime a) =>
-              [Pitch p] -> [OnOff a (TimeOf a)] -> [Pitch p]
-newPitches curr grp = (curr L.\\ (pitch <$> offs)) `L.union` (pitch <$> ons)
-  where (ons, offs) = L.partition isOn grp
-
-groupsToSlices :: (Foldable f, HasTime n, Num (TimeOf n), Ord (TimeOf n),
-                   HasPitch n, Eq (IntervalOf n))
-               => f [OnOff n (TimeOf n)] -> [TimedEvent [Pitch (IntervalOf n)] (TimeOf n)]
-groupsToSlices groups = processFoldable groups $ construct $ do
-  first <- await
-  slices $ halfSlice [] first
-  where halfSlice curr grp = (onset $ head grp, newPitches curr grp)
-        slice ps on off = yield $ TimedEvent ps on off
-        slices (on, pitches) = do
-          grp <- await -- <|> slice pitches on on *> stop
-          let nxt = halfSlice pitches grp
-          slice pitches on (fst nxt)
-          slices nxt
-
--- groupsToPitches :: (Foldable t, Pitched a, Timed a, Eq p, p ~ PitchOf a) => t [OnOff a (TimeOf a)] -> [p]
-groupsToPitches groups = processFoldable groups $ construct $ do
-  grp1 <- await
-  let init = newPitches [] grp1
-  go init
-  where go curr = do
-          ps <- newPitches curr <$> await <|> when (not $ null curr) (yield curr) *> stop
-          yield curr
-          go ps
-  
-  
--- notesToSlices :: (Foldable f, Timed n, Pitched n) => f n -> [TimedEvent [PitchOf n] (TimeOf n)] 
--- notesToSlices notes
---   | null notes = []
---   | otherwise = fst $ foldl slices init notes
---   where init = ([], [])
---         slices (out, curr) note = map
---           where now = onset note
---                 (old, rem) = partition (\n -> offset n <= now)
---                 ts = L.sort $ L.nub $ now : (offset <$> old)
