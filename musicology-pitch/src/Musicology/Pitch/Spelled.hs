@@ -2,6 +2,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Musicology.Pitch.Spelled
   ( SInterval(..)
   , spelled
@@ -117,8 +119,7 @@ onlyDia x = wholetone ^* x ^-^ chromaticSemitone ^* (2 * x)
 spelledDiaChrom :: Int -> Int -> SInterval
 spelledDiaChrom dia chrom = diaPart ^+^ chromPart
  where
-  whole     = spelled 2 (-1)
-  diaPart   = whole ^* dia
+  diaPart   = wholetone ^* dia
   chromPart = chromaticSemitone ^* (chrom - 2 * dia)
 
 second = Impf (spelled 2 (-1) ^-^)
@@ -308,14 +309,14 @@ instance Notation SIC where
 -- spelled pitch / pitch class
 ------------------------------
 
-instance Spelled i => Spelled (Pitch i) where
+instance (Spelled i, Interval i, Spelled (ICOf i)) => Spelled (Pitch i) where
   fifths (Pitch i) = fifths i
   octaves (Pitch i) = octaves i
   internalOctaves (Pitch i) = internalOctaves i
   degree (Pitch i) = degree i
   generic (Pitch i) = generic i
   diasteps (Pitch i) = diasteps i
-  alteration (Pitch i) = alteration i
+  alteration (Pitch i) = alteration $ ic i
 
 letter :: Spelled i => i -> Char
 letter i = chr $ ord 'A' + ((degree i + 2) `mod` 7)

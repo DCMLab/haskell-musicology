@@ -178,6 +178,7 @@ testSpelled = describe "Spelled" $ do
 
     alteration (rspc "F") `shouldBe` 0
     alteration (rspc "B") `shouldBe` 0
+    alteration (rsp "Cb-1") `shouldBe` (-1)
 
   it "printing notation" $ do
     showNotation (rsi "m3:1") `shouldBe` "m3:1"
@@ -307,7 +308,7 @@ testSpelled = describe "Spelled" $ do
       rsp "G4" `pfrom` rsp "C#4" `shouldBe` rsi "d5:0"
       rsp "G4" `pto` rsp "C#4" `shouldBe` rsi "-d5:0"
 
-  describe "Pitch Interface" $ do
+  describe "Pitch Class Interface" $ do
     it "conversion" $ do
       toPitch (rsic "m3") `shouldBe` rspc "Eb"
       toInterval (rspc "E") `shouldBe` rsic "M3"
@@ -320,4 +321,3 @@ testSpelled = describe "Spelled" $ do
       rspc "Eb" -^ rsic "P5" `shouldBe` rspc "Ab"
       rspc "G" `pfrom` rspc "C#" `shouldBe` rsic "d5"
       rspc "G" `pto` rspc "C#" `shouldBe` rsic "a4"
-
