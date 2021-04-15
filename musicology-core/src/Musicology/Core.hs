@@ -1,3 +1,5 @@
+{-# LANGUAGE ConstrainedClassMethods #-}
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE FlexibleInstances #-}
 -- {-# LANGUAGE UndecidableSuperClasses #-}
@@ -9,25 +11,40 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Musicology.Core
   ( module Musicology.Pitch
-  , Timed(..), HasTime(..)
-  , Pitched(..), HasInterval(..), HasPitch(..)
+  , Timed(..)
+  , HasTime(..)
+  , Pitched(..)
+  , HasInterval(..)
+  , HasPitch(..)
   , Identifiable(..)
-  , TimedEvent(..), timedEventContent
-  , Note(..), NoteId(..)
-  , OnOff(..), isOn, isOff
-  ) where
+  , TimedEvent(..)
+  , timedEventContent
+  , Note(..)
+  , NoteId(..)
+  , OnOff(..)
+  , onOffContent
+  , isOn
+  , isOff
+  , Tied(..)
+  , LeftTied(..)
+  , RightTied(..)
+  , rightTie
+  , leftTie
+  , fullTie
+  )
+where
 
-import Musicology.Pitch
+import           Musicology.Pitch
 
-import Data.Functor.Identity (Identity(..))
+import           Data.Functor.Identity          ( Identity(..) )
 
-import GHC.Generics (Generic)
-import Control.DeepSeq (NFData)
+import           GHC.Generics                   ( Generic )
+import           Control.DeepSeq                ( NFData )
 
-import Lens.Micro
-import Lens.Micro.Extras
+import           Lens.Micro
+import           Lens.Micro.Extras
 
-import Data.Aeson
+import           Data.Aeson
 
 ----------------
 -- Containers --
@@ -50,23 +67,29 @@ class Timed a => HasTime a where
   setOffset :: TimeOf a -> a -> a
   setOffset = set offsetL
 
-class (Interval (IntervalOf a)) => Pitched a where
+class (Interval (IntervalOf a),
+       ReTypeInterval a (IntervalOf a) ~ a) => Pitched a where
   type IntervalOf a
+  type ReTypeInterval a p
 
 class Pitched a => HasInterval a where
-  intervalL :: Lens' a (IntervalOf a)
+  intervalL :: (IntervalOf (ReTypeInterval a p2) ~ p2)
+            => Lens a (ReTypeInterval a p2) (IntervalOf a) p2
   intervalL = lens interval (flip setInterval)
   interval :: a -> IntervalOf a
   interval = view intervalL
-  setInterval :: IntervalOf a -> a -> a
+  setInterval :: (IntervalOf (ReTypeInterval a p2) ~ p2)
+              => p2 -> a -> ReTypeInterval a p2
   setInterval = set intervalL
 
-class Pitched a => HasPitch a where
-  pitchL :: Lens' a (Pitch (IntervalOf a))
+class (Pitched a) => HasPitch a where
+  pitchL :: (IntervalOf (ReTypeInterval a p2) ~ p2)
+         => Lens a (ReTypeInterval a p2) (Pitch (IntervalOf a)) (Pitch p2)
   pitchL = lens pitch (flip setPitch)
   pitch :: a -> Pitch (IntervalOf a)
   pitch = view pitchL
-  setPitch :: Pitch (IntervalOf a) -> a -> a
+  setPitch :: (IntervalOf (ReTypeInterval a p2) ~ p2)
+           => Pitch p2 -> a -> ReTypeInterval a p2
   setPitch = set pitchL
 
 -- some container helpers (put in separate module?)
@@ -81,12 +104,15 @@ class Pitched a => HasPitch a where
 
 instance Interval p => Pitched [p] where
   type IntervalOf [p] = p
+  type ReTypeInterval [p] p2 = [p2]
 
 instance Interval p => Pitched (Maybe p) where
   type IntervalOf (Maybe p) = p
+  type ReTypeInterval (Maybe p) p2 = Maybe p2
 
 instance Interval p => Pitched (Identity p) where
   type IntervalOf (Identity p) = p
+  type ReTypeInterval (Identity p) p2 = Identity p2
 
 ---------
 -- IDs --
@@ -110,10 +136,11 @@ instance (Num t, Ord t) => Timed (TimedEvent p t) where
 
 instance (Num t, Ord t) => HasTime (TimedEvent p t) where
   onsetL f (TimedEvent e on off) = fmap (\on' -> TimedEvent e on' off) (f on)
-  offsetL f (TimedEvent e on off) = fmap (\off' -> TimedEvent e on off') (f off)
+  offsetL f (TimedEvent e on off) = fmap (TimedEvent e on) (f off)
 
 instance Pitched c => Pitched (TimedEvent c t) where
   type IntervalOf (TimedEvent c t) = IntervalOf c
+  type ReTypeInterval (TimedEvent c t) p2 = TimedEvent (ReTypeInterval c p2) t
 
 -- instance Pitch p => Pitched (TimedEvent p t) where
 --   pitch (TimedEvent p _ _) = p
@@ -143,8 +170,10 @@ instance (Num t, Ord t) => HasTime (Note p t) where
 
 instance Interval p => Pitched (Note p t) where
   type IntervalOf (Note p t) = p
+  type ReTypeInterval (Note p t) p2 = Note p2 t
 
 instance Interval p => HasPitch (Note p t) where
+  pitchL :: Lens (Note p t) (Note p2 t) (Pitch p) (Pitch p2)
   pitchL f (Note p on off) = fmap (\p' -> Note p' on off) (f p)
 
 instance (ToJSON p, ToJSON t) => ToJSON (Note p t) where
@@ -154,10 +183,8 @@ instance (ToJSON p, ToJSON t) => ToJSON (Note p t) where
     pairs ("pitch" .= p <> "onset" .= on <> "offset" .= off)
 
 instance (FromJSON p, FromJSON t) => FromJSON (Note p t) where
-  parseJSON = withObject "Note" $ \v -> Note
-    <$> (toPitch <$> v .: "pitch")
-    <*> v .: "onset"
-    <*> v .: "offset"
+  parseJSON = withObject "Note" $ \v ->
+    Note <$> (toPitch <$> v .: "pitch") <*> v .: "onset" <*> v .: "offset"
 
 -- note with id
 ---------------
@@ -179,8 +206,10 @@ instance (Num t, Ord t) => HasTime (NoteId p t i) where
 
 instance Interval p => Pitched (NoteId p t i) where
   type IntervalOf (NoteId p t i) = p
+  type ReTypeInterval (NoteId p t i) p2 = NoteId p2 t i
 
 instance Interval p => HasPitch (NoteId p t i) where
+  pitchL :: Lens (NoteId p t i) (NoteId p2 t i) (Pitch p) (Pitch p2)
   pitchL f (NoteId p on off id) = fmap (\p' -> NoteId p' on off id) (f p)
 
 instance Identifiable (NoteId p t i) where
@@ -194,11 +223,15 @@ instance (ToJSON p, ToJSON t, ToJSON i) => ToJSON (NoteId p t i) where
     pairs ("pitch" .= p <> "onset" .= on <> "offset" .= off <> "id" .= id)
 
 instance (FromJSON p, FromJSON t, FromJSON i) => FromJSON (NoteId p t i) where
-  parseJSON = withObject "Note" $ \v -> NoteId
-    <$> (toPitch <$> v .: "pitch")
-    <*> v .: "onset"
-    <*> v .: "offset"
-    <*> v .: "id"
+  parseJSON = withObject "Note" $ \v ->
+    NoteId
+      <$> (toPitch <$> v .: "pitch")
+      <*> v
+      .:  "onset"
+      <*> v
+      .:  "offset"
+      <*> v
+      .:  "id"
 
 
 ----------------------------------------------
@@ -210,25 +243,26 @@ data OnOff c t = Onset c !t
                | Offset c !t
   deriving (Eq, Ord, Show, Read, Generic)
 
-isOn (Onset _ _) = True
+isOn (Onset  _ _) = True
 isOn (Offset _ _) = False
 ifOff (Onset _ _) = False
 isOff (Offset _ _) = True
 
-onOffContent :: Lens' (OnOff c t) c
-onOffContent f (Onset c t) = fmap (`Onset` t) (f c)
+onOffContent :: Lens (OnOff c t) (OnOff c2 t) c c2
+onOffContent f (Onset  c t) = fmap (`Onset` t) (f c)
 onOffContent f (Offset c t) = fmap (`Offset` t) (f c)
 
 instance (Num t, Ord t) => Timed (OnOff c t) where
   type TimeOf (OnOff c t) = t
 
 instance (Num t, Ord t) => HasTime (OnOff p t) where
-  onsetL f (Onset p t) = fmap (Onset p) (f t)
+  onsetL f (Onset  p t) = fmap (Onset p) (f t)
   onsetL f (Offset p t) = fmap (Offset p) (f t)
   offsetL = onsetL
 
 instance Pitched c => Pitched (OnOff c t) where
   type IntervalOf (OnOff c t) = IntervalOf c
+  type ReTypeInterval (OnOff c t) p2 = OnOff (ReTypeInterval c p2) t
 
 instance HasInterval c => HasInterval (OnOff c t) where
   intervalL = onOffContent . intervalL
@@ -236,6 +270,38 @@ instance HasInterval c => HasInterval (OnOff c t) where
 instance HasPitch c => HasPitch (OnOff c t) where
   pitchL = onOffContent . pitchL
 
----------------------------------
--- contextual note: held over? --
----------------------------------
+----------------------------------------
+-- tied events: continued/continuing? --
+----------------------------------------
+
+data Tied = Single
+          | Starts
+          | Continues
+          | Stops
+  deriving (Show, Eq, Ord)
+
+data RightTied = Holds
+               | Ends
+  deriving (Show, Eq, Ord)
+
+rightTie :: Tied -> RightTied
+rightTie Single    = Ends
+rightTie Starts    = Holds
+rightTie Continues = Holds
+rightTie Stops     = Ends
+
+data LeftTied = New
+              | Held
+  deriving (Show, Eq, Ord)
+
+leftTie :: Tied -> LeftTied
+leftTie Single    = New
+leftTie Starts    = New
+leftTie Continues = Held
+leftTie Stops     = Held
+
+fullTie :: LeftTied -> RightTied -> Tied
+fullTie New  Ends  = Single
+fullTie New  Holds = Starts
+fullTie Held Holds = Continues
+fullTie Held Ends  = Stops

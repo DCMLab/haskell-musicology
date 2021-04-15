@@ -1,3 +1,4 @@
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -117,8 +118,10 @@ instance HasTime XmlNote where
 
 instance Pitched XmlNote where
   type IntervalOf XmlNote = SInterval
+  type ReTypeInterval XmlNote p2 = XmlNote
 
 instance HasPitch XmlNote where
+  pitchL :: Lens' XmlNote SPitch
   pitchL f note = fmap updatePitch (f $ _pitch note)
     where updatePitch p = note { _pitch  = p }
 
