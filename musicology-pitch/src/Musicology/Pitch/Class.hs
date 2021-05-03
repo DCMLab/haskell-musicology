@@ -48,6 +48,7 @@ import           Data.Aeson                     ( FromJSON
                                                 , ToJSON
                                                 )
 import           Data.Maybe                     ( listToMaybe )
+import           Data.Hashable                  ( Hashable )
 
 ---------------
 -- Intervals --
@@ -124,9 +125,7 @@ class Notation i where
 
 -- wrapper type: turn intervals into pitches
 newtype Pitch a = Pitch a
-  deriving (Eq, Ord, Generic, ToJSON, FromJSON)
-
-instance NFData a => NFData (Pitch a)
+  deriving (Eq, Ord, Generic, ToJSON, FromJSON, NFData, Hashable)
 
 instance Functor Pitch where
   fmap f (Pitch p) = Pitch (f p)

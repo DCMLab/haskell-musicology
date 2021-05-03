@@ -24,6 +24,7 @@ dependencies:
 - aeson
 - microlens
 - deepseq
+- hashable
 
 library:
   source-dirs: src

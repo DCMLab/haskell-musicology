@@ -9,6 +9,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 module Musicology.Core
   ( module Musicology.Pitch
   , Timed(..)
@@ -40,6 +41,7 @@ import           Data.Functor.Identity          ( Identity(..) )
 
 import           GHC.Generics                   ( Generic )
 import           Control.DeepSeq                ( NFData )
+import           Data.Hashable                  ( Hashable )
 
 import           Lens.Micro
 import           Lens.Micro.Extras
@@ -127,7 +129,7 @@ class Identifiable i where
 ----------------
 
 data TimedEvent c t = TimedEvent c t t
-  deriving (Eq, Ord, Show, Read)
+  deriving (Eq, Ord, Show, Read, Generic, NFData, Hashable)
 
 timedEventContent (TimedEvent c _ _) = c
 
@@ -154,9 +156,7 @@ instance Pitched c => Pitched (TimedEvent c t) where
 ----------
 
 data Note p t = Note !(Pitch p) !t !t
-  deriving (Eq, Ord, Generic)
-
-instance (NFData p, NFData t) => NFData (Note p t)
+  deriving (Eq, Ord, Generic, NFData, Hashable)
 
 deriving instance (Show (Pitch p), Show t) => Show (Note p t)
 deriving instance (Read (Pitch p), Read t) => Read (Note p t)
@@ -190,9 +190,7 @@ instance (FromJSON p, FromJSON t) => FromJSON (Note p t) where
 ---------------
 
 data NoteId p t i = NoteId !(Pitch p) !t !t !i
-  deriving (Eq, Ord, Generic)
-
-instance (NFData p, NFData t, NFData i) => NFData (NoteId p t i)
+  deriving (Eq, Ord, Generic, NFData, Hashable)
 
 deriving instance (Show (Pitch p), Show t, Show i) => Show (NoteId p t i)
 deriving instance (Read (Pitch p), Read t, Read i) => Read (NoteId p t i)
@@ -241,7 +239,7 @@ instance (FromJSON p, FromJSON t, FromJSON i) => FromJSON (NoteId p t i) where
 
 data OnOff c t = Onset c !t
                | Offset c !t
-  deriving (Eq, Ord, Show, Read, Generic)
+  deriving (Eq, Ord, Show, Read, Generic, NFData, Hashable)
 
 isOn (Onset  _ _) = True
 isOn (Offset _ _) = False
@@ -278,11 +276,11 @@ data Tied = Single
           | Starts
           | Continues
           | Stops
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Generic, NFData, Hashable)
 
 data RightTied = Holds
                | Ends
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Generic, NFData, Hashable)
 
 rightTie :: Tied -> RightTied
 rightTie Single    = Ends
@@ -292,7 +290,7 @@ rightTie Stops     = Ends
 
 data LeftTied = New
               | Held
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Generic, NFData, Hashable)
 
 leftTie :: Tied -> LeftTied
 leftTie Single    = New

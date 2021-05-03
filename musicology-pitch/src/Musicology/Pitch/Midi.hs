@@ -17,12 +17,13 @@ import           Musicology.Pitch.Internal
 import qualified Text.ParserCombinators.ReadP  as R
 import           Control.DeepSeq                ( NFData )
 import           Text.Read                      ( readMaybe )
+import Data.Hashable (Hashable)
 
 -- MidiInterval
 ---------------
 
 newtype MidiIC = MidiIC Int
-  deriving (Eq, Ord, NFData, Show)
+  deriving (Eq, Ord, NFData, Show, Hashable)
 
 mic :: Int -> MidiIC
 mic = MidiIC . flip mod 12

@@ -4,6 +4,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass #-}
 module Musicology.Pitch.Spelled
   ( SInterval(..)
   , spelled
@@ -64,6 +65,7 @@ import           Control.Applicative            ( (<|>) )
 import           Data.Char                      ( ord
                                                 , chr
                                                 )
+import Data.Hashable (Hashable)
 
 -- Spelled Interval
 -------------------
@@ -105,7 +107,7 @@ data SInterval = SInterval
                  { siFifths :: Int
                  , siOctaves :: Int
                  }
-  deriving (Eq, Generic, Show)
+  deriving (Eq, Generic, Show, NFData, Hashable)
 
 -- smart constructors
 
@@ -132,8 +134,6 @@ seventh = Impf (spelled 5 (-2) ^-^)
 
 instance ToJSON SInterval -- TODO make more specific
 instance FromJSON SInterval
-
-instance NFData SInterval
 
 instance Spelled SInterval where
   fifths (SInterval f _) = f
@@ -232,7 +232,7 @@ instance Notation SInterval where
 -- spc are based on the line of fifth
 
 newtype SIC = SIC { sFifth :: Int }
-  deriving (Ord, Eq, Show, Generic)
+  deriving (Ord, Eq, Show, Generic, NFData, Hashable)
 
 instance ToJSON SIC -- TODO: better keys in object
 instance FromJSON SIC
@@ -247,8 +247,6 @@ tritone' = sic 6
 fifth' = sic 1
 sixth' = Impf (sic 3 ^-^)
 seventh' = Impf (sic 5 ^-^)
-
-instance NFData SIC
 
 instance Spelled SIC where
   fifths (SIC f) = f

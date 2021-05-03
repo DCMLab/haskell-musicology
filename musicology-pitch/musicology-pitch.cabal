@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d1b644dbdcf870c23572b3c41865dff3122588fe5596f017e50bf7ed10402f0f
+-- hash: 45d0e5808cb9d0c62c8d7996a89d73fc441fd384a362b4a661253c010e25b837
 
 name:           musicology-pitch
 version:        0.1.0.0
@@ -39,6 +39,7 @@ library
       aeson
     , base >=4.7 && <5
     , deepseq
+    , hashable
     , text
     , vector-space
   default-language: Haskell2010
@@ -57,6 +58,7 @@ test-suite musicology-pitch-test
     , aeson
     , base >=4.7 && <5
     , deepseq
+    , hashable
     , hspec
     , musicology-pitch
     , text
