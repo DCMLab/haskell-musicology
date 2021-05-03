@@ -104,6 +104,14 @@ class (Pitched a) => HasPitch a where
 -- some default instances
 -------------------------
 
+instance Interval i => Pitched (Pitch i) where
+  type IntervalOf (Pitch i) = i
+  type ReTypeInterval (Pitch i) i' = Pitch i'
+
+instance Interval i => HasPitch (Pitch i) where
+  pitch = id
+  setPitch = const
+
 instance Interval p => Pitched [p] where
   type IntervalOf [p] = p
   type ReTypeInterval [p] p2 = [p2]
