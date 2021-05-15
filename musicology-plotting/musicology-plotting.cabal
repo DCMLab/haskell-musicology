@@ -1,0 +1,76 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: c2a616356f24b1b182a626e533be74102334e818a6f496f4075e5296a74b69bd
+
+name:           musicology-plotting
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/DCMLab/haskell-musicology#readme>
+homepage:       https://github.com/DCMLab/haskell-musicology#readme
+bug-reports:    https://github.com/DCMLab/haskell-musicology/issues
+author:         Christoph Finkensiep
+maintainer:     chfin@chfin.de
+copyright:      2019 Christoph Finkensiep
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/DCMLab/haskell-musicology
+
+library
+  exposed-modules:
+      Musicology.Plotting.Charts
+      Musicology.Plotting.Plotting
+  other-modules:
+      Paths_musicology_plotting
+  hs-source-dirs:
+      src
+  build-depends:
+      Chart
+    , aeson
+    , aeson-pretty
+    , base >=4.7 && <5
+    , bytestring
+    , colour
+    , hvega
+    , musicology-core
+    , open-browser
+    , temporary
+    , text
+    , type-of-html
+    , unordered-containers
+    , vector
+  default-language: Haskell2010
+
+test-suite musicology-plotting-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_musicology_plotting
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Chart
+    , aeson
+    , aeson-pretty
+    , base >=4.7 && <5
+    , bytestring
+    , colour
+    , hvega
+    , musicology-core
+    , musicology-plotting
+    , open-browser
+    , temporary
+    , text
+    , type-of-html
+    , unordered-containers
+    , vector
+  default-language: Haskell2010
