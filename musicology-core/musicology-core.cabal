@@ -1,0 +1,59 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 1354782a360da8bb38f45a820000e046a95e7476b98ef1be53b551ec09ccd4e2
+
+name:           musicology-core
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/chfin/musicology-core#readme>
+homepage:       https://github.com/DCMLab/haskell-musicology#readme
+bug-reports:    https://github.com/DCMLab/haskell-musicology/issues
+author:         Christoph Finkensiep
+maintainer:     chfin@chfin.de
+copyright:      2021 Christoph Finkensiep
+license:        BSD3
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/DCMLab/haskell-musicology
+
+library
+  exposed-modules:
+      Musicology.Core
+      Musicology.Core.Slicing
+  other-modules:
+      Paths_musicology_core
+  hs-source-dirs:
+      src
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , deepseq
+    , hashable
+    , microlens
+    , musicology-pitch
+  default-language: Haskell2010
+
+test-suite musicology-core-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_musicology_core
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , deepseq
+    , hashable
+    , microlens
+    , musicology-core
+    , musicology-pitch
+  default-language: Haskell2010
