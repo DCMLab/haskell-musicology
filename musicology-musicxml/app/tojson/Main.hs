@@ -41,8 +41,8 @@ main = do
   source  <- maybe B.getContents B.readFile $ inFile opts
   let
     xml = parseWithIds True source
-    notes  = if unfold opts then xmlNotesHeard xml else xmlNotesWritten xml
-    jnotes = noteToJSON . asNoteWithId <$> notes
+    notes  = (if unfold opts then asNoteWithIdHeard else asNoteWithIdWritten) <$> xmlNotes xml
+    jnotes = noteToJSON <$> notes
     str =
       if pretty opts then P.encodePretty' prettyCfg jnotes else encode jnotes
   case outFile opts of

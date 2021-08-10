@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d21e3d117ae78c03b25368d21b5d9cf2c2716460bc045dc408e85f6d98a7de89
+-- hash: 65215be5eac9cd29df400bf2bd9292ac70af9215503abb8233ebc29d99188416
 
 name:           musicology-musicxml
 version:        0.1.0.0
@@ -41,6 +41,7 @@ library
     , mtl
     , musicology-core
     , musicology-pitch
+    , musicology-time
     , pipes
     , text
     , vector
@@ -66,6 +67,7 @@ executable musicology-musicxml-exe
     , musicology-core
     , musicology-musicxml
     , musicology-pitch
+    , musicology-time
     , pipes
     , text
     , vector
@@ -92,6 +94,7 @@ executable musicxml2json
     , musicology-core
     , musicology-musicxml
     , musicology-pitch
+    , musicology-time
     , optparse-applicative
     , pipes
     , text
@@ -119,6 +122,7 @@ test-suite musicology-musicxml-test
     , musicology-core
     , musicology-musicxml
     , musicology-pitch
+    , musicology-time
     , pipes
     , text
     , vector

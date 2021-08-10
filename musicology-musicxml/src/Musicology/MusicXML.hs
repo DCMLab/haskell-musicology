@@ -7,10 +7,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Musicology.MusicXML
   ( parseWithIds, parseWithoutIds, idfy
-  , XmlNote(..), XmlRecord
+  , XmlNote(..), XmlRecord, AsWritten(..)
   , xmlNoteToRecord, notesToFrame
-  , asNote, asNoteWithId
-  , xmlNotes, xmlNotesWritten, xmlNotesHeard, scoreNotes
+  , asNoteWritten, asNoteWithIdWritten
+  , asNoteHeard, asNoteWithIdHeard
+  , xmlNotes, parseScore
   ) where
 
 import Text.XML.Light
@@ -35,6 +36,7 @@ import Lens.Micro
 import Musicology.Core
 
 import qualified Debug.Trace as D
+import Musicology.Time
 
 -- helpers
 ----------
@@ -103,21 +105,44 @@ idfy keep input = maybe "" showTopElement $ parseWithIds keep input
 -- note list
 ------------
 
+data XmlNoteW = XmlNoteW
+  { _onsetW :: Ratio Int
+  , _offsetW :: Ratio Int
+  , _pitchW :: SPitch
+  , _partW :: Int
+  , _idW :: Maybe String
+  }
+  deriving (Eq, Ord, Show)
+
 data XmlNote = XmlNote
-  { _onset :: Ratio Int
-  , _offset :: Ratio Int
+  { _onsetWritten :: Ratio Int
+  , _offsetWritten :: Ratio Int
+  , _onsetHeard :: Ratio Int
+  , _offsetHeard :: Ratio Int
   , _pitch :: SPitch
   , _part :: Int
   , _id :: Maybe String
   }
   deriving (Eq, Ord, Show)
 
+newtype AsWritten = AsWritten XmlNote
+  deriving (Eq, Ord, Show)
+
 instance Timed XmlNote where
   type TimeOf XmlNote = Ratio Int
 
 instance HasTime XmlNote where
-  onsetL f note = fmap (\on' -> note { _onset = on' }) (f $ _onset note)
-  offsetL f note = fmap (\off' -> note { _offset = off' }) (f $ _offset note)
+  onsetL f note = fmap (\on' -> note { _onsetHeard = on' }) (f $ _onsetHeard note)
+  offsetL f note = fmap (\off' -> note { _offsetHeard = off' }) (f $ _offsetHeard note)
+
+instance Timed AsWritten where
+  type TimeOf AsWritten = Ratio Int
+
+instance HasTime AsWritten where
+  onsetL f (AsWritten note) =
+    fmap (\on' -> AsWritten $ note { _onsetWritten = on' }) (f $ _onsetWritten note)
+  offsetL f (AsWritten note) =
+    fmap (\off' -> AsWritten $ note { _offsetWritten = off' }) (f $ _offsetWritten note)
 
 instance Pitched XmlNote where
   type IntervalOf XmlNote = SInterval
@@ -128,29 +153,46 @@ instance HasPitch XmlNote where
   pitchL f note = fmap updatePitch (f $ _pitch note)
     where updatePitch p = note { _pitch  = p }
 
+instance Pitched AsWritten where
+  type IntervalOf AsWritten = SInterval
+  type ReTypeInterval AsWritten p2 = AsWritten
+
+instance HasPitch AsWritten where
+  pitchL :: Lens' AsWritten SPitch
+  pitchL f (AsWritten note) = fmap updatePitch (f $ _pitch note)
+    where updatePitch p = AsWritten $ note { _pitch  = p }
+
 type instance VectorFor (Ratio Int) = V.Vector
 type instance VectorFor (Maybe String) = V.Vector
 type instance VectorFor SPitch = V.Vector
 
-type XmlRecord = Record '[ "onset" :-> Ratio Int
-                         , "offset" :-> Ratio Int
+type XmlRecord = Record '[ "onsetWritten" :-> Ratio Int
+                         , "offsetWritten" :-> Ratio Int
+                         , "onsetHeard" :-> Ratio Int
+                         , "offsetHeard" :-> Ratio Int
                          , "pitch" :-> SPitch
                          , "part" :-> Int
                          , "id" :-> Maybe String
                          ]
 
 xmlNoteToRecord :: XmlNote -> XmlRecord
-xmlNoteToRecord (XmlNote on off p part id) =
-  on &: off &: p &: part &: id &: RNil
+xmlNoteToRecord (XmlNote onW offW onH offH p part id) =
+  onW &: offW &: onH &: offH &: p &: part &: id &: RNil
 
 notesToFrame :: [XmlNote] -> Frame XmlRecord
 notesToFrame notes = toFrame $ map xmlNoteToRecord notes
 
-asNote :: XmlNote -> Note SInterval (Ratio Int)
-asNote (XmlNote on off p _ _) = Note p on off
+asNoteWritten :: XmlNote -> Note SInterval (Ratio Int)
+asNoteWritten (XmlNote on off _ _ p _ _) = Note p on off
 
-asNoteWithId :: XmlNote -> NoteId SInterval (Ratio Int) (Maybe String)
-asNoteWithId (XmlNote on off p _ id) = NoteId p on off id
+asNoteWithIdWritten :: XmlNote -> NoteId SInterval (Ratio Int) (Maybe String)
+asNoteWithIdWritten (XmlNote on off _ _ p _ id) = NoteId p on off id
+
+asNoteHeard :: XmlNote -> Note SInterval (Ratio Int)
+asNoteHeard (XmlNote _ _ on off p _ _) = Note p on off
+
+asNoteWithIdHeard :: XmlNote -> NoteId SInterval (Ratio Int) (Maybe String)
+asNoteWithIdHeard (XmlNote _ _ on off p _ id) = NoteId p on off id
 
 -- musical control flow
 -----------------------
@@ -270,43 +312,59 @@ runFlow blocks notes = snd $ foldl nextBlock (0, []) blocks
                 nts   = filter (\n -> (offset n > t1) && (onset n < t2)) notes
                 acc'  = acc <> fmap ((onsetL %~ shift) . (offsetL %~ shift)) nts
 
+runFlowXml :: [(Ratio Int,Ratio Int)] -> [XmlNoteW] -> [XmlNote]
+runFlowXml blocks notes = snd $ foldl nextBlock (0, []) blocks
+  where nextBlock (now,acc) (t1,t2) = (now', acc')
+          where shift = (+(now-t1))
+                now'  = shift t2
+                nts   = filter (\n -> (_offsetW n > t1) && (_onsetW n < t2)) notes
+                acc'  = acc <> fmap (\(XmlNoteW on off p i pt) -> XmlNote on off (shift on) (shift off) p i pt) nts
+
+
 -- parsing to notelist
 ----------------------
 
-data ParsingState = PS
-  { psNotes :: [XmlNote]
+data ParsingState n = PS
+  { psNotes :: [n]
   , psDiv :: Int
   , psTime :: Ratio Int
   , psPrevTime :: Ratio Int
   , psTrans :: SInterval
-  , psTied :: [XmlNote]
+  , psTied :: [XmlNoteW]
+  , psTimeSig :: TimeSignature
+  , psSigs :: [(Ratio Int, TimeSignature)]
+  , psFirstBar :: Bool
   , psFlow :: [FlowMarker (Ratio Int)]
   } deriving Show
 
-xmlNotes :: Bool -> Maybe Element -> [XmlNote]
-xmlNotes unfold = maybe [] (scoreNotes unfold)
+xmlNotes :: Maybe Element -> [XmlNote]
+xmlNotes = maybe [] (fst . parseScore)
 
-xmlNotesWritten :: Maybe Element -> [XmlNote]
-xmlNotesWritten = xmlNotes False
+parseScore :: Element -> ([XmlNote], [[(Ratio Int, TimeSignature)]])
+parseScore root
+  | ename root == "score-partwise" = (sortOn _onsetHeard $ reverse notes, sigmaps)
+  | otherwise = ([], [])
+  where parts = uncurry parsePart <$> zip (namedChildren root "part") [1..]
+        notes = concatMap fst parts
+        sigmaps = snd <$> parts
 
-xmlNotesHeard :: Maybe Element -> [XmlNote]
-xmlNotesHeard = xmlNotes True
-
-scoreNotes :: Bool -> Element -> [XmlNote]
-scoreNotes unfoldReps root = sortOn _onset $ reverse notes
-  where notes = if ename root == "score-partwise"
-                then concatMap (uncurry $ partNotes unfoldReps) $ zip (namedChildren root "part") [1..]
-                else []
-
-partNotes :: Bool -> Element -> Int -> [XmlNote]
-partNotes unfold part parti = psNotes $ execState doPart init
-  where init = PS [] 1 (0%1) (0%1) unison [] []
+parsePart :: Element -> Int -> ([XmlNote], [(Ratio Int, TimeSignature)])
+parsePart part parti = (notes, sigs)
+  where init = PS [] 1 (0%1) (0%1) unison [] (TS 4 4) [] True []
+        final = execState doPart init
+        notes = runFlowXml (unfoldFlow (psTime final) (psFlow final)) (psNotes final)
+        sigs = reverse $ psSigs final
         doPart = do
           mapM_ doMeasure $ namedChildren part "measure"
           modify $ \st -> st { psNotes = psNotes st <> psTied st }
-          when unfold $ modify $ \st -> st { psNotes = runFlow (unfoldFlow (psTime st) (psFlow st))
-                                                       (psNotes st) }
-        doMeasure m = mapM_ mElt $ elChildren m
+        doMeasure m = do
+          mapM_ mElt $ elChildren m
+          st <- get
+          when (psFirstBar st) $ do
+            let firstSigOn = if psTime st < measureDuration (psTimeSig st)
+                  then psTime st
+                  else 0%1
+            put $ st { psFirstBar = False, psSigs = [(firstSigOn, psTimeSig st)]}
         mElt elt = case ename elt of
           "barline"    -> doBarLine elt
           "attributes" -> doAttribs elt
@@ -316,7 +374,7 @@ partNotes unfold part parti = psNotes $ execState doPart init
           "backup"     -> doBackup elt
           _            -> pure ()
 
-doBarLine :: Element -> State ParsingState ()
+doBarLine :: Element -> State (ParsingState XmlNoteW) ()
 doBarLine elt = do
   for_ (firstChild elt "repeat") $ \rep ->
     case attr rep "direction" of
@@ -334,7 +392,7 @@ doBarLine elt = do
         pushFlow flow = modify $
           \st -> st { psFlow = FM (psTime st) flow : psFlow st }
 
-doAttribs :: Element -> State ParsingState ()
+doAttribs :: Element -> State (ParsingState XmlNoteW) ()
 doAttribs elt = forM_ (elChildren elt) $ \att ->
   case ename att of
     "divisions" -> for_ (readMaybe $ strContent att) $
@@ -346,9 +404,13 @@ doAttribs elt = forM_ (elChildren elt) $ \att ->
                         Nothing -> pure ()
                         Just chrom  -> modify $
                           \st -> st { psTrans = spelledDiaChrom dia chrom ^+^ octs *^ octave}
+    "time" -> let num = firstInt' att "beats" 4
+                  denom = firstInt' att "beat-type" 4
+                  ts = TS num denom
+              in modify $ \st -> st { psSigs = (psTime st, ts) : psSigs st, psTimeSig = ts}
     _           -> pure ()
 
-doDirection :: Element -> State ParsingState ()
+doDirection :: Element -> State (ParsingState XmlNoteW) ()
 doDirection elt = mapM_ doSound (namedChildren elt "sound")
   where doSound sound = do
           let attr name = findAttr (unqual name) sound
@@ -373,7 +435,7 @@ noteNames "A" = Just a
 noteNames "B" = Just b
 noteNames _   = Nothing
 
-doNote :: Element -> Int -> State ParsingState ()
+doNote :: Element -> Int -> State (ParsingState XmlNoteW) ()
 doNote note parti = do
   st <- get
   -- time
@@ -411,26 +473,26 @@ doNote note parti = do
 
     -- tie stop?
     let (tied, onset', id') = if anyTieOfType "stop"
-          then let continued (XmlNote _ toff tpitch _ _) =
+          then let continued (XmlNoteW _ toff tpitch _ _) =
                      toff == onset && tpitch == pitch
                    start = find continued (psTied st) in
                  case start of
                    Nothing -> (psTied st, onset, id)
-                   Just n@(XmlNote ton _ _ _ tid) ->
+                   Just n@(XmlNoteW ton _ _ _ tid) ->
                      ( filter (/=n) (psTied st)
                      , ton
                      , tid <|> id )
           else (psTied st, onset, id)
 
     -- tie start?
-    let newNote = XmlNote onset' offset pitch parti id'
+    let newNote = XmlNoteW onset' offset pitch parti id'
     if anyTieOfType "start"
       then pure $ modify $ \st -> st { psTied = newNote : tied }
       else pure $ modify $ \st -> st { psNotes = newNote : psNotes st, psTied = tied }
     -- let newNote = XmlNote onset offset dia chrom parti id
     -- pure $ modify $ \st -> st { psNotes = newNote : psNotes st }
 
-doForward :: Element -> State ParsingState ()
+doForward :: Element -> State (ParsingState XmlNoteW) ()
 doForward elt = do
   st <- get
   let div = psDiv st
@@ -438,7 +500,7 @@ doForward elt = do
       t'  = t + firstInt' elt "duration" 0 % (div * 4)
   put st { psTime = t', psPrevTime = t' }
 
-doBackup :: Element -> State ParsingState ()
+doBackup :: Element -> State (ParsingState XmlNoteW) ()
 doBackup elt = do
   st <- get
   let div = psDiv st

@@ -30,4 +30,4 @@ main = do
       output = putStrLn
   txt <- input
   let xml = parseWithoutIds txt
-  P.runEffect $ P.for (produceCSV $ notesToFrame $ xmlNotesHeard xml) (P.lift . output)
+  P.runEffect $ P.for (produceCSV $ notesToFrame $ xmlNotes xml) (P.lift . output)

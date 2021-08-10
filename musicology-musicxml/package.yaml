@@ -22,6 +22,7 @@ dependencies:
 - base >= 4.7 && < 5
 - musicology-core
 - musicology-pitch
+- musicology-time
 - xml
 - Frames
 - bytestring

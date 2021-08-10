@@ -34,6 +34,7 @@ resolver: lts-17.0
 #  - wai
 packages:
 - musicology-pitch
+- musicology-time
 - musicology-core
 - musicology-extra
 - musicology-plotting
