@@ -6,7 +6,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Musicology.MusicXML
-  ( parseWithIds, idfy
+  ( parseWithIds, parseWithoutIds, idfy
   , XmlNote(..), XmlRecord
   , xmlNoteToRecord, notesToFrame
   , asNote, asNoteWithId
@@ -93,6 +93,9 @@ parseWithIds keep input = do
         contentIds (Elem e) = Elem <$> addIds e
         contentIds t@(Text _) = pure t
         contentIds c@(CRef _) = pure c
+
+parseWithoutIds :: XmlSource s => s -> Maybe Element
+parseWithoutIds = parseXMLDoc
 
 idfy :: Bool -> String -> String
 idfy keep input = maybe "" showTopElement $ parseWithIds keep input
@@ -280,13 +283,13 @@ data ParsingState = PS
   , psFlow :: [FlowMarker (Ratio Int)]
   } deriving Show
 
-xmlNotes :: XmlSource s => Bool -> s -> [XmlNote]
-xmlNotes unfoldReps input = maybe [] (scoreNotes unfoldReps) (parseXMLDoc input)
+xmlNotes :: Bool -> Maybe Element -> [XmlNote]
+xmlNotes unfold = maybe [] (scoreNotes unfold)
 
-xmlNotesWritten :: XmlSource s => s -> [XmlNote]
+xmlNotesWritten :: Maybe Element -> [XmlNote]
 xmlNotesWritten = xmlNotes False
 
-xmlNotesHeard :: XmlSource s => s -> [XmlNote]
+xmlNotesHeard :: Maybe Element -> [XmlNote]
 xmlNotesHeard = xmlNotes True
 
 scoreNotes :: Bool -> Element -> [XmlNote]

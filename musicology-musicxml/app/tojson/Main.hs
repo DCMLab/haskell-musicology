@@ -38,8 +38,9 @@ main = do
   let getOpts   = info (optParser <**> helper) fullDesc
       prettyCfg = P.defConfig { P.confIndent = P.Spaces 1 }
   opts <- execParser getOpts
-  xml  <- maybe B.getContents B.readFile $ inFile opts
+  source  <- maybe B.getContents B.readFile $ inFile opts
   let
+    xml = parseWithIds True source
     notes  = if unfold opts then xmlNotesHeard xml else xmlNotesWritten xml
     jnotes = noteToJSON . asNoteWithId <$> notes
     str =

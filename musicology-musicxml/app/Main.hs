@@ -29,4 +29,5 @@ main = do
   let input = getContents
       output = putStrLn
   txt <- input
-  P.runEffect $ P.for (produceCSV $ notesToFrame $ xmlNotesHeard txt) (P.lift . output)
+  let xml = parseWithoutIds txt
+  P.runEffect $ P.for (produceCSV $ notesToFrame $ xmlNotesHeard xml) (P.lift . output)
