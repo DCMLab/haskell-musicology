@@ -10,6 +10,7 @@ import Frames.CSV (produceCSV)
 import Frames.ShowCSV
 import Data.Ratio
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 
 instance ShowCSV i => ShowCSV (Ratio i) where
   showCSV r = showCSV (numerator r) <> "//" <> showCSV (denominator r)
@@ -29,5 +30,5 @@ main = do
   let input = getContents
       output = putStrLn
   txt <- input
-  let xml = parseWithoutIds txt
+  let xml = parseWithoutIds $ TL.pack txt
   P.runEffect $ P.for (produceCSV $ notesToFrame $ xmlNotes xml) (P.lift . output)

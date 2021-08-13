@@ -6,6 +6,7 @@ import           Data.Aeson
 import qualified Data.Aeson.Encoding           as E
 import qualified Data.Aeson.Encode.Pretty      as P
 import qualified Data.ByteString.Lazy          as B
+import qualified Data.Text.Lazy as TL
 
 import           Options.Applicative
 
@@ -38,9 +39,9 @@ main = do
   let getOpts   = info (optParser <**> helper) fullDesc
       prettyCfg = P.defConfig { P.confIndent = P.Spaces 1 }
   opts <- execParser getOpts
-  source  <- maybe B.getContents B.readFile $ inFile opts
+  source  <- maybe getContents readFile $ inFile opts
   let
-    xml = parseWithIds True source
+    xml = parseWithIds True $ TL.pack source
     notes  = (if unfold opts then asNoteWithIdHeard else asNoteWithIdWritten) <$> xmlNotes xml
     jnotes = noteToJSON <$> notes
     str =

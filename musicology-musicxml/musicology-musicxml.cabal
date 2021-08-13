@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 65215be5eac9cd29df400bf2bd9292ac70af9215503abb8233ebc29d99188416
+-- hash: 12297783a2a853e0b3d4b7ce271e7f04a731d20bb2ed5796467549b0883e1318
 
 name:           musicology-musicxml
 version:        0.1.0.0
@@ -46,7 +46,7 @@ library
     , text
     , vector
     , vinyl
-    , xml
+    , xml-conduit
   default-language: Haskell2010
 
 executable musicology-musicxml-exe
@@ -72,7 +72,7 @@ executable musicology-musicxml-exe
     , text
     , vector
     , vinyl
-    , xml
+    , xml-conduit
   default-language: Haskell2010
 
 executable musicxml2json
@@ -100,7 +100,7 @@ executable musicxml2json
     , text
     , vector
     , vinyl
-    , xml
+    , xml-conduit
   default-language: Haskell2010
 
 test-suite musicology-musicxml-test
@@ -127,5 +127,5 @@ test-suite musicology-musicxml-test
     , text
     , vector
     , vinyl
-    , xml
+    , xml-conduit
   default-language: Haskell2010

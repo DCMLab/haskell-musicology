@@ -23,7 +23,7 @@ dependencies:
 - musicology-core
 - musicology-pitch
 - musicology-time
-- xml
+- xml-conduit
 - Frames
 - bytestring
 - mtl
