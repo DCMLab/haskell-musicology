@@ -1,21 +1,5 @@
-# musicology-pitch
+module Main where
 
-This package provides useful representations and operations for working with musical pitch.
-Follows the same API and notation formats as the companion libraries:
-- [Pitches.jl](https://github.com/DCMLab/Pitches.jl/) (Julia)
-- [purescript-pitches](https://github.com/DCMLab/purescript-pitches) (Purescript)
-- [rust-pitches](https://github.com/DCMLab/rust-pitches) (Rust)
-- [pitchtypes](https://github.com/DCMLab/pitchtypes) (Python)
-
-
-The two main goals are:
-
-- providing types and operations (such as arithmetics, printing and parsing) for common types of pitches and intervals
-- providing a generic interface for writing code that is agnostic to the specific pitch or interval types.
-
-It allows you to write generic algorithms that can then be applied to pitches and intervals in different formats:
-
-```haskell
 import           Data.Foldable                  ( forM_ )
 import           Data.Maybe                     ( catMaybes )
 import           Musicology.Pitch
@@ -45,22 +29,3 @@ main = do
       Just interval  = readNotation "M3:0"
   forM_ (transposeAndAddOctave spelledPitches interval)
     $ \p -> putStrLn $ "- " <> showNotation p
-```
-
-Output:
-
-```
-MIDI:
-- p75
-- p79
-- p82
-MIDI classes:
-- pcic3
-- pcic7
-- pcic10
-spelled:
-- E5
-- G5
-- B♯5
-- E6
-```

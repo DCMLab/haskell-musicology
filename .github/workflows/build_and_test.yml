@@ -30,12 +30,25 @@ jobs:
 
       # Build the dependencies
       - name: Build Dependencies
-        run: stack build --test --no-run-tests --bench --no-run-benchmarks --only-dependencies
+        run: stack build --test --no-run-tests --bench --no-run-benchmarks --only-dependencies --haddock
 
       # Build the package
       - name: Build Packages
-        run: stack build --test --no-run-tests --bench --no-run-benchmarks
+        run: stack build --test --no-run-tests --bench --no-run-benchmarks --haddock
 
       # Run the tests for all sub-packages
       - name: Run Tests
         run: stack test
+
+      # Copy docs
+      - name: Copy Docs
+      - run: |
+          doc_path=`stack path | grep local-doc-root | cut -f2 -d ":"`
+          cp -r "doc_path" docs
+
+      # Copy docs
+      - name: Deploy docs
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs

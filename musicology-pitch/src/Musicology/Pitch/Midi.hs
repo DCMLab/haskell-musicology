@@ -8,16 +8,17 @@ module Musicology.Pitch.Midi
   , mic
   , MidiPitch
   , MidiPC
-  )
-where
+  , midip
+  , midipc
+  ) where
 
 import           Musicology.Pitch.Class
 import           Musicology.Pitch.Internal
 
-import qualified Text.ParserCombinators.ReadP  as R
 import           Control.DeepSeq                ( NFData )
+import           Data.Hashable                  ( Hashable )
+import qualified Text.ParserCombinators.ReadP  as R
 import           Text.Read                      ( readMaybe )
-import Data.Hashable (Hashable)
 
 -- MidiInterval
 ---------------
