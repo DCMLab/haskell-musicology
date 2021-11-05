@@ -69,6 +69,25 @@ Output:
 > - G5
 > - B♯5
 > - E6
+
+The fundamental idea behind this library is that the central object is the /interval/.
+Pitches are derived from intervals by interpreting them with respect to a reference point.
+This is much like the relation between vectors (= intervals) and points (= pitches).
+For example, the pitch @E♭4@ can be represented as an interval (e.g. a minor third, @m3:0@)
+above a reference pitch such as Middle C (@C4@).
+The concept of an interval is represented by the 'Interval' class.
+Pitches are represented using the generic 'Pitch' type.
+Pitch types for concrete interval types, however, may provide specialized functionality
+(e.g. for reading and printing) as well as type synonyms
+(e.g. 'SPitch' for @Pitch Snterval@).
+
+Similar to vectors and points, intervals and pitches support a number of operations
+such as addition and scalar multiplication,
+which are here implemented using the 'Interval' class and its superclasses (e.g. 'VectorSpace').
+
+For the general pitch and interval interface, have a look at "Musicology.Pitch.Class".
+Documentation for spelled and MIDI types
+can be found in "Musicology.Pitch.Spelled" and "Musicology.Pitch.Midi", respectively.
 -}
 module Musicology.Pitch
   ( module Musicology.Pitch.Class

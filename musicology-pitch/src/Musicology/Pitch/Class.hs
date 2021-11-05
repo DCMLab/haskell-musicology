@@ -3,6 +3,19 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DefaultSignatures #-}
+{-# OPTIONS_HADDOCK show-extensions #-}
+{-|
+Module: Musicology.Pitch
+Description: Representations and operations for musical pitch.
+Copyright: Christoph Finkensiep, 2021
+License: BSD
+Maintainer: chfin@chfin.de
+Stability: experimental
+
+This module defines a generic interface for pitch and interval types.
+
+It provides three basic blocks of functionality
+-}
 module Musicology.Pitch.Class
   ( module Data.VectorSpace
   , IntervalClass(..)
