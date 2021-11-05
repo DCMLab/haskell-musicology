@@ -10,12 +10,17 @@
 
 -- | This module defines a generic interface for pitch and interval types.
 --   
---   It provides three basic blocks of functionality
+--   It provides three basic blocks of functionality:
+--   
+--   <ul>
+--   <li>a set of type classes for generically <a>working with
+--   intervals</a></li>
+--   <li>a generic type and associated operations for <a>working with
+--   pitches</a></li>
+--   <li>functionality for reading and printing pitches and intervals in a
+--   <a>common notation</a></li>
+--   </ul>
 module Musicology.Pitch.Class
-class (Interval i, Interval (IOf i), VectorSpace i, ICOf (IOf i) ~ i) => IntervalClass i where {
-    type family IOf i;
-}
-emb :: IntervalClass i => i -> IOf i
 class VectorSpace i => Interval i where {
     type family ICOf i;
 }
@@ -24,6 +29,10 @@ octave :: Interval i => i
 direction :: Interval i => i -> Ordering
 direction :: (Interval i, Ord i) => i -> Ordering
 iabs :: Interval i => i -> i
+class (Interval i, Interval (IOf i), VectorSpace i, ICOf (IOf i) ~ i) => IntervalClass i where {
+    type family IOf i;
+}
+emb :: IntervalClass i => i -> IOf i
 oct :: (IntervalClass i, s ~ Scalar (IOf i)) => s -> i -> IOf i
 unison :: Interval i => i
 class Interval i => Diatonic i
