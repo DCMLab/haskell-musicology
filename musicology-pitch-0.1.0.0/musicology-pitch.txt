@@ -39,11 +39,11 @@ class Interval i => Diatonic i
 isStep :: Diatonic i => i -> Bool
 class Interval i => Chromatic i
 chromaticSemitone :: Chromatic i => i
-newtype ImperfectInterval i
-Impf :: (i -> i) -> ImperfectInterval i
 aug :: Chromatic i => i -> i
 dim :: Chromatic i => i -> i
 down :: Interval i => i -> i
+newtype ImperfectInterval i
+Impf :: (i -> i) -> ImperfectInterval i
 minor :: Chromatic i => ImperfectInterval i -> i
 major :: Interval i => ImperfectInterval i -> i
 newtype Pitch a
@@ -86,6 +86,9 @@ parseInt' :: ReadP Int
 munchChar :: Char -> ReadP String
 munchChar1 :: Char -> ReadP String
 
+
+-- | This module defines pitch and interval types for enharmonic/chromatic
+--   pitch, (as used in MIDI). Midi intervals are just <a>Int</a>s.
 module Musicology.Pitch.Midi
 type MidiInterval = Int
 newtype MidiIC
@@ -120,6 +123,9 @@ instance Musicology.Pitch.Class.Interval GHC.Types.Int
 instance Musicology.Pitch.Class.Diatonic GHC.Types.Int
 instance Musicology.Pitch.Class.Chromatic GHC.Types.Int
 
+
+-- | This module defines pitch and interval types for spelled pitch, i.e.
+--   Western notation.
 module Musicology.Pitch.Spelled
 data SInterval
 SInterval :: Int -> Int -> SInterval
@@ -131,6 +137,10 @@ newtype SIC
 SIC :: Int -> SIC
 [sFifth] :: SIC -> Int
 sic :: Int -> SIC
+type SPitch = Pitch SInterval
+type SPC = Pitch SIC
+spelledp :: Int -> Int -> SPitch
+spc :: Int -> SPC
 class Spelled i
 fifths :: Spelled i => i -> Int
 octaves :: Spelled i => i -> Int
@@ -154,15 +164,11 @@ tritone' :: SIC
 fifth' :: SIC
 sixth' :: ImperfectInterval SIC
 seventh' :: ImperfectInterval SIC
-type SPitch = Pitch SInterval
-type SPC = Pitch SIC
-spelledp :: Int -> Int -> SPitch
-spc :: Int -> SPC
 newtype Accidental
 Acc :: Int -> Accidental
 flt :: Accidental
-shp :: Accidental
 nat :: Accidental
+shp :: Accidental
 c :: Accidental -> Int -> SPitch
 d :: Accidental -> Int -> SPitch
 e :: Accidental -> Int -> SPitch
@@ -282,9 +288,9 @@ instance (Musicology.Pitch.Spelled.Spelled i, Musicology.Pitch.Class.Interval i,
 --   - p79
 --   - p82
 --   MIDI classes:
---   - pcic3
---   - pcic7
---   - pcic10
+--   - ic3
+--   - ic7
+--   - ic10
 --   spelled:
 --   - E5
 --   - G5
