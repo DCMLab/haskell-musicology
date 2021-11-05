@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{-|
+Module      : Graphics.Vega.VegaLite.Data
+Copyright   : (c) Douglas Burke, 2018-2019
+License     : BSD3
+
+Maintainer  : dburke.gw@gmail.com
+Stability   : unstable
+
+Representing data values (excluding base time
+types).
+
+-}</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Graphics.Vega.VegaLite.Data</span><span>
+</span><span id="line-15"></span><span>       </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DataValue"><span class="hs-identifier">DataValue</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DataValues"><span class="hs-identifier">DataValues</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span>       </span><span class="hs-comment">-- not for external export</span><span>
+</span><span id="line-19"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#dataValueSpec"><span class="hs-identifier">dataValueSpec</span></a></span><span>
+</span><span id="line-20"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#dataValuesSpecs"><span class="hs-identifier">dataValuesSpecs</span></a></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span>       </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">A</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">toJSON</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html"><span class="hs-identifier">Graphics.Vega.VegaLite.Specification</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier">VLSpec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html"><span class="hs-identifier">Graphics.Vega.VegaLite.Time</span></a></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DateTime"><span class="hs-identifier">DateTime</span></a></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeSpec"><span class="hs-identifier">dateTimeSpec</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">{-|
+
+A single data value. This is used when a function or constructor
+can accept values of different types (e.g. either a number or a string),
+such as:
+'Graphics.Vega.VegaLite.dataRow', 'Graphics.Vega.VegaLite.geometry', many constructors of the 'Graphics.Vega.VegaLite.Filter' type,
+'Graphics.Vega.VegaLite.ImNewValue', and 'Graphics.Vega.VegaLite.SInit'.
+
+-}</span><span>
+</span><span id="line-46"></span><span class="hs-keyword">data</span><span> </span><span id="DataValue"><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DataValue"><span class="hs-identifier hs-var">DataValue</span></a></span></span><span>
+</span><span id="line-47"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="Boolean"><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Boolean"><span class="hs-identifier hs-var">Boolean</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-48"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DateTime"><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DateTime"><span class="hs-identifier hs-var">DateTime</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DateTime"><span class="hs-identifier hs-type">DateTime</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Number"><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Number"><span class="hs-identifier hs-var">Number</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-50"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Str"><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Str"><span class="hs-identifier hs-var">Str</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-51"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="NullValue"><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#NullValue"><span class="hs-identifier hs-var">NullValue</span></a></span></span><span>
+</span><span id="line-52"></span><span>      </span><span class="hs-comment">-- ^ Create a JavaScript @null@ value. This can be useful when</span><span>
+</span><span id="line-53"></span><span>      </span><span class="hs-comment">--   explictly recoding a value as undefined, such as in the following</span><span>
+</span><span id="line-54"></span><span>      </span><span class="hs-comment">--   example:</span><span>
+</span><span id="line-55"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-56"></span><span>      </span><span class="hs-comment">--   @</span><span>
+</span><span id="line-57"></span><span>      </span><span class="hs-comment">--   'Graphics.Vega.VegaLite.dataFromRows' []</span><span>
+</span><span id="line-58"></span><span>      </span><span class="hs-comment">--     . 'Graphics.Vega.VegaLite.dataRow' [(&quot;x&quot;, 'Number' 1), (&quot;y&quot;, 'Str' &quot;good&quot;)]</span><span>
+</span><span id="line-59"></span><span>      </span><span class="hs-comment">--     . 'Graphics.Vega.VegaLite.dataRow' [(&quot;x&quot;, 'Number' 2), (&quot;y&quot;, 'NullValue')]</span><span>
+</span><span id="line-60"></span><span>      </span><span class="hs-comment">--     . 'Graphics.Vega.VegaLite.dataRow' [(&quot;x&quot;, 'Number' 3), (&quot;y&quot;, 'String' &quot;bad&quot;)]</span><span>
+</span><span id="line-61"></span><span>      </span><span class="hs-comment">--   @</span><span>
+</span><span id="line-62"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-63"></span><span>      </span><span class="hs-comment">--   For more-complex data sources - such as lists of defined</span><span>
+</span><span id="line-64"></span><span>      </span><span class="hs-comment">--   and un-specified values, it is suggested that 'Graphics.Vega.VegaLite.dataFromJson'</span><span>
+</span><span id="line-65"></span><span>      </span><span class="hs-comment">--   be used rather than 'Graphics.Vega.VegaLite.dataFromRows' or 'Graphics.Vega.VegaLite.dataFromColumns'.</span><span>
+</span><span id="line-66"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-67"></span><span>      </span><span class="hs-comment">--   @since 0.4.0.0</span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#dataValueSpec"><span class="hs-identifier hs-type">dataValueSpec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DataValue"><span class="hs-identifier hs-type">DataValue</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier hs-type">VLSpec</span></a></span><span>
+</span><span id="line-70"></span><span id="dataValueSpec"><span class="annot"><span class="annottext">dataValueSpec :: DataValue -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Data.html#dataValueSpec"><span class="hs-identifier hs-var hs-var">dataValueSpec</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Boolean"><span class="hs-identifier hs-type">Boolean</span></a></span><span> </span><span id="local-6989586621679112814"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679112814"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679112814"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-71"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#dataValueSpec"><span class="hs-identifier hs-var">dataValueSpec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DateTime"><span class="hs-identifier hs-type">DateTime</span></a></span><span> </span><span id="local-6989586621679112813"><span class="annot"><span class="annottext">[DateTime]
+</span><a href="#local-6989586621679112813"><span class="hs-identifier hs-var">dt</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[DateTime] -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Time.html#dateTimeSpec"><span class="hs-identifier hs-var">dateTimeSpec</span></a></span><span> </span><span class="annot"><span class="annottext">[DateTime]
+</span><a href="#local-6989586621679112813"><span class="hs-identifier hs-var">dt</span></a></span><span>
+</span><span id="line-72"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#dataValueSpec"><span class="hs-identifier hs-var">dataValueSpec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Number"><span class="hs-identifier hs-type">Number</span></a></span><span> </span><span id="local-6989586621679112812"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679112812"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679112812"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-73"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#dataValueSpec"><span class="hs-identifier hs-var">dataValueSpec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Str"><span class="hs-identifier hs-type">Str</span></a></span><span> </span><span id="local-6989586621679112811"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679112811"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679112811"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-74"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#dataValueSpec"><span class="hs-identifier hs-var">dataValueSpec</span></a></span><span> </span><span class="annot"><span class="annottext">DataValue
+</span><a href="Graphics.Vega.VegaLite.Data.html#NullValue"><span class="hs-identifier hs-var">NullValue</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">VLSpec
+</span><span class="hs-identifier hs-var">A.Null</span></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="hs-comment">{-|
+
+A list of data values. This is used when a function or constructor
+can accept lists of different types (e.g. either a list of numbers
+or a list of strings), such as:
+'Graphics.Vega.VegaLite.dataColumn', 'Graphics.Vega.VegaLite.CustomSort', 'Graphics.Vega.VegaLite.FOneOf', or 'Graphics.Vega.VegaLite.ImKeyVals'.
+
+If your data contains undefined values then it is suggested that
+you convert it to JSON (e.g. 'A.Value') and then use 'Graphics.Vega.VegaLite.dataFromJson'.
+
+-}</span><span>
+</span><span id="line-88"></span><span class="hs-keyword">data</span><span> </span><span id="DataValues"><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DataValues"><span class="hs-identifier hs-var">DataValues</span></a></span></span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="Booleans"><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Booleans"><span class="hs-identifier hs-var">Booleans</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">]</span><span>
+</span><span id="line-90"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DateTimes"><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DateTimes"><span class="hs-identifier hs-var">DateTimes</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DateTime"><span class="hs-identifier hs-type">DateTime</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
+</span><span id="line-91"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Numbers"><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Numbers"><span class="hs-identifier hs-var">Numbers</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span>
+</span><span id="line-92"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Strings"><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Strings"><span class="hs-identifier hs-var">Strings</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span class="hs-special">]</span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#dataValuesSpecs"><span class="hs-identifier hs-type">dataValuesSpecs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DataValues"><span class="hs-identifier hs-type">DataValues</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier hs-type">VLSpec</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-96"></span><span id="dataValuesSpecs"><span class="annot"><span class="annottext">dataValuesSpecs :: DataValues -&gt; [VLSpec]
+</span><a href="Graphics.Vega.VegaLite.Data.html#dataValuesSpecs"><span class="hs-identifier hs-var hs-var">dataValuesSpecs</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Booleans"><span class="hs-identifier hs-type">Booleans</span></a></span><span> </span><span id="local-6989586621679112805"><span class="annot"><span class="annottext">[Bool]
+</span><a href="#local-6989586621679112805"><span class="hs-identifier hs-var">bs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; VLSpec) -&gt; [Bool] -&gt; [VLSpec]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">[Bool]
+</span><a href="#local-6989586621679112805"><span class="hs-identifier hs-var">bs</span></a></span><span>
+</span><span id="line-97"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#dataValuesSpecs"><span class="hs-identifier hs-var">dataValuesSpecs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DateTimes"><span class="hs-identifier hs-type">DateTimes</span></a></span><span> </span><span id="local-6989586621679112804"><span class="annot"><span class="annottext">[[DateTime]]
+</span><a href="#local-6989586621679112804"><span class="hs-identifier hs-var">dtss</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([DateTime] -&gt; VLSpec) -&gt; [[DateTime]] -&gt; [VLSpec]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">[DateTime] -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Time.html#dateTimeSpec"><span class="hs-identifier hs-var">dateTimeSpec</span></a></span><span> </span><span class="annot"><span class="annottext">[[DateTime]]
+</span><a href="#local-6989586621679112804"><span class="hs-identifier hs-var">dtss</span></a></span><span>
+</span><span id="line-98"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#dataValuesSpecs"><span class="hs-identifier hs-var">dataValuesSpecs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Numbers"><span class="hs-identifier hs-type">Numbers</span></a></span><span> </span><span id="local-6989586621679112803"><span class="annot"><span class="annottext">[Double]
+</span><a href="#local-6989586621679112803"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; VLSpec) -&gt; [Double] -&gt; [VLSpec]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">[Double]
+</span><a href="#local-6989586621679112803"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-99"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#dataValuesSpecs"><span class="hs-identifier hs-var">dataValuesSpecs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Strings"><span class="hs-identifier hs-type">Strings</span></a></span><span> </span><span id="local-6989586621679112802"><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679112802"><span class="hs-identifier hs-var">ss</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Text -&gt; VLSpec) -&gt; [Text] -&gt; [VLSpec]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679112802"><span class="hs-identifier hs-var">ss</span></a></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span></pre></body></html>

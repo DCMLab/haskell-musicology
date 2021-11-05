@@ -1,0 +1,335 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables  #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances    #-}</span><span>
+</span><span id="line-6"></span><span class="hs-pragma">{-# LANGUAGE TypeApplications     #-}</span><span>
+</span><span id="line-7"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts     #-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# LANGUAGE ConstraintKinds      #-}</span><span>
+</span><span id="line-9"></span><span class="hs-pragma">{-# LANGUAGE TypeOperators        #-}</span><span>
+</span><span id="line-10"></span><span class="hs-pragma">{-# LANGUAGE DataKinds            #-}</span><span>
+</span><span id="line-11"></span><span class="hs-pragma">{-# LANGUAGE PolyKinds            #-}</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Html</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Html.Type.html"><span class="hs-identifier">Html.Type</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Html.Convert.html"><span class="hs-identifier">Html.Convert</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Html.html#renderString"><span class="hs-identifier">renderString</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Html.html#renderText"><span class="hs-identifier">renderText</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Html.html#renderByteString"><span class="hs-identifier">renderByteString</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Html.html#renderBuilder"><span class="hs-identifier">renderBuilder</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Html.html#compactHTML"><span class="hs-identifier">compactHTML</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Html.html#renderCompactString"><span class="hs-identifier">renderCompactString</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Html.html#renderCompactText"><span class="hs-identifier">renderCompactText</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Html.html#renderCompactByteString"><span class="hs-identifier">renderCompactByteString</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Html.html#renderCompactBuilder"><span class="hs-identifier">renderCompactBuilder</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Html.Reify.html#Put"><span class="hs-identifier">Put</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Html.Type.Internal.html#V"><span class="hs-identifier">V</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Html.Reify.html"><span class="hs-identifier">Html.Reify</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Html.Convert.html"><span class="hs-identifier">Html.Convert</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Html.Type.html"><span class="hs-identifier">Html.Type</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Html.Type.Internal.html"><span class="hs-identifier">Html.Type.Internal</span></a></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Arrow</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Exts</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Either</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Builder</span></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString</span></span><span>               </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">B</span></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Lazy</span></span><span>          </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">BL</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Builder.Extra</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">BE</span></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Lazy</span></span><span>                </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Lazy.Encoding</span></span><span>       </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- | Render a html document to a Builder.</span><span>
+</span><span id="line-48"></span><span id="local-6989586621679052991"><span class="annot"><a href="Html.html#renderBuilder"><span class="hs-identifier hs-type">renderBuilder</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Html.Reify.html#Document"><span class="hs-identifier hs-type">Document</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052991"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679052991"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Builder</span></span></span><span>
+</span><span id="line-49"></span><span id="renderBuilder"><span class="annot"><span class="annottext">renderBuilder :: a -&gt; Builder
+</span><a href="Html.html#renderBuilder"><span class="hs-identifier hs-var hs-var">renderBuilder</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Converted -&gt; Builder
+</span><a href="Html.Convert.html#unConv"><span class="hs-identifier hs-var hs-var">unConv</span></a></span><span> </span><span class="annot"><span class="annottext">(Converted -&gt; Builder) -&gt; (a -&gt; Converted) -&gt; a -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (u :: Bool) a. R u a =&gt; a -&gt; RenderOutput u
+forall a. R 'False a =&gt; a -&gt; RenderOutput 'False
+</span><a href="Html.Reify.html#render"><span class="hs-identifier hs-var">render</span></a></span><span> </span><span class="hs-glyph">@</span><span> </span><span class="hs-special">'</span><span class="annot"><span class="hs-identifier hs-type">False</span></span><span> </span><span class="annot"><span class="annottext">(T (ToList a) a -&gt; Converted)
+-&gt; (a -&gt; T (ToList a) a) -&gt; a -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679052901"><span class="annot"><span class="annottext">forall a. a -&gt; T (ToList a) a
+forall k (proxies :: k) target. target -&gt; T proxies target
+</span><a href="Html.Type.Internal.html#T"><span class="hs-identifier hs-var">T</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679052901"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Type.Internal.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#ToList"><span class="hs-identifier hs-type">ToList</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052901"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679052901"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- | Render a html document to a String.</span><span>
+</span><span id="line-52"></span><span id="local-6989586621679052935"><span class="annot"><a href="Html.html#renderString"><span class="hs-identifier hs-type">renderString</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Html.Reify.html#Document"><span class="hs-identifier hs-type">Document</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052935"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679052935"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span></span><span>
+</span><span id="line-53"></span><span id="renderString"><span class="annot"><span class="annottext">renderString :: a -&gt; String
+</span><a href="Html.html#renderString"><span class="hs-identifier hs-var hs-var">renderString</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; String
+</span><span class="hs-identifier hs-var">T.unpack</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; String) -&gt; (a -&gt; Text) -&gt; a -&gt; String
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Text
+forall a. Document a =&gt; a -&gt; Text
+</span><a href="Html.html#renderText"><span class="hs-identifier hs-var">renderText</span></a></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- | Render a html document to a lazy Text.</span><span>
+</span><span id="line-56"></span><span id="local-6989586621679052998"><span class="annot"><a href="Html.html#renderText"><span class="hs-identifier hs-type">renderText</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Html.Reify.html#Document"><span class="hs-identifier hs-type">Document</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052998"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679052998"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span></span><span>
+</span><span id="line-57"></span><span id="renderText"><span class="annot"><span class="annottext">renderText :: a -&gt; Text
+</span><a href="Html.html#renderText"><span class="hs-identifier hs-var hs-var">renderText</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Text
+</span><span class="hs-identifier hs-var">T.decodeUtf8</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Text) -&gt; (a -&gt; ByteString) -&gt; a -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; ByteString
+forall a. Document a =&gt; a -&gt; ByteString
+</span><a href="Html.html#renderByteString"><span class="hs-identifier hs-var">renderByteString</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- | Render a html document to a lazy ByteString.</span><span>
+</span><span id="line-60"></span><span id="local-6989586621679052994"><span class="annot"><a href="Html.html#renderByteString"><span class="hs-identifier hs-type">renderByteString</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Html.Reify.html#Document"><span class="hs-identifier hs-type">Document</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052994"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679052994"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BL.ByteString</span></span></span><span>
+</span><span id="line-61"></span><span id="renderByteString"><span class="annot"><span class="annottext">renderByteString :: a -&gt; ByteString
+</span><a href="Html.html#renderByteString"><span class="hs-identifier hs-var hs-var">renderByteString</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AllocationStrategy -&gt; ByteString -&gt; Builder -&gt; ByteString
+</span><span class="hs-identifier hs-var">BE.toLazyByteStringWith</span></span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; AllocationStrategy
+</span><span class="hs-identifier hs-var">BE.untrimmedStrategy</span></span><span>
+</span><span id="line-63"></span><span>    </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1024</span></span><span>
+</span><span id="line-64"></span><span>    </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier hs-var">BE.smallChunkSize</span></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-identifier hs-var">BL.empty</span></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; ByteString) -&gt; (a -&gt; Builder) -&gt; a -&gt; ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Builder
+forall a. Document a =&gt; a -&gt; Builder
+</span><a href="Html.html#renderBuilder"><span class="hs-identifier hs-var">renderBuilder</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span id="local-6989586621679052980"><span id="local-6989586621679052981"><span class="annot"><a href="Html.html#renderCompactHTML"><span class="hs-identifier hs-type">renderCompactHTML</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Html.Reify.html#Retrievable"><span class="hs-identifier hs-type">Retrievable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052981"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Builder</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679052980"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Type.Internal.html#CompactHTML"><span class="hs-identifier hs-type">CompactHTML</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052981"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Reify.html#Retrieve"><span class="hs-identifier hs-type">Retrieve</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052980"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052981"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-68"></span><span id="renderCompactHTML"><span class="annot"><span class="annottext">renderCompactHTML :: (Builder -&gt; f) -&gt; CompactHTML a -&gt; Retrieve f a
+</span><a href="Html.html#renderCompactHTML"><span class="hs-identifier hs-var hs-var">renderCompactHTML</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([Builder] -&gt; [Builder])
+-&gt; (Builder -&gt; f) -&gt; CompactHTML a -&gt; Retrieve f a
+forall (a :: [Symbol]) f.
+Retrievable a =&gt;
+([Builder] -&gt; [Builder])
+-&gt; (Builder -&gt; f) -&gt; CompactHTML a -&gt; Retrieve f a
+</span><a href="Html.Reify.html#retrieve"><span class="hs-identifier hs-var">retrieve</span></a></span><span> </span><span class="annot"><span class="annottext">[Builder] -&gt; [Builder]
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- | Render a compacted html document to a Builder.</span><span>
+</span><span id="line-71"></span><span id="local-6989586621679052890"><span class="annot"><a href="Html.html#renderCompactBuilder"><span class="hs-identifier hs-type">renderCompactBuilder</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Html.Reify.html#Retrievable"><span class="hs-identifier hs-type">Retrievable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052890"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Html.Type.Internal.html#CompactHTML"><span class="hs-identifier hs-type">CompactHTML</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052890"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Reify.html#Retrieve"><span class="hs-identifier hs-type">Retrieve</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Builder</span></span><span> </span><span class="annot"><a href="#local-6989586621679052890"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-72"></span><span id="renderCompactBuilder"><span class="annot"><span class="annottext">renderCompactBuilder :: CompactHTML a -&gt; Retrieve Builder a
+</span><a href="Html.html#renderCompactBuilder"><span class="hs-identifier hs-var hs-var">renderCompactBuilder</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Builder) -&gt; CompactHTML a -&gt; Retrieve Builder a
+forall (a :: [Symbol]) f.
+Retrievable a =&gt;
+(Builder -&gt; f) -&gt; CompactHTML a -&gt; Retrieve f a
+</span><a href="Html.html#renderCompactHTML"><span class="hs-identifier hs-var">renderCompactHTML</span></a></span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Builder
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- | Render a compacted html document to a lazy ByteString.</span><span>
+</span><span id="line-75"></span><span id="local-6989586621679052889"><span class="annot"><a href="Html.html#renderCompactByteString"><span class="hs-identifier hs-type">renderCompactByteString</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Html.Reify.html#Retrievable"><span class="hs-identifier hs-type">Retrievable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052889"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Html.Type.Internal.html#CompactHTML"><span class="hs-identifier hs-type">CompactHTML</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052889"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Reify.html#Retrieve"><span class="hs-identifier hs-type">Retrieve</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">BL.ByteString</span></span><span> </span><span class="annot"><a href="#local-6989586621679052889"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-76"></span><span id="renderCompactByteString"><span class="annot"><span class="annottext">renderCompactByteString :: CompactHTML a -&gt; Retrieve ByteString a
+</span><a href="Html.html#renderCompactByteString"><span class="hs-identifier hs-var hs-var">renderCompactByteString</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; ByteString) -&gt; CompactHTML a -&gt; Retrieve ByteString a
+forall (a :: [Symbol]) f.
+Retrievable a =&gt;
+(Builder -&gt; f) -&gt; CompactHTML a -&gt; Retrieve f a
+</span><a href="Html.html#renderCompactHTML"><span class="hs-identifier hs-var">renderCompactHTML</span></a></span><span> </span><span class="annot"><span class="annottext">Builder -&gt; ByteString
+</span><a href="Html.html#toLazyBS"><span class="hs-identifier hs-var">toLazyBS</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- | Render a compacted html document to a lazy Text.</span><span>
+</span><span id="line-79"></span><span id="local-6989586621679052887"><span class="annot"><a href="Html.html#renderCompactText"><span class="hs-identifier hs-type">renderCompactText</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Html.Reify.html#Retrievable"><span class="hs-identifier hs-type">Retrievable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052887"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Html.Type.Internal.html#CompactHTML"><span class="hs-identifier hs-type">CompactHTML</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052887"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Reify.html#Retrieve"><span class="hs-identifier hs-type">Retrieve</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span> </span><span class="annot"><a href="#local-6989586621679052887"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-80"></span><span id="renderCompactText"><span class="annot"><span class="annottext">renderCompactText :: CompactHTML a -&gt; Retrieve Text a
+</span><a href="Html.html#renderCompactText"><span class="hs-identifier hs-var hs-var">renderCompactText</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Text) -&gt; CompactHTML a -&gt; Retrieve Text a
+forall (a :: [Symbol]) f.
+Retrievable a =&gt;
+(Builder -&gt; f) -&gt; CompactHTML a -&gt; Retrieve f a
+</span><a href="Html.html#renderCompactHTML"><span class="hs-identifier hs-var">renderCompactHTML</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ByteString -&gt; Text
+</span><span class="hs-identifier hs-var">T.decodeUtf8</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Text) -&gt; (Builder -&gt; ByteString) -&gt; Builder -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Builder -&gt; ByteString
+</span><a href="Html.html#toLazyBS"><span class="hs-identifier hs-var">toLazyBS</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- | Render a compacted html document to a String.</span><span>
+</span><span id="line-83"></span><span id="local-6989586621679052886"><span class="annot"><a href="Html.html#renderCompactString"><span class="hs-identifier hs-type">renderCompactString</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Html.Reify.html#Retrievable"><span class="hs-identifier hs-type">Retrievable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052886"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Html.Type.Internal.html#CompactHTML"><span class="hs-identifier hs-type">CompactHTML</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052886"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Reify.html#Retrieve"><span class="hs-identifier hs-type">Retrieve</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><a href="#local-6989586621679052886"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-84"></span><span id="renderCompactString"><span class="annot"><span class="annottext">renderCompactString :: CompactHTML a -&gt; Retrieve String a
+</span><a href="Html.html#renderCompactString"><span class="hs-identifier hs-var hs-var">renderCompactString</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; String) -&gt; CompactHTML a -&gt; Retrieve String a
+forall (a :: [Symbol]) f.
+Retrievable a =&gt;
+(Builder -&gt; f) -&gt; CompactHTML a -&gt; Retrieve f a
+</span><a href="Html.html#renderCompactHTML"><span class="hs-identifier hs-var">renderCompactHTML</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; String
+</span><span class="hs-identifier hs-var">T.unpack</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; String) -&gt; (Builder -&gt; Text) -&gt; Builder -&gt; String
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Text
+</span><span class="hs-identifier hs-var">T.decodeUtf8</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Text) -&gt; (Builder -&gt; ByteString) -&gt; Builder -&gt; Text
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Builder -&gt; ByteString
+</span><a href="Html.html#toLazyBS"><span class="hs-identifier hs-var">toLazyBS</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span class="annot"><a href="Html.html#toLazyBS"><span class="hs-identifier hs-type">toLazyBS</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Builder</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BL.ByteString</span></span><span>
+</span><span id="line-87"></span><span id="toLazyBS"><span class="annot"><span class="annottext">toLazyBS :: Builder -&gt; ByteString
+</span><a href="Html.html#toLazyBS"><span class="hs-identifier hs-var hs-var">toLazyBS</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AllocationStrategy -&gt; ByteString -&gt; Builder -&gt; ByteString
+</span><span class="hs-identifier hs-var">BE.toLazyByteStringWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; AllocationStrategy
+</span><span class="hs-identifier hs-var">BE.untrimmedStrategy</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1024</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier hs-var">BE.smallChunkSize</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-identifier hs-var">BL.empty</span></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- | Compact a html document.</span><span>
+</span><span id="line-90"></span><span id="local-6989586621679052885"><span class="annot"><a href="Html.html#compactHTML"><span class="hs-identifier hs-type">compactHTML</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Html.Reify.html#Compactable"><span class="hs-identifier hs-type">Compactable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052885"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679052885"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Type.Internal.html#CompactHTML"><span class="hs-identifier hs-type">CompactHTML</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#Variables"><span class="hs-identifier hs-type">Variables</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052885"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-91"></span><span id="compactHTML"><span class="annot"><span class="annottext">compactHTML :: a -&gt; CompactHTML (Variables a)
+</span><a href="Html.html#compactHTML"><span class="hs-identifier hs-var hs-var">compactHTML</span></a></span></span><span> </span><span id="local-6989586621679052884"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679052884"><span class="hs-identifier hs-var">html</span></a></span></span><span>
+</span><span id="line-92"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; [(Int, ByteString)] -&gt; CompactHTML (Variables a))
+-&gt; (ByteString, [(Int, ByteString)]) -&gt; CompactHTML (Variables a)
+forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
+</span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; [(Int, ByteString)] -&gt; CompactHTML (Variables a)
+forall (a :: [Symbol]).
+ByteString -&gt; [(Int, ByteString)] -&gt; CompactHTML a
+</span><a href="Html.Type.Internal.html#MkCompactHTML"><span class="hs-identifier hs-var">MkCompactHTML</span></a></span><span>
+</span><span id="line-93"></span><span>  </span><span class="annot"><span class="annottext">((ByteString, [(Int, ByteString)]) -&gt; CompactHTML (Variables a))
+-&gt; (T (ToList a) a -&gt; (ByteString, [(Int, ByteString)]))
+-&gt; T (ToList a) a
+-&gt; CompactHTML (Variables a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Either Converted String] -&gt; (ByteString, [(Int, ByteString)])
+</span><a href="#local-6989586621679052881"><span class="hs-identifier hs-var">concatEithers</span></a></span><span>
+</span><span id="line-94"></span><span>  </span><span class="annot"><span class="annottext">([Either Converted String] -&gt; (ByteString, [(Int, ByteString)]))
+-&gt; (T (ToList a) a -&gt; [Either Converted String])
+-&gt; T (ToList a) a
+-&gt; (ByteString, [(Int, ByteString)])
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Seq (Either Converted String) -&gt; [Either Converted String]
+forall l. IsList l =&gt; l -&gt; [Item l]
+</span><span class="hs-identifier hs-var">toList</span></span><span>
+</span><span id="line-95"></span><span>  </span><span class="annot"><span class="annottext">(Seq (Either Converted String) -&gt; [Either Converted String])
+-&gt; (T (ToList a) a -&gt; Seq (Either Converted String))
+-&gt; T (ToList a) a
+-&gt; [Either Converted String]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall (u :: Bool) a. R u a =&gt; a -&gt; RenderOutput u
+forall a. R 'True a =&gt; a -&gt; RenderOutput 'True
+</span><a href="Html.Reify.html#render"><span class="hs-identifier hs-var">render</span></a></span><span> </span><span class="hs-glyph">@</span><span> </span><span class="hs-special">'</span><span class="annot"><span class="hs-identifier hs-type">True</span></span><span>
+</span><span id="line-96"></span><span>  </span><span class="annot"><span class="annottext">(T (ToList a) a -&gt; CompactHTML (Variables a))
+-&gt; T (ToList a) a -&gt; CompactHTML (Variables a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679052880"><span class="annot"><span class="annottext">forall a. a -&gt; T (ToList a) a
+forall k (proxies :: k) target. target -&gt; T proxies target
+</span><a href="Html.Type.Internal.html#T"><span class="hs-identifier hs-var">T</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679052880"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Type.Internal.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#ToList"><span class="hs-identifier hs-type">ToList</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052880"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679052880"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679052884"><span class="hs-identifier hs-var">html</span></a></span><span>
+</span><span id="line-97"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-98"></span><span>    </span><span class="annot"><a href="#local-6989586621679052881"><span class="hs-identifier hs-type">concatEithers</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-type">Converted</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">B.ByteString</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">B.ByteString</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>    </span><span id="local-6989586621679052881"><span class="annot"><span class="annottext">concatEithers :: [Either Converted String] -&gt; (ByteString, [(Int, ByteString)])
+</span><a href="#local-6989586621679052881"><span class="hs-identifier hs-var hs-var">concatEithers</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Either Converted String] -&gt; ByteString
+forall b. [Either Converted b] -&gt; ByteString
+</span><a href="#local-6989586621679052879"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">([Either Converted String] -&gt; ByteString)
+-&gt; ([Either Converted String] -&gt; [(Int, ByteString)])
+-&gt; ([Either Converted String], [Either Converted String])
+-&gt; (ByteString, [(Int, ByteString)])
+forall (a :: * -&gt; * -&gt; *) b c b' c'.
+Arrow a =&gt;
+a b c -&gt; a b' c' -&gt; a (b, b') (c, c')
+</span><span class="hs-operator hs-var">***</span></span><span> </span><span class="annot"><span class="annottext">[Either Converted String] -&gt; [(Int, ByteString)]
+</span><a href="#local-6989586621679052877"><span class="hs-identifier hs-var">go</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(([Either Converted String], [Either Converted String])
+ -&gt; (ByteString, [(Int, ByteString)]))
+-&gt; ([Either Converted String]
+    -&gt; ([Either Converted String], [Either Converted String]))
+-&gt; [Either Converted String]
+-&gt; (ByteString, [(Int, ByteString)])
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Either Converted String -&gt; Bool)
+-&gt; [Either Converted String]
+-&gt; ([Either Converted String], [Either Converted String])
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">span</span></span><span> </span><span class="annot"><span class="annottext">Either Converted String -&gt; Bool
+forall a b. Either a b -&gt; Bool
+</span><span class="hs-identifier hs-var">isLeft</span></span><span>
+</span><span id="line-100"></span><span>      </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679052877"><span class="annot"><span class="annottext">go :: [Either Converted String] -&gt; [(Int, ByteString)]
+</span><a href="#local-6989586621679052877"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679052874"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679052874"><span class="hs-identifier hs-var">r1</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679052873"><span class="annot"><span class="annottext">[Either Converted String]
+</span><a href="#local-6989586621679052873"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679052872"><span class="annot"><span class="annottext">[Either Converted String]
+</span><a href="#local-6989586621679052872"><span class="hs-identifier hs-var">ls</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679052871"><span class="annot"><span class="annottext">[Either Converted String]
+</span><a href="#local-6989586621679052871"><span class="hs-identifier hs-var">rs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Either Converted String -&gt; Bool)
+-&gt; [Either Converted String]
+-&gt; ([Either Converted String], [Either Converted String])
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">span</span></span><span> </span><span class="annot"><span class="annottext">Either Converted String -&gt; Bool
+forall a b. Either a b -&gt; Bool
+</span><span class="hs-identifier hs-var">isLeft</span></span><span> </span><span class="annot"><span class="annottext">[Either Converted String]
+</span><a href="#local-6989586621679052873"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-101"></span><span>                               </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; String -&gt; Int
+forall a. Compactable a =&gt; a -&gt; String -&gt; Int
+</span><a href="#local-6989586621679052870"><span class="hs-identifier hs-var">indexVar</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679052884"><span class="hs-identifier hs-var">html</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679052874"><span class="hs-identifier hs-var">r1</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Either Converted String] -&gt; ByteString
+forall b. [Either Converted b] -&gt; ByteString
+</span><a href="#local-6989586621679052879"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">[Either Converted String]
+</span><a href="#local-6989586621679052872"><span class="hs-identifier hs-var">ls</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Int, ByteString) -&gt; [(Int, ByteString)] -&gt; [(Int, ByteString)]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[Either Converted String] -&gt; [(Int, ByteString)]
+</span><a href="#local-6989586621679052877"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[Either Converted String]
+</span><a href="#local-6989586621679052871"><span class="hs-identifier hs-var">rs</span></a></span><span>
+</span><span id="line-102"></span><span>            </span><span class="annot"><a href="#local-6989586621679052877"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[Either Converted String]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-103"></span><span>            </span><span id="local-6989586621679052879"><span class="annot"><span class="annottext">f :: [Either Converted b] -&gt; ByteString
+</span><a href="#local-6989586621679052879"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; ByteString
+</span><span class="hs-identifier hs-var">BL.toStrict</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; ByteString)
+-&gt; ([Either Converted b] -&gt; ByteString)
+-&gt; [Either Converted b]
+-&gt; ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Builder -&gt; ByteString
+</span><span class="hs-identifier hs-var">toLazyByteString</span></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; ByteString)
+-&gt; ([Either Converted b] -&gt; Builder)
+-&gt; [Either Converted b]
+-&gt; ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Converted -&gt; Builder
+</span><a href="Html.Convert.html#unConv"><span class="hs-identifier hs-var hs-var">unConv</span></a></span><span> </span><span class="annot"><span class="annottext">(Converted -&gt; Builder)
+-&gt; ([Either Converted b] -&gt; Converted)
+-&gt; [Either Converted b]
+-&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Converted] -&gt; Converted
+forall a. Monoid a =&gt; [a] -&gt; a
+</span><span class="hs-identifier hs-var">mconcat</span></span><span> </span><span class="annot"><span class="annottext">([Converted] -&gt; Converted)
+-&gt; ([Either Converted b] -&gt; [Converted])
+-&gt; [Either Converted b]
+-&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Either Converted b] -&gt; [Converted]
+forall a b. [Either a b] -&gt; [a]
+</span><span class="hs-identifier hs-var">lefts</span></span><span>
+</span><span id="line-104"></span><span>    </span><span class="annot"><a href="#local-6989586621679052870"><span class="hs-identifier hs-type">indexVar</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679052953"><span class="annot"><a href="#local-6989586621679052953"><span class="hs-identifier hs-type">a</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="Html.Reify.html#Compactable"><span class="hs-identifier hs-type">Compactable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052953"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679052953"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-105"></span><span>    </span><span id="local-6989586621679052870"><span class="annot"><span class="annottext">indexVar :: a -&gt; String -&gt; Int
+</span><a href="#local-6989586621679052870"><span class="hs-identifier hs-var hs-var">indexVar</span></a></span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679052866"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679052866"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Int -&gt; Int
+forall a. HasCallStack =&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromJust</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; Maybe Int
+forall a. Eq a =&gt; a -&gt; [a] -&gt; Maybe Int
+</span><span class="hs-identifier hs-var">elemIndex</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679052866"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ShowTypeList (Variables a) =&gt; [String]
+forall k (a :: k). ShowTypeList a =&gt; [String]
+</span><a href="Html.Type.Internal.html#showTypeList"><span class="hs-identifier hs-var">showTypeList</span></a></span><span> </span><span class="hs-glyph">@</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#Variables"><span class="hs-identifier hs-type">Variables</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052953"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- | Show instances to faciliate ghci development.</span><span>
+</span><span id="line-108"></span><span id="local-6989586621679052861"><span id="local-6989586621679052862"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679052856"><span id="local-6989586621679052859"><span class="annot"><a href="Html.Reify.html#Document"><span class="hs-identifier hs-type">Document</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679052862"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="Html.Type.Internal.html#%3A%3D"><span class="hs-operator hs-type">:=</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052861"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679052862"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="Html.Type.Internal.html#%3A%3D"><span class="hs-operator hs-type">:=</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052861"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679052854"><span class="annot"><span class="annottext">show :: (a := b) -&gt; String
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a := b) -&gt; String
+forall a. Document a =&gt; a -&gt; String
+</span><a href="Html.html#renderString"><span class="hs-identifier hs-var">renderString</span></a></span></span></span><span>
+</span><span id="line-109"></span><span id="local-6989586621679052851"><span id="local-6989586621679052852"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679052846"><span id="local-6989586621679052849"><span class="annot"><a href="Html.Reify.html#Document"><span class="hs-identifier hs-type">Document</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679052852"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="Html.Type.Internal.html#%23"><span class="hs-operator hs-type">#</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052851"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679052852"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="Html.Type.Internal.html#%23"><span class="hs-operator hs-type">#</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052851"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679052845"><span class="annot"><span class="annottext">show :: (a # b) -&gt; String
+</span><a href="#local-6989586621679052845"><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a # b) -&gt; String
+forall a. Document a =&gt; a -&gt; String
+</span><a href="Html.html#renderString"><span class="hs-identifier hs-var">renderString</span></a></span></span></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span id="local-6989586621679052843"><span id="local-6989586621679052844"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679052838"><span id="local-6989586621679052841"><span class="annot"><a href="Html.Reify.html#Document"><span class="hs-identifier hs-type">Document</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679052844"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="Html.Type.Internal.html#%3A%40"><span class="hs-operator hs-type">:@</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052843"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679052844"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="Html.Type.Internal.html#%3A%40"><span class="hs-operator hs-type">:@</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052843"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679052837"><span class="annot"><span class="annottext">show :: (a :@ b) -&gt; String
+</span><a href="#local-6989586621679052837"><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a :@ b) -&gt; String
+forall a. Document a =&gt; a -&gt; String
+</span><a href="Html.html#renderString"><span class="hs-identifier hs-var">renderString</span></a></span></span></span><span>
+</span><span id="line-112"></span><span id="local-6989586621679052835"><span id="local-6989586621679052836"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679052830"><span id="local-6989586621679052833"><span class="annot"><a href="Html.Reify.html#Document"><span class="hs-identifier hs-type">Document</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679052836"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="Html.Type.Internal.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052835"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679052836"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="Html.Type.Internal.html#%3A%3E"><span class="hs-operator hs-type">:&gt;</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052835"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679052829"><span class="annot"><span class="annottext">show :: (a :&gt; b) -&gt; String
+</span><a href="#local-6989586621679052829"><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a :&gt; b) -&gt; String
+forall a. Document a =&gt; a -&gt; String
+</span><a href="Html.html#renderString"><span class="hs-identifier hs-var">renderString</span></a></span></span></span><span>
+</span><span id="line-113"></span><span id="local-6989586621679052826"><span id="local-6989586621679052827"><span id="local-6989586621679052828"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679052821"><span id="local-6989586621679052824"><span class="annot"><a href="Html.Reify.html#Document"><span class="hs-identifier hs-type">Document</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#Attribute"><span class="hs-identifier hs-type">Attribute</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052828"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052827"><span class="hs-identifier hs-type">global</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052826"><span class="hs-identifier hs-type">boolean</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#Attribute"><span class="hs-identifier hs-type">Attribute</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052828"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052827"><span class="hs-identifier hs-type">global</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052826"><span class="hs-identifier hs-type">boolean</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679052820"><span class="annot"><span class="annottext">show :: Attribute a global boolean -&gt; String
+</span><a href="#local-6989586621679052820"><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Attribute a global boolean -&gt; String
+forall a. Document a =&gt; a -&gt; String
+</span><a href="Html.html#renderString"><span class="hs-identifier hs-var">renderString</span></a></span></span></span></span><span>
+</span><span id="line-114"></span><span id="local-6989586621679052816"><span id="local-6989586621679052817"><span id="local-6989586621679052818"><span id="local-6989586621679052819"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679052811"><span id="local-6989586621679052814"><span class="annot"><a href="Html.Reify.html#Document"><span class="hs-identifier hs-type">Document</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052819"><span class="hs-identifier hs-type">name</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052818"><span class="hs-identifier hs-type">categories</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052817"><span class="hs-identifier hs-type">contentModel</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052816"><span class="hs-identifier hs-type">contentAttributes</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#Element"><span class="hs-identifier hs-type">Element</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052819"><span class="hs-identifier hs-type">name</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052818"><span class="hs-identifier hs-type">categories</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052817"><span class="hs-identifier hs-type">contentModel</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679052816"><span class="hs-identifier hs-type">contentAttributes</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679052810"><span class="annot"><span class="annottext">show :: Element name categories contentModel contentAttributes -&gt; String
+</span><a href="#local-6989586621679052810"><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Element name categories contentModel contentAttributes -&gt; String
+forall a. Document a =&gt; a -&gt; String
+</span><a href="Html.html#renderString"><span class="hs-identifier hs-var">renderString</span></a></span></span></span></span></span><span>
+</span><span id="line-115"></span></pre></body></html>

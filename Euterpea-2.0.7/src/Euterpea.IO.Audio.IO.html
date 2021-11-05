@@ -1,0 +1,454 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE BangPatterns, ExistentialQuantification, 
+    ScopedTypeVariables, FlexibleContexts #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Euterpea.IO.Audio.IO</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-5"></span><span>    </span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#outFile"><span class="hs-identifier">outFile</span></a></span><span class="hs-special">,</span><span>  </span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#outFileNorm"><span class="hs-identifier">outFileNorm</span></a></span><span class="hs-special">,</span><span> </span><span>
+</span><span id="line-6"></span><span class="hs-comment">--    outFileA, outFileNormA, RecordStatus, </span><span>
+</span><span id="line-7"></span><span>    </span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#maxSample"><span class="hs-identifier">maxSample</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Control.Arrow.ArrowP.html"><span class="hs-identifier">Control.Arrow.ArrowP</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Control.SF.SF.html"><span class="hs-identifier">Control.SF.SF</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Types.html"><span class="hs-identifier">Euterpea.IO.Audio.Types</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#Signal"><span class="hs-identifier">Signal</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Codec.Wav</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Audio</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Array.Unboxed</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Int</span></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-comment">--import Data.IORef</span><span>
+</span><span id="line-19"></span><span class="hs-comment">--import Foreign.C</span><span>
+</span><span id="line-20"></span><span class="hs-comment">--import Foreign.Marshal.Array</span><span>
+</span><span id="line-21"></span><span class="hs-comment">--import Foreign.Marshal.Utils</span><span>
+</span><span id="line-22"></span><span class="hs-comment">--import Foreign.Ptr</span><span>
+</span><span id="line-23"></span><span class="hs-comment">--import Foreign.Storable</span><span>
+</span><span id="line-24"></span><span class="hs-comment">--import Control.CCA.Types</span><span>
+</span><span id="line-25"></span><span class="hs-comment">--import Control.Arrow</span><span>
+</span><span id="line-26"></span><span class="hs-comment">--import Control.Concurrent.MonadIO</span><span>
+</span><span id="line-27"></span><span class="hs-comment">--import Sound.RtAudio</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">type</span><span> </span><span id="Signal"><span class="annot"><a href="Euterpea.IO.Audio.IO.html#Signal"><span class="hs-identifier hs-var">Signal</span></a></span></span><span> </span><span id="local-6989586621679091644"><span class="annot"><a href="#local-6989586621679091644"><span class="hs-identifier hs-type">clk</span></a></span></span><span> </span><span id="local-6989586621679091643"><span class="annot"><a href="#local-6989586621679091643"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679091642"><span class="annot"><a href="#local-6989586621679091642"><span class="hs-identifier hs-type">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Control.Arrow.ArrowP.html#ArrowP"><span class="hs-identifier hs-type">ArrowP</span></a></span><span> </span><span class="annot"><a href="Control.SF.SF.html#SF"><span class="hs-identifier hs-type">SF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091644"><span class="hs-identifier hs-type">clk</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091643"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091642"><span class="hs-identifier hs-type">b</span></a></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- | Writes sound to a wave file (.wav)</span><span>
+</span><span id="line-32"></span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#outFile"><span class="hs-identifier hs-type">outFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679091641"><span class="annot"><a href="#local-6989586621679091641"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679091640"><span class="annot"><a href="#local-6989586621679091640"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#AudioSample"><span class="hs-identifier hs-type">AudioSample</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091641"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#Clock"><span class="hs-identifier hs-type">Clock</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091640"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span>
+</span><span id="line-33"></span><span>           </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>              </span><span class="hs-comment">-- ^ Filename to write to.</span><span>
+</span><span id="line-34"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>              </span><span class="hs-comment">-- ^ Duration of the wav in seconds.</span><span>
+</span><span id="line-35"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#Signal"><span class="hs-identifier hs-type">Signal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091640"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679091641"><span class="hs-identifier hs-type">a</span></a></span><span>       </span><span class="hs-comment">-- ^ Signal representing the sound.</span><span>
+</span><span id="line-36"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span id="outFile"><span class="annot"><span class="annottext">outFile :: String -&gt; Double -&gt; Signal p () a -&gt; IO ()
+</span><a href="Euterpea.IO.Audio.IO.html#outFile"><span class="hs-identifier hs-var hs-var">outFile</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([Double] -&gt; [Double])
+-&gt; String -&gt; Double -&gt; Signal p () a -&gt; IO ()
+forall a p.
+(AudioSample a, Clock p) =&gt;
+([Double] -&gt; [Double])
+-&gt; String -&gt; Double -&gt; Signal p () a -&gt; IO ()
+</span><a href="Euterpea.IO.Audio.IO.html#outFileHelp%27"><span class="hs-identifier hs-var">outFileHelp'</span></a></span><span> </span><span class="annot"><span class="annottext">[Double] -&gt; [Double]
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#normList"><span class="hs-identifier hs-type">normList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span>
+</span><span id="line-40"></span><span id="normList"><span class="annot"><span class="annottext">normList :: [Double] -&gt; [Double]
+</span><a href="Euterpea.IO.Audio.IO.html#normList"><span class="hs-identifier hs-var hs-var">normList</span></a></span></span><span> </span><span id="local-6989586621679091636"><span class="annot"><span class="annottext">[Double]
+</span><a href="#local-6989586621679091636"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Double) -&gt; [Double] -&gt; [Double]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091634"><span class="hs-identifier hs-var">mx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Double]
+</span><a href="#local-6989586621679091636"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span>
+</span><span id="line-41"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679091634"><span class="annot"><span class="annottext">mx :: Double
+</span><a href="#local-6989586621679091634"><span class="hs-identifier hs-var hs-var">mx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+forall a. Ord a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">max</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><span class="hs-number">1.0</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Double] -&gt; Double
+forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">maximum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Double -&gt; Double) -&gt; [Double] -&gt; [Double]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="annot"><span class="annottext">[Double]
+</span><a href="#local-6989586621679091636"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- | Like outFile, but normalizes the output if the amplitude of </span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- the signal goes above 1.  If the maximum sample is less than</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- or equal to 1, the output is not normalized.</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- Currently this requires storing the entire output stream in memory</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- before writing to the file.</span><span>
+</span><span id="line-48"></span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#outFileNorm"><span class="hs-identifier hs-type">outFileNorm</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679091630"><span class="annot"><a href="#local-6989586621679091630"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679091629"><span class="annot"><a href="#local-6989586621679091629"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#AudioSample"><span class="hs-identifier hs-type">AudioSample</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091630"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#Clock"><span class="hs-identifier hs-type">Clock</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091629"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span>
+</span><span id="line-49"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>              </span><span class="hs-comment">-- ^ Filename to write to.</span><span>
+</span><span id="line-50"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>              </span><span class="hs-comment">-- ^ Duration of the wav in seconds.</span><span>
+</span><span id="line-51"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#Signal"><span class="hs-identifier hs-type">Signal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091629"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679091630"><span class="hs-identifier hs-type">a</span></a></span><span>       </span><span class="hs-comment">-- ^ Signal representing the sound.</span><span>
+</span><span id="line-52"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span id="outFileNorm"><span class="annot"><span class="annottext">outFileNorm :: String -&gt; Double -&gt; Signal p () a -&gt; IO ()
+</span><a href="Euterpea.IO.Audio.IO.html#outFileNorm"><span class="hs-identifier hs-var hs-var">outFileNorm</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([Double] -&gt; [Double])
+-&gt; String -&gt; Double -&gt; Signal p () a -&gt; IO ()
+forall a p.
+(AudioSample a, Clock p) =&gt;
+([Double] -&gt; [Double])
+-&gt; String -&gt; Double -&gt; Signal p () a -&gt; IO ()
+</span><a href="Euterpea.IO.Audio.IO.html#outFileHelp%27"><span class="hs-identifier hs-var">outFileHelp'</span></a></span><span> </span><span class="annot"><span class="annottext">[Double] -&gt; [Double]
+</span><a href="Euterpea.IO.Audio.IO.html#normList"><span class="hs-identifier hs-var">normList</span></a></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#outFileHelp"><span class="hs-identifier hs-type">outFileHelp</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679091627"><span class="annot"><a href="#local-6989586621679091627"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679091626"><span class="annot"><a href="#local-6989586621679091626"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#AudioSample"><span class="hs-identifier hs-type">AudioSample</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091627"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#Clock"><span class="hs-identifier hs-type">Clock</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091626"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span>
+</span><span id="line-56"></span><span>            </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- ^ Post-processing function.</span><span>
+</span><span id="line-57"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>              </span><span class="hs-comment">-- ^ Filename to write to.</span><span>
+</span><span id="line-58"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>              </span><span class="hs-comment">-- ^ Duration of the wav in seconds.</span><span>
+</span><span id="line-59"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#Signal"><span class="hs-identifier hs-type">Signal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091626"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679091627"><span class="hs-identifier hs-type">a</span></a></span><span>       </span><span class="hs-comment">-- ^ Signal representing the sound.</span><span>
+</span><span id="line-60"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span id="outFileHelp"><span class="annot"><span class="annottext">outFileHelp :: ([Double] -&gt; [Double])
+-&gt; String -&gt; Double -&gt; Signal p () a -&gt; IO ()
+</span><a href="Euterpea.IO.Audio.IO.html#outFileHelp"><span class="hs-identifier hs-var hs-var">outFileHelp</span></a></span></span><span> </span><span id="local-6989586621679091625"><span class="annot"><span class="annottext">[Double] -&gt; [Double]
+</span><a href="#local-6989586621679091625"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679091624"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679091624"><span class="hs-identifier hs-var">filepath</span></a></span></span><span> </span><span id="local-6989586621679091623"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091623"><span class="hs-identifier hs-var">dur</span></a></span></span><span> </span><span id="local-6989586621679091622"><span class="annot"><span class="annottext">Signal p () a
+</span><a href="#local-6989586621679091622"><span class="hs-identifier hs-var">sf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679091621"><span class="annot"><span class="annottext">sr :: Double
+</span><a href="#local-6989586621679091621"><span class="hs-identifier hs-var hs-var">sr</span></a></span></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p -&gt; Double
+forall p. Clock p =&gt; p -&gt; Double
+</span><a href="Euterpea.IO.Audio.Types.html#rate"><span class="hs-identifier hs-var">rate</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">p
+forall a. HasCallStack =&gt; a
+</span><span class="hs-identifier hs-var">undefined</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679091626"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>      </span><span id="local-6989586621679091618"><span class="annot"><span class="annottext">numChannels :: Int
+</span><a href="#local-6989586621679091618"><span class="hs-identifier hs-var hs-var">numChannels</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Int
+forall a. AudioSample a =&gt; a -&gt; Int
+</span><a href="Euterpea.IO.Audio.Types.html#numChans"><span class="hs-identifier hs-var">numChans</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+forall a. HasCallStack =&gt; a
+</span><span class="hs-identifier hs-var">undefined</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679091627"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>      </span><span id="local-6989586621679091616"><span class="annot"><span class="annottext">numSamples :: Int
+</span><a href="#local-6989586621679091616"><span class="hs-identifier hs-var hs-var">numSamples</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Int
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">truncate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091623"><span class="hs-identifier hs-var">dur</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091621"><span class="hs-identifier hs-var">sr</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679091618"><span class="hs-identifier hs-var">numChannels</span></a></span><span>
+</span><span id="line-65"></span><span>      </span><span id="local-6989586621679091613"><span class="annot"><span class="annottext">dat :: [Int32]
+</span><a href="#local-6989586621679091613"><span class="hs-identifier hs-var hs-var">dat</span></a></span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Int32) -&gt; [Double] -&gt; [Int32]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Int32
+forall a. Audible a =&gt; Double -&gt; a
+</span><span class="hs-identifier hs-var">fromSample</span></span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Int32) -&gt; (Double -&gt; Double) -&gt; Double -&gt; Int32
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Double
+</span><span class="hs-number">0.999</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span>
+</span><span id="line-66"></span><span>                        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Double] -&gt; [Double]
+</span><a href="#local-6989586621679091625"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Signal p () a -&gt; [Double]
+forall a p.
+(AudioSample a, Clock p) =&gt;
+Double -&gt; Signal p () a -&gt; [Double]
+</span><a href="Euterpea.IO.Audio.IO.html#toSamples"><span class="hs-identifier hs-var">toSamples</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091623"><span class="hs-identifier hs-var">dur</span></a></span><span> </span><span class="annot"><span class="annottext">Signal p () a
+</span><a href="#local-6989586621679091622"><span class="hs-identifier hs-var">sf</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int32</span></span><span class="hs-special">]</span><span>
+</span><span id="line-67"></span><span>                    </span><span class="hs-comment">-- multiply by 0.999 to avoid wraparound at 1.0</span><span>
+</span><span id="line-68"></span><span>      </span><span id="local-6989586621679091609"><span class="annot"><span class="annottext">array :: UArray Int Int32
+</span><a href="#local-6989586621679091609"><span class="hs-identifier hs-var hs-var">array</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; [Int32] -&gt; UArray Int Int32
+forall (a :: * -&gt; * -&gt; *) e i.
+(IArray a e, Ix i) =&gt;
+(i, i) -&gt; [e] -&gt; a i e
+</span><span class="hs-identifier hs-var">listArray</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679091616"><span class="hs-identifier hs-var">numSamples</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Int32]
+</span><a href="#local-6989586621679091613"><span class="hs-identifier hs-var">dat</span></a></span><span>
+</span><span id="line-69"></span><span>      </span><span id="local-6989586621679091607"><span class="annot"><span class="annottext">aud :: Audio Int32
+</span><a href="#local-6989586621679091607"><span class="hs-identifier hs-var hs-var">aud</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Audio :: forall a. Int -&gt; Int -&gt; SampleData a -&gt; Audio a
+</span><span class="hs-identifier hs-type">Audio</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">sampleRate :: Int
+</span><span class="hs-identifier hs-var">sampleRate</span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Int
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">truncate</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091621"><span class="hs-identifier hs-var">sr</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-70"></span><span>                    </span><span class="annot"><span class="annottext">channelNumber :: Int
+</span><span class="hs-identifier hs-var">channelNumber</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679091618"><span class="hs-identifier hs-var">numChannels</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-71"></span><span>                    </span><span class="annot"><span class="annottext">sampleData :: UArray Int Int32
+</span><span class="hs-identifier hs-var">sampleData</span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UArray Int Int32
+</span><a href="#local-6989586621679091609"><span class="hs-identifier hs-var">array</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">String -&gt; Audio Int32 -&gt; IO ()
+forall a.
+(IArray UArray a, Audible a, AudibleInWav a) =&gt;
+String -&gt; Audio a -&gt; IO ()
+</span><span class="hs-identifier hs-var">exportFile</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679091624"><span class="hs-identifier hs-var">filepath</span></a></span><span> </span><span class="annot"><span class="annottext">Audio Int32
+</span><a href="#local-6989586621679091607"><span class="hs-identifier hs-var">aud</span></a></span><span>
+</span><span id="line-73"></span><span>  </span><span>
+</span><span id="line-74"></span><span class="hs-comment">{-
+Alternative definition of the above that enforces a clipping behavior when 
+the value exceeds the [-1.0, 1.0] range. The overflow behavior makes it 
+very hard to debug sound modeling problems that involve certain waveforms, 
+such as saw waves. Clipping is also a more common behavior in other audio 
+software rather than overflowing or wrap-around.
+-}</span><span>
+</span><span id="line-81"></span><span>  </span><span>
+</span><span id="line-82"></span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#outFileHelp%27"><span class="hs-identifier hs-type">outFileHelp'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679091709"><span class="annot"><a href="#local-6989586621679091709"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679091707"><span class="annot"><a href="#local-6989586621679091707"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#AudioSample"><span class="hs-identifier hs-type">AudioSample</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091709"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#Clock"><span class="hs-identifier hs-type">Clock</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091707"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span>
+</span><span id="line-83"></span><span>            </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- ^ Post-processing function.</span><span>
+</span><span id="line-84"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>              </span><span class="hs-comment">-- ^ Filename to write to.</span><span>
+</span><span id="line-85"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>              </span><span class="hs-comment">-- ^ Duration of the wav in seconds.</span><span>
+</span><span id="line-86"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#Signal"><span class="hs-identifier hs-type">Signal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091707"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679091709"><span class="hs-identifier hs-type">a</span></a></span><span>       </span><span class="hs-comment">-- ^ Signal representing the sound.</span><span>
+</span><span id="line-87"></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span id="outFileHelp%27"><span class="annot"><span class="annottext">outFileHelp' :: ([Double] -&gt; [Double])
+-&gt; String -&gt; Double -&gt; Signal p () a -&gt; IO ()
+</span><a href="Euterpea.IO.Audio.IO.html#outFileHelp%27"><span class="hs-identifier hs-var hs-var">outFileHelp'</span></a></span></span><span> </span><span id="local-6989586621679091601"><span class="annot"><span class="annottext">[Double] -&gt; [Double]
+</span><a href="#local-6989586621679091601"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679091600"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679091600"><span class="hs-identifier hs-var">filepath</span></a></span></span><span> </span><span id="local-6989586621679091599"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091599"><span class="hs-identifier hs-var">dur</span></a></span></span><span> </span><span id="local-6989586621679091598"><span class="annot"><span class="annottext">Signal p () a
+</span><a href="#local-6989586621679091598"><span class="hs-identifier hs-var">sf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><span id="line-89"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679091597"><span class="annot"><span class="annottext">sr :: Double
+</span><a href="#local-6989586621679091597"><span class="hs-identifier hs-var hs-var">sr</span></a></span></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p -&gt; Double
+forall p. Clock p =&gt; p -&gt; Double
+</span><a href="Euterpea.IO.Audio.Types.html#rate"><span class="hs-identifier hs-var">rate</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">p
+forall a. HasCallStack =&gt; a
+</span><span class="hs-identifier hs-var">undefined</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679091707"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>      </span><span id="local-6989586621679091596"><span class="annot"><span class="annottext">numChannels :: Int
+</span><a href="#local-6989586621679091596"><span class="hs-identifier hs-var hs-var">numChannels</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Int
+forall a. AudioSample a =&gt; a -&gt; Int
+</span><a href="Euterpea.IO.Audio.Types.html#numChans"><span class="hs-identifier hs-var">numChans</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+forall a. HasCallStack =&gt; a
+</span><span class="hs-identifier hs-var">undefined</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679091709"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>      </span><span id="local-6989586621679091595"><span class="annot"><span class="annottext">numSamples :: Int
+</span><a href="#local-6989586621679091595"><span class="hs-identifier hs-var hs-var">numSamples</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Int
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">truncate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091599"><span class="hs-identifier hs-var">dur</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091597"><span class="hs-identifier hs-var">sr</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679091596"><span class="hs-identifier hs-var">numChannels</span></a></span><span>
+</span><span id="line-92"></span><span>      </span><span id="local-6989586621679091594"><span class="annot"><span class="annottext">dat :: [Int32]
+</span><a href="#local-6989586621679091594"><span class="hs-identifier hs-var hs-var">dat</span></a></span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Int32) -&gt; [Double] -&gt; [Int32]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Int32
+forall a. Audible a =&gt; Double -&gt; a
+</span><span class="hs-identifier hs-var">fromSample</span></span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Int32) -&gt; (Double -&gt; Double) -&gt; Double -&gt; Int32
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Double
+</span><span class="hs-number">0.999</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Double) -&gt; (Double -&gt; Double) -&gt; Double -&gt; Double
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
+forall p. (Ord p, Fractional p) =&gt; p -&gt; p
+</span><a href="#local-6989586621679091593"><span class="hs-identifier hs-var">clipFix</span></a></span><span class="hs-special">)</span><span> </span><span>
+</span><span id="line-93"></span><span>                        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Double] -&gt; [Double]
+</span><a href="#local-6989586621679091601"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Signal p () a -&gt; [Double]
+forall a p.
+(AudioSample a, Clock p) =&gt;
+Double -&gt; Signal p () a -&gt; [Double]
+</span><a href="Euterpea.IO.Audio.IO.html#toSamples"><span class="hs-identifier hs-var">toSamples</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091599"><span class="hs-identifier hs-var">dur</span></a></span><span> </span><span class="annot"><span class="annottext">Signal p () a
+</span><a href="#local-6989586621679091598"><span class="hs-identifier hs-var">sf</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Int32</span></span><span class="hs-special">]</span><span>
+</span><span id="line-94"></span><span>      </span><span id="local-6989586621679091592"><span class="annot"><span class="annottext">array :: UArray Int Int32
+</span><a href="#local-6989586621679091592"><span class="hs-identifier hs-var hs-var">array</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; [Int32] -&gt; UArray Int Int32
+forall (a :: * -&gt; * -&gt; *) e i.
+(IArray a e, Ix i) =&gt;
+(i, i) -&gt; [e] -&gt; a i e
+</span><span class="hs-identifier hs-var">listArray</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679091595"><span class="hs-identifier hs-var">numSamples</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Int32]
+</span><a href="#local-6989586621679091594"><span class="hs-identifier hs-var">dat</span></a></span><span>
+</span><span id="line-95"></span><span>      </span><span id="local-6989586621679091591"><span class="annot"><span class="annottext">aud :: Audio Int32
+</span><a href="#local-6989586621679091591"><span class="hs-identifier hs-var hs-var">aud</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Audio :: forall a. Int -&gt; Int -&gt; SampleData a -&gt; Audio a
+</span><span class="hs-identifier hs-type">Audio</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">sampleRate :: Int
+</span><span class="hs-identifier hs-var">sampleRate</span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Int
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">truncate</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091597"><span class="hs-identifier hs-var">sr</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-96"></span><span>                    </span><span class="annot"><span class="annottext">channelNumber :: Int
+</span><span class="hs-identifier hs-var">channelNumber</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679091596"><span class="hs-identifier hs-var">numChannels</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-97"></span><span>                    </span><span class="annot"><span class="annottext">sampleData :: UArray Int Int32
+</span><span class="hs-identifier hs-var">sampleData</span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UArray Int Int32
+</span><a href="#local-6989586621679091592"><span class="hs-identifier hs-var">array</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-98"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">String -&gt; Audio Int32 -&gt; IO ()
+forall a.
+(IArray UArray a, Audible a, AudibleInWav a) =&gt;
+String -&gt; Audio a -&gt; IO ()
+</span><span class="hs-identifier hs-var">exportFile</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679091600"><span class="hs-identifier hs-var">filepath</span></a></span><span> </span><span class="annot"><span class="annottext">Audio Int32
+</span><a href="#local-6989586621679091591"><span class="hs-identifier hs-var">aud</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-99"></span><span>      </span><span id="local-6989586621679091593"><span class="annot"><span class="annottext">clipFix :: p -&gt; p
+</span><a href="#local-6989586621679091593"><span class="hs-identifier hs-var hs-var">clipFix</span></a></span></span><span> </span><span id="local-6989586621679091590"><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679091590"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679091590"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">p -&gt; p -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">p
+</span><span class="hs-number">1.0</span></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">p
+</span><span class="hs-number">1.0</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679091590"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">p -&gt; p -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">p
+</span><span class="hs-number">1.0</span></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">p
+</span><span class="hs-number">1.0</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679091590"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="hs-comment">{-
+data RecordStatus = Pause | Record | Clear | Write
+
+outFileA :: forall a. AudioSample a =&gt; 
+            String               -- ^ Filename to write to.
+         -&gt; Double               -- ^ Sample rate of the incoming signal.
+         -&gt; UISF (a, RecordStatus) ()
+outFileA = outFileHelpA id
+
+outFileNormA :: forall a. AudioSample a =&gt; 
+                String               -- ^ Filename to write to.
+             -&gt; Double               -- ^ Sample rate of the incoming signal.
+             -&gt; UISF (a, RecordStatus) ()
+outFileNormA = outFileHelpA normList
+
+outFileHelpA :: forall a. AudioSample a =&gt; 
+             ([Double] -&gt; [Double]) -- ^ Post-processing function.
+          -&gt; String                 -- ^ Filename to write to.
+          -&gt; Double                 -- ^ Sample rate of the incoming signal.
+          -&gt; UISF (a, RecordStatus) ()
+outFileHelpA f filepath sr = 
+  let numChannels = numChans (undefined :: a)
+      writeWavSink = sink (writeWav f filepath sr numChannels)
+  in proc (a, rs) -&gt; do
+        rec dat &lt;- delay [] -&lt; dat'
+            dat' &lt;- case rs of
+                        Pause  -&gt; returnA -&lt; dat
+                        Record -&gt; returnA -&lt; a:dat
+                        Clear  -&gt; returnA -&lt; []
+                        Write  -&gt; do writeWavSink -&lt; dat
+                                     returnA -&lt; a:dat
+        returnA -&lt; ()
+-}</span><span>
+</span><span id="line-135"></span><span class="hs-comment">{-
+writeWav :: AudioSample a =&gt; ([Double] -&gt; [Double]) -&gt; String -&gt; Double -&gt; Int -&gt; [a] -&gt; UI ()
+writeWav f filepath sr numChannels adat = 
+  let dat         = map (fromSample . (*0.999)) 
+                        (f (concatMap collapse adat)) :: [Int32]
+                    -- multiply by 0.999 to avoid wraparound at 1.0
+      array       = listArray (0, (length dat)-1) dat
+      aud = Audio { sampleRate    = truncate sr,
+                    channelNumber = numChannels,
+                    sampleData    = array }
+  in liftIO $ exportFile filepath aud
+-}</span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span>  </span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#toSamples"><span class="hs-identifier hs-type">toSamples</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679091681"><span class="annot"><a href="#local-6989586621679091681"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679091680"><span class="annot"><a href="#local-6989586621679091680"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#AudioSample"><span class="hs-identifier hs-type">AudioSample</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091681"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#Clock"><span class="hs-identifier hs-type">Clock</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091680"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-152"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#Signal"><span class="hs-identifier hs-type">Signal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091680"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679091681"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span>
+</span><span id="line-153"></span><span id="toSamples"><span class="annot"><span class="annottext">toSamples :: Double -&gt; Signal p () a -&gt; [Double]
+</span><a href="Euterpea.IO.Audio.IO.html#toSamples"><span class="hs-identifier hs-var hs-var">toSamples</span></a></span></span><span> </span><span id="local-6989586621679091587"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091587"><span class="hs-identifier hs-var">dur</span></a></span></span><span> </span><span id="local-6989586621679091586"><span class="annot"><span class="annottext">Signal p () a
+</span><a href="#local-6989586621679091586"><span class="hs-identifier hs-var">sf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><span id="line-154"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679091585"><span class="annot"><span class="annottext">sr :: Double
+</span><a href="#local-6989586621679091585"><span class="hs-identifier hs-var hs-var">sr</span></a></span></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p -&gt; Double
+forall p. Clock p =&gt; p -&gt; Double
+</span><a href="Euterpea.IO.Audio.Types.html#rate"><span class="hs-identifier hs-var">rate</span></a></span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="annottext">p
+forall a. HasCallStack =&gt; a
+</span><span class="hs-identifier hs-var">undefined</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679091680"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-155"></span><span>      </span><span id="local-6989586621679091584"><span class="annot"><span class="annottext">numChannels :: Int
+</span><a href="#local-6989586621679091584"><span class="hs-identifier hs-var hs-var">numChannels</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Int
+forall a. AudioSample a =&gt; a -&gt; Int
+</span><a href="Euterpea.IO.Audio.Types.html#numChans"><span class="hs-identifier hs-var">numChans</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+forall a. HasCallStack =&gt; a
+</span><span class="hs-identifier hs-var">undefined</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679091681"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-156"></span><span>      </span><span id="local-6989586621679091583"><span class="annot"><span class="annottext">numSamples :: Int
+</span><a href="#local-6989586621679091583"><span class="hs-identifier hs-var hs-var">numSamples</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Int
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">truncate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091587"><span class="hs-identifier hs-var">dur</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091585"><span class="hs-identifier hs-var">sr</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679091584"><span class="hs-identifier hs-var">numChannels</span></a></span><span>
+</span><span id="line-157"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Double] -&gt; [Double]
+forall a. Int -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">take</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679091583"><span class="hs-identifier hs-var">numSamples</span></a></span><span> </span><span class="annot"><span class="annottext">([Double] -&gt; [Double]) -&gt; [Double] -&gt; [Double]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; [Double]) -&gt; [a] -&gt; [Double]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [Double]
+forall a. AudioSample a =&gt; a -&gt; [Double]
+</span><a href="Euterpea.IO.Audio.Types.html#collapse"><span class="hs-identifier hs-var">collapse</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [Double]) -&gt; [a] -&gt; [Double]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SF () a -&gt; [a]
+forall a. SF () a -&gt; [a]
+</span><a href="Control.SF.SF.html#unfold"><span class="hs-identifier hs-var">unfold</span></a></span><span> </span><span class="annot"><span class="annottext">(SF () a -&gt; [a]) -&gt; SF () a -&gt; [a]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Signal p () a -&gt; SF () a
+forall (a :: * -&gt; * -&gt; *) p b c. ArrowP a p b c -&gt; a b c
+</span><a href="Control.Arrow.ArrowP.html#strip"><span class="hs-identifier hs-var hs-var">strip</span></a></span><span> </span><span class="annot"><span class="annottext">Signal p () a
+</span><a href="#local-6989586621679091586"><span class="hs-identifier hs-var">sf</span></a></span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span class="hs-comment">-- | Compute the maximum sample of an SF in the first 'dur' seconds.</span><span>
+</span><span id="line-160"></span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#maxSample"><span class="hs-identifier hs-type">maxSample</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679091577"><span class="annot"><a href="#local-6989586621679091577"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679091576"><span class="annot"><a href="#local-6989586621679091576"><span class="hs-identifier hs-type">p</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#AudioSample"><span class="hs-identifier hs-type">AudioSample</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091577"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Types.html#Clock"><span class="hs-identifier hs-type">Clock</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091576"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-161"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.IO.html#Signal"><span class="hs-identifier hs-type">Signal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679091576"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679091577"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-162"></span><span id="maxSample"><span class="annot"><span class="annottext">maxSample :: Double -&gt; Signal p () a -&gt; Double
+</span><a href="Euterpea.IO.Audio.IO.html#maxSample"><span class="hs-identifier hs-var hs-var">maxSample</span></a></span></span><span> </span><span id="local-6989586621679091575"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091575"><span class="hs-identifier hs-var">dur</span></a></span></span><span> </span><span id="local-6989586621679091574"><span class="annot"><span class="annottext">Signal p () a
+</span><a href="#local-6989586621679091574"><span class="hs-identifier hs-var">sf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Double] -&gt; Double
+forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">maximum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Double -&gt; Double) -&gt; [Double] -&gt; [Double]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Signal p () a -&gt; [Double]
+forall a p.
+(AudioSample a, Clock p) =&gt;
+Double -&gt; Signal p () a -&gt; [Double]
+</span><a href="Euterpea.IO.Audio.IO.html#toSamples"><span class="hs-identifier hs-var">toSamples</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679091575"><span class="hs-identifier hs-var">dur</span></a></span><span> </span><span class="annot"><span class="annottext">Signal p () a
+</span><a href="#local-6989586621679091574"><span class="hs-identifier hs-var">sf</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span>
+</span><span id="line-165"></span><span class="hs-comment">{-
+chunk !nFrames !(i, f) ref buf = nFrames `seq` i `seq` f `seq` aux nFrames i 
+    where aux !n !i = x `seq` i `seq` i' `seq`
+                       if n == 0 then do
+                                  writeIORef ref i
+                                  return ()
+                       else do
+                        pokeElemOff buf (fromIntegral nFrames-n) (realToFrac x)
+                        aux (n-1) i'
+              where (x, i') = f ((), i)
+{-# INLINE [0] chunk #-}
+
+chunkify !i !f !secs = do
+  --userData &lt;- new i
+  ref &lt;- newIORef i
+  let cb :: RtAudioCallback 
+      cb oBuf iBuf nFrames nSecs status userData = do
+                      
+                      lastState &lt;- readIORef ref
+                      -- Fill output buffer with nFrames of samples
+                      chunk (fromIntegral nFrames) (lastState,f) ref oBuf
+                      if secs &lt; (realToFrac nSecs) then return 2 else return 0
+                              
+                                                          
+  mkAudioCallback cb                                 
+
+
+
+playPure :: Show b =&gt; Double -&gt; (b, ((), b) -&gt; (Double, b)) -&gt; IO ()
+playPure !secs !(i, f) = do
+  rtaCloseStream
+  rtaInitialize
+  dev &lt;- rtaGetDefaultOutputDevice
+  callback &lt;- chunkify i f secs
+  with (StreamParameters dev 1 0) (\params -&gt; do
+         rtaOpenStream params nullPtr float64 44100 4096 callback nullPtr nullPtr)
+  rtaStartStream
+  return ()
+  
+-}</span><span>
+</span><span id="line-205"></span></pre></body></html>

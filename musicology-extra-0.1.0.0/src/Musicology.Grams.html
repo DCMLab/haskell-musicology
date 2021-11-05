@@ -1,0 +1,1082 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Musicology.Grams</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Machine</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Applicative</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Trans</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Identity</span></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Safe.Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">minimumMay</span></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Musicology.Internal.Helpers.html"><span class="hs-identifier">Musicology.Internal.Helpers</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Musicology.Internal.Helpers.html#release"><span class="hs-identifier">release</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Musicology.Internal.Helpers.html#processFoldable"><span class="hs-identifier">processFoldable</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Musicology.Internal.Helpers.html#processFoldableT"><span class="hs-identifier">processFoldableT</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">M</span></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.Random.MWC</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Gen</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.Random.MWC.Distributions</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">bernoulli</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Primitive</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">PrimMonad</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">PrimState</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- pointfree helpers</span><span>
+</span><span id="line-20"></span><span id=".%3A"><span class="annot"><span class="annottext">.: :: (b -&gt; c) -&gt; (a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; c
+</span><a href="Musicology.Grams.html#.%3A"><span class="hs-operator hs-var hs-var">(.:)</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a -&gt; b) -&gt; a -&gt; c) -&gt; (a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(.)</span></span><span class="annot"><span class="annottext">(((a -&gt; b) -&gt; a -&gt; c) -&gt; (a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; c)
+-&gt; ((b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c)
+-&gt; (b -&gt; c)
+-&gt; (a -&gt; a -&gt; b)
+-&gt; a
+-&gt; a
+-&gt; c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(.)</span></span><span>
+</span><span id="line-21"></span><span id=".%3A%3A"><span class="annot"><span class="annottext">.:: :: (b -&gt; c) -&gt; (a -&gt; a -&gt; a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; a -&gt; a -&gt; c
+</span><a href="Musicology.Grams.html#.%3A%3A"><span class="hs-operator hs-var hs-var">(.::)</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a -&gt; a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; a -&gt; c)
+-&gt; (a -&gt; a -&gt; a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; a -&gt; a -&gt; c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(.)</span></span><span class="annot"><span class="annottext">(((a -&gt; a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; a -&gt; c)
+ -&gt; (a -&gt; a -&gt; a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; a -&gt; a -&gt; c)
+-&gt; ((b -&gt; c) -&gt; (a -&gt; a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; a -&gt; c)
+-&gt; (b -&gt; c)
+-&gt; (a -&gt; a -&gt; a -&gt; a -&gt; b)
+-&gt; a
+-&gt; a
+-&gt; a
+-&gt; a
+-&gt; c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; c)
+-&gt; (a -&gt; a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; a -&gt; c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(.)</span></span><span class="annot"><span class="annottext">(((a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; c)
+ -&gt; (a -&gt; a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; a -&gt; c)
+-&gt; ((b -&gt; c) -&gt; (a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; c)
+-&gt; (b -&gt; c)
+-&gt; (a -&gt; a -&gt; a -&gt; b)
+-&gt; a
+-&gt; a
+-&gt; a
+-&gt; c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((a -&gt; b) -&gt; a -&gt; c) -&gt; (a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(.)</span></span><span class="annot"><span class="annottext">(((a -&gt; b) -&gt; a -&gt; c) -&gt; (a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; c)
+-&gt; ((b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c)
+-&gt; (b -&gt; c)
+-&gt; (a -&gt; a -&gt; b)
+-&gt; a
+-&gt; a
+-&gt; c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">(.)</span></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-comment">-------------</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- n-grams --</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-------------</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span id="local-6989586621679131100"><span class="annot"><a href="Musicology.Grams.html#gramsMach"><span class="hs-identifier hs-type">gramsMach</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Process</span></span><span> </span><span class="annot"><a href="#local-6989586621679131100"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679131100"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-28"></span><span id="gramsMach"><span class="annot"><span class="annottext">gramsMach :: Int -&gt; Process a [a]
+</span><a href="Musicology.Grams.html#gramsMach"><span class="hs-identifier hs-var hs-var">gramsMach</span></a></span></span><span> </span><span id="local-6989586621679130917"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679130917"><span class="hs-identifier hs-var">n</span></a></span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679130917"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanT (Is a) [a] m Any -&gt; MachineT m (Is a) [a]
+forall (m :: * -&gt; *) (k :: * -&gt; *) o a.
+Monad m =&gt;
+PlanT k o m a -&gt; MachineT m k o
+</span><span class="hs-identifier hs-var">construct</span></span><span> </span><span class="annot"><span class="annottext">(PlanT (Is a) [a] m Any -&gt; MachineT m (Is a) [a])
+-&gt; PlanT (Is a) [a] m Any -&gt; MachineT m (Is a) [a]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlanT (Is a) [a] m Any
+forall (k :: * -&gt; *) o a. Plan k o a
+</span><span class="hs-identifier hs-var">stop</span></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanT (Is a) [a] m Any -&gt; MachineT m (Is a) [a]
+forall (m :: * -&gt; *) (k :: * -&gt; *) o a.
+Monad m =&gt;
+PlanT k o m a -&gt; MachineT m k o
+</span><span class="hs-identifier hs-var">construct</span></span><span> </span><span class="annot"><span class="annottext">(PlanT (Is a) [a] m Any -&gt; MachineT m (Is a) [a])
+-&gt; PlanT (Is a) [a] m Any -&gt; MachineT m (Is a) [a]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-31"></span><span>      </span><span id="local-6989586621679130913"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130913"><span class="hs-identifier hs-var">inits</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; PlanT (Is a) [a] m a -&gt; PlanT (Is a) [a] m [a]
+forall (m :: * -&gt; *) a. Applicative m =&gt; Int -&gt; m a -&gt; m [a]
+</span><span class="hs-identifier hs-var">replicateM</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679130917"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">PlanT (Is a) [a] m a
+forall (k :: * -&gt; * -&gt; *) i o. Category k =&gt; Plan (k i) o i
+</span><span class="hs-identifier hs-var">await</span></span><span>
+</span><span id="line-32"></span><span>      </span><span class="annot"><span class="annottext">[a] -&gt; PlanT (Is a) [a] m Any
+forall (k :: * -&gt; * -&gt; *) a (m :: * -&gt; *) b.
+Category k =&gt;
+[a] -&gt; PlanT (k a) [a] m b
+</span><a href="#local-6989586621679130910"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130913"><span class="hs-identifier hs-var">inits</span></a></span><span>
+</span><span id="line-33"></span><span>        </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679130910"><span class="annot"><span class="annottext">go :: [a] -&gt; PlanT (k a) [a] m b
+</span><a href="#local-6989586621679130910"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679130909"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130909"><span class="hs-identifier hs-var">buf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-34"></span><span>                </span><span class="annot"><span class="annottext">[a] -&gt; Plan (k a) [a] ()
+forall o (k :: * -&gt; *). o -&gt; Plan k o ()
+</span><span class="hs-identifier hs-var">yield</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130909"><span class="hs-identifier hs-var">buf</span></a></span><span>
+</span><span id="line-35"></span><span>                </span><span id="local-6989586621679130907"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130907"><span class="hs-identifier hs-var">next</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">PlanT (k a) [a] m a
+forall (k :: * -&gt; * -&gt; *) i o. Category k =&gt; Plan (k i) o i
+</span><span class="hs-identifier hs-var">await</span></span><span>
+</span><span id="line-36"></span><span>                </span><span class="annot"><span class="annottext">[a] -&gt; PlanT (k a) [a] m b
+</span><a href="#local-6989586621679130910"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; PlanT (k a) [a] m b) -&gt; [a] -&gt; PlanT (k a) [a] m b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">tail</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130909"><span class="hs-identifier hs-var">buf</span></a></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a] -&gt; [a]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130907"><span class="hs-identifier hs-var">next</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span id="local-6989586621679130904"><span id="local-6989586621679130905"><span class="annot"><a href="Musicology.Grams.html#grams"><span class="hs-identifier hs-type">grams</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679130905"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130905"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679130904"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130904"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-39"></span><span class="hs-comment">--grams n xs = run $ source xs ~&gt; gramsMach n</span><span>
+</span><span id="line-40"></span><span id="grams"><span class="annot"><span class="annottext">grams :: Int -&gt; t a -&gt; [[a]]
+</span><a href="Musicology.Grams.html#grams"><span class="hs-identifier hs-var hs-var">grams</span></a></span></span><span> </span><span id="local-6989586621679130902"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679130902"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679130901"><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130901"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">t a -&gt; MachineT Identity (Is a) [a] -&gt; [[a]]
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+t a -&gt; MachineT Identity (Is a) b -&gt; [b]
+</span><a href="Musicology.Internal.Helpers.html#processFoldable"><span class="hs-identifier hs-var">processFoldable</span></a></span><span> </span><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130901"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT Identity (Is a) [a] -&gt; [[a]])
+-&gt; MachineT Identity (Is a) [a] -&gt; [[a]]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Process a [a]
+forall a. Int -&gt; Process a [a]
+</span><a href="Musicology.Grams.html#gramsMach"><span class="hs-identifier hs-var">gramsMach</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679130902"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">---------------</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- Skipgrams --</span><span>
+</span><span id="line-44"></span><span class="hs-comment">---------------</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- basic machines</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-----------------</span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span id="local-6989586621679130999"><span id="local-6989586621679131000"><span id="local-6989586621679131001"><span id="local-6989586621679131002"><span class="annot"><a href="Musicology.Grams.html#skipgramsRMach"><span class="hs-identifier hs-type">skipgramsRMach</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679131002"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679131002"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679131001"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679131000"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-50"></span><span>                  </span><span class="annot"><a href="#local-6989586621679131000"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130999"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679130999"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130999"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679131002"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679131001"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679131002"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ProcessT</span></span><span> </span><span class="annot"><a href="#local-6989586621679131000"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679130999"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130999"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span></span></span></span><span>
+</span><span id="line-51"></span><span id="skipgramsRMach"><span class="annot"><span class="annottext">skipgramsRMach :: m Bool
+-&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; ProcessT m a [a]
+</span><a href="Musicology.Grams.html#skipgramsRMach"><span class="hs-identifier hs-var hs-var">skipgramsRMach</span></a></span></span><span> </span><span id="local-6989586621679130899"><span class="annot"><span class="annottext">m Bool
+</span><a href="#local-6989586621679130899"><span class="hs-identifier hs-var">coin</span></a></span></span><span> </span><span id="local-6989586621679130898"><span class="annot"><span class="annottext">[a] -&gt; Bool
+</span><a href="#local-6989586621679130898"><span class="hs-identifier hs-var">pred</span></a></span></span><span> </span><span id="local-6989586621679130897"><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130897"><span class="hs-identifier hs-var">cost</span></a></span></span><span> </span><span id="local-6989586621679130896"><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130896"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679130895"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130895"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(n, k, [a])]
+-&gt; ([(n, k, [a])] -&gt; PlanT (Is a) [a] m [(n, k, [a])])
+-&gt; ProcessT m a [a]
+forall (m :: * -&gt; *) s (k :: * -&gt; *) o.
+Monad m =&gt;
+s -&gt; (s -&gt; PlanT k o m s) -&gt; MachineT m k o
+</span><span class="hs-identifier hs-var">unfoldPlan</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[(n, k, [a])] -&gt; PlanT (Is a) [a] m [(n, k, [a])]
+forall (k :: * -&gt; * -&gt; *).
+Category k =&gt;
+[(n, k, [a])] -&gt; PlanT (k a) [a] m [(n, k, [a])]
+</span><a href="#local-6989586621679130893"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span class="hs-comment">-- go :: [(n, k, [a])] -&gt; Plan...</span><span>
+</span><span id="line-53"></span><span>        </span><span id="local-6989586621679130893"><span class="annot"><span class="annottext">go :: [(n, k, [a])] -&gt; PlanT (k a) [a] m [(n, k, [a])]
+</span><a href="#local-6989586621679130893"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679130892"><span class="annot"><span class="annottext">[(n, k, [a])]
+</span><a href="#local-6989586621679130892"><span class="hs-identifier hs-var">pfxs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-54"></span><span>          </span><span id="local-6989586621679130891"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130891"><span class="hs-identifier hs-var">candidate</span></a></span></span><span>     </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">PlanT (k a) [a] m a
+forall (k :: * -&gt; * -&gt; *) i o. Category k =&gt; Plan (k i) o i
+</span><span class="hs-identifier hs-var">await</span></span><span>
+</span><span id="line-55"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679130890"><span class="annot"><span class="annottext">oldClosed :: [(n, k, [a])]
+</span><a href="#local-6989586621679130890"><span class="hs-identifier hs-var hs-var">oldClosed</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((n, k, [a]) -&gt; Bool) -&gt; [(n, k, [a])] -&gt; [(n, k, [a])]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679130889"><span class="annot"><span class="annottext">(n, k, [a])
+</span><a href="#local-6989586621679130889"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(n, k, [a]) -&gt; a -&gt; k
+forall a. (a, k, [a]) -&gt; a -&gt; k
+</span><a href="#local-6989586621679130888"><span class="hs-identifier hs-var">totalCost</span></a></span><span> </span><span class="annot"><span class="annottext">(n, k, [a])
+</span><a href="#local-6989586621679130889"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130891"><span class="hs-identifier hs-var">candidate</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130895"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(n, k, [a])]
+</span><a href="#local-6989586621679130892"><span class="hs-identifier hs-var">pfxs</span></a></span><span>
+</span><span id="line-56"></span><span>          </span><span id="local-6989586621679130886"><span class="annot"><span class="annottext">[(n, k, [a])]
+</span><a href="#local-6989586621679130886"><span class="hs-identifier hs-var">extendable</span></a></span></span><span>    </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">((n, k, [a]) -&gt; PlanT (k a) [a] m Bool)
+-&gt; [(n, k, [a])] -&gt; PlanT (k a) [a] m [(n, k, [a])]
+forall (m :: * -&gt; *) a.
+Applicative m =&gt;
+(a -&gt; m Bool) -&gt; [a] -&gt; m [a]
+</span><span class="hs-identifier hs-var">filterM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; (n, k, [a]) -&gt; PlanT (k a) [a] m Bool
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) a b.
+(MonadTrans t, Monad (t m)) =&gt;
+a -&gt; (a, b, [a]) -&gt; t m Bool
+</span><a href="#local-6989586621679130884"><span class="hs-identifier hs-var">doesExtend</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130891"><span class="hs-identifier hs-var">candidate</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(n, k, [a])]
+</span><a href="#local-6989586621679130890"><span class="hs-identifier hs-var">oldClosed</span></a></span><span>
+</span><span id="line-57"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679130883"><span class="annot"><span class="annottext">extended :: [(n, k, [a])]
+</span><a href="#local-6989586621679130883"><span class="hs-identifier hs-var hs-var">extended</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; (n, k, [a])
+forall b a. Num b =&gt; a -&gt; (n, b, [a])
+</span><a href="#local-6989586621679130882"><span class="hs-identifier hs-var">mkPrefix</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130891"><span class="hs-identifier hs-var">candidate</span></a></span><span> </span><span class="annot"><span class="annottext">(n, k, [a]) -&gt; [(n, k, [a])] -&gt; [(n, k, [a])]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">((n, k, [a]) -&gt; (n, k, [a])) -&gt; [(n, k, [a])] -&gt; [(n, k, [a])]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; (n, k, [a]) -&gt; (n, k, [a])
+forall a. Num a =&gt; a -&gt; (a, k, [a]) -&gt; (a, k, [a])
+</span><a href="#local-6989586621679130881"><span class="hs-identifier hs-var">extendPrefix</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130891"><span class="hs-identifier hs-var">candidate</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(n, k, [a])]
+</span><a href="#local-6989586621679130886"><span class="hs-identifier hs-var">extendable</span></a></span><span>
+</span><span id="line-58"></span><span>              </span><span id="local-6989586621679130880"><span class="annot"><span class="annottext">pfxs' :: [(n, k, [a])]
+</span><a href="#local-6989586621679130880"><span class="hs-identifier hs-var hs-var">pfxs'</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(n, k, [a])]
+</span><a href="#local-6989586621679130890"><span class="hs-identifier hs-var">oldClosed</span></a></span><span> </span><span class="annot"><span class="annottext">[(n, k, [a])] -&gt; [(n, k, [a])] -&gt; [(n, k, [a])]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">((n, k, [a]) -&gt; Bool) -&gt; [(n, k, [a])] -&gt; [(n, k, [a])]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool) -&gt; ((n, k, [a]) -&gt; Bool) -&gt; (n, k, [a]) -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(n, k, [a]) -&gt; Bool
+forall a b c. (Eq a, Num a) =&gt; (a, b, c) -&gt; Bool
+</span><a href="#local-6989586621679130878"><span class="hs-identifier hs-var">pfxComplete</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(n, k, [a])]
+</span><a href="#local-6989586621679130883"><span class="hs-identifier hs-var">extended</span></a></span><span> </span><span class="hs-comment">-- two filters in one call (look up)</span><span>
+</span><span id="line-59"></span><span>          </span><span class="annot"><span class="annottext">((n, k, [a]) -&gt; PlanT (k a) [a] m ())
+-&gt; [(n, k, [a])] -&gt; PlanT (k a) [a] m ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="annot"><span class="annottext">(n, k, [a]) -&gt; PlanT (k a) [a] m ()
+forall a b a (k :: * -&gt; *) (m :: * -&gt; *).
+(a, b, [a]) -&gt; PlanT k [a] m ()
+</span><a href="#local-6989586621679130876"><span class="hs-identifier hs-var">yieldGram</span></a></span><span> </span><span class="annot"><span class="annottext">([(n, k, [a])] -&gt; PlanT (k a) [a] m ())
+-&gt; [(n, k, [a])] -&gt; PlanT (k a) [a] m ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((n, k, [a]) -&gt; Bool) -&gt; [(n, k, [a])] -&gt; [(n, k, [a])]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="annot"><span class="annottext">(n, k, [a]) -&gt; Bool
+forall a b c. (Eq a, Num a) =&gt; (a, b, c) -&gt; Bool
+</span><a href="#local-6989586621679130878"><span class="hs-identifier hs-var">pfxComplete</span></a></span><span> </span><span class="annot"><span class="annottext">[(n, k, [a])]
+</span><a href="#local-6989586621679130883"><span class="hs-identifier hs-var">extended</span></a></span><span>
+</span><span id="line-60"></span><span>          </span><span class="annot"><span class="annottext">[(n, k, [a])] -&gt; PlanT (k a) [a] m [(n, k, [a])]
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">[(n, k, [a])]
+</span><a href="#local-6989586621679130880"><span class="hs-identifier hs-var">pfxs'</span></a></span><span>
+</span><span id="line-61"></span><span>        </span><span id="local-6989586621679130882"><span class="annot"><span class="annottext">mkPrefix :: a -&gt; (n, b, [a])
+</span><a href="#local-6989586621679130882"><span class="hs-identifier hs-var hs-var">mkPrefix</span></a></span></span><span> </span><span id="local-6989586621679130875"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130875"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130896"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">n -&gt; n -&gt; n
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">n
+</span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130875"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>        </span><span id="local-6989586621679130888"><span class="annot"><span class="annottext">totalCost :: (a, k, [a]) -&gt; a -&gt; k
+</span><a href="#local-6989586621679130888"><span class="hs-identifier hs-var hs-var">totalCost</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130874"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130874"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130873"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130873"><span class="hs-identifier hs-var">prev</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[a]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679130872"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130872"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130874"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; k
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130897"><span class="hs-identifier hs-var">cost</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130873"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130872"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-63"></span><span>        </span><span id="local-6989586621679130881"><span class="annot"><span class="annottext">extendPrefix :: a -&gt; (a, k, [a]) -&gt; (a, k, [a])
+</span><a href="#local-6989586621679130881"><span class="hs-identifier hs-var hs-var">extendPrefix</span></a></span></span><span> </span><span id="local-6989586621679130870"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130870"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679130869"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130869"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130868"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130868"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130867"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130867"><span class="hs-identifier hs-var">p</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679130866"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130866"><span class="hs-identifier hs-var">fx</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130869"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130868"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; k
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130897"><span class="hs-identifier hs-var">cost</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130867"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130870"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130870"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130867"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130866"><span class="hs-identifier hs-var">fx</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>        </span><span id="local-6989586621679130878"><span class="annot"><span class="annottext">pfxComplete :: (a, b, c) -&gt; Bool
+</span><a href="#local-6989586621679130878"><span class="hs-identifier hs-var hs-var">pfxComplete</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679130865"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130865"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">c
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130865"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-65"></span><span>        </span><span id="local-6989586621679130884"><span class="annot"><span class="annottext">doesExtend :: a -&gt; (a, b, [a]) -&gt; t m Bool
+</span><a href="#local-6989586621679130884"><span class="hs-identifier hs-var hs-var">doesExtend</span></a></span></span><span> </span><span id="local-6989586621679130864"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130864"><span class="hs-identifier hs-var">cand</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130863"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130863"><span class="hs-identifier hs-var">pfx</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-66"></span><span>          </span><span id="local-6989586621679130862"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679130862"><span class="hs-identifier hs-var">isHeads</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m Bool -&gt; t m Bool
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">m Bool
+</span><a href="#local-6989586621679130899"><span class="hs-identifier hs-var">coin</span></a></span><span>
+</span><span id="line-67"></span><span>          </span><span class="annot"><span class="annottext">Bool -&gt; t m Bool
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; t m Bool) -&gt; Bool -&gt; t m Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; Bool
+</span><a href="#local-6989586621679130898"><span class="hs-identifier hs-var">pred</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Bool) -&gt; [a] -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130864"><span class="hs-identifier hs-var">cand</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130863"><span class="hs-identifier hs-var">pfx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679130862"><span class="hs-identifier hs-var">isHeads</span></a></span><span>
+</span><span id="line-68"></span><span>        </span><span id="local-6989586621679130876"><span class="annot"><span class="annottext">yieldGram :: (a, b, [a]) -&gt; PlanT k [a] m ()
+</span><a href="#local-6989586621679130876"><span class="hs-identifier hs-var hs-var">yieldGram</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130859"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130859"><span class="hs-identifier hs-var">gram</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Plan k [a] ()
+forall o (k :: * -&gt; *). o -&gt; Plan k o ()
+</span><span class="hs-identifier hs-var">yield</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Plan k [a] ()) -&gt; [a] -&gt; Plan k [a] ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130859"><span class="hs-identifier hs-var">gram</span></a></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span id="local-6989586621679130854"><span id="local-6989586621679130855"><span id="local-6989586621679130856"><span id="local-6989586621679130857"><span class="annot"><a href="Musicology.Grams.html#skipgramsRSMach"><span class="hs-identifier hs-type">skipgramsRSMach</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679130857"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679130857"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679130856"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679130855"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-71"></span><span>                   </span><span class="annot"><a href="#local-6989586621679130855"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130854"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679130854"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130854"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130857"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130856"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130857"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ProcessT</span></span><span> </span><span class="annot"><a href="#local-6989586621679130855"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679130854"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130854"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span></span></span></span><span>
+</span><span id="line-72"></span><span id="skipgramsRSMach"><span class="annot"><span class="annottext">skipgramsRSMach :: m Bool
+-&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; ProcessT m a [a]
+</span><a href="Musicology.Grams.html#skipgramsRSMach"><span class="hs-identifier hs-var hs-var">skipgramsRSMach</span></a></span></span><span> </span><span id="local-6989586621679130852"><span class="annot"><span class="annottext">m Bool
+</span><a href="#local-6989586621679130852"><span class="hs-identifier hs-var">coin</span></a></span></span><span> </span><span id="local-6989586621679130851"><span class="annot"><span class="annottext">[a] -&gt; Bool
+</span><a href="#local-6989586621679130851"><span class="hs-identifier hs-var">pred</span></a></span></span><span> </span><span id="local-6989586621679130850"><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130850"><span class="hs-identifier hs-var">cost</span></a></span></span><span> </span><span id="local-6989586621679130849"><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130849"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679130848"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130848"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([(n, k, [a], Int)], Int, Map Int [[a]])
+-&gt; (([(n, k, [a], Int)], Int, Map Int [[a]])
+    -&gt; PlanT (Is a) [a] m ([(n, k, [a], Int)], Int, Map Int [[a]]))
+-&gt; ProcessT m a [a]
+forall (m :: * -&gt; *) s (k :: * -&gt; *) o.
+Monad m =&gt;
+s -&gt; (s -&gt; PlanT k o m s) -&gt; MachineT m k o
+</span><span class="hs-identifier hs-var">unfoldPlan</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span class="hs-glyph">::</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Map Int [[a]]
+forall k a. Map k a
+</span><span class="hs-identifier hs-var">M.empty</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([(n, k, [a], Int)], Int, Map Int [[a]])
+-&gt; PlanT (Is a) [a] m ([(n, k, [a], Int)], Int, Map Int [[a]])
+forall (k :: * -&gt; * -&gt; *) b.
+(Category k, Num b, Ord b) =&gt;
+([(n, k, [a], b)], b, Map b [[a]])
+-&gt; PlanT (k a) [a] m ([(n, k, [a], b)], b, Map b [[a]])
+</span><a href="#local-6989586621679130846"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span class="hs-comment">-- go :: [(n, k, [a], Int)] -&gt; Plan...</span><span>
+</span><span id="line-74"></span><span>        </span><span id="local-6989586621679130846"><span class="annot"><span class="annottext">go :: ([(n, k, [a], b)], b, Map b [[a]])
+-&gt; PlanT (k a) [a] m ([(n, k, [a], b)], b, Map b [[a]])
+</span><a href="#local-6989586621679130846"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679130845"><span class="annot"><span class="annottext">[(n, k, [a], b)]
+</span><a href="#local-6989586621679130845"><span class="hs-identifier hs-var">pfxs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130844"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679130844"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130843"><span class="annot"><span class="annottext">Map b [[a]]
+</span><a href="#local-6989586621679130843"><span class="hs-identifier hs-var">queue</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-75"></span><span>          </span><span id="local-6989586621679130842"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130842"><span class="hs-identifier hs-var">candidate</span></a></span></span><span>     </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">PlanT (k a) [a] m a
+forall (k :: * -&gt; * -&gt; *) i o. Category k =&gt; Plan (k i) o i
+</span><span class="hs-identifier hs-var">await</span></span><span> </span><span class="annot"><span class="annottext">PlanT (k a) [a] m a -&gt; PlanT (k a) [a] m a -&gt; PlanT (k a) [a] m a
+forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
+</span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">([[a]] -&gt; PlanT (k a) [a] m ()) -&gt; [[[a]]] -&gt; PlanT (k a) [a] m ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">([a] -&gt; PlanT (k a) [a] m ()) -&gt; [[a]] -&gt; PlanT (k a) [a] m ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; PlanT (k a) [a] m ()
+forall o (k :: * -&gt; *). o -&gt; Plan k o ()
+</span><span class="hs-identifier hs-var">yield</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map b [[a]] -&gt; [[[a]]]
+forall k a. Map k a -&gt; [a]
+</span><span class="hs-identifier hs-var">M.elems</span></span><span> </span><span class="annot"><span class="annottext">Map b [[a]]
+</span><a href="#local-6989586621679130843"><span class="hs-identifier hs-var">queue</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">PlanT (k a) [a] m () -&gt; PlanT (k a) [a] m a -&gt; PlanT (k a) [a] m a
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">PlanT (k a) [a] m a
+forall (k :: * -&gt; *) o a. Plan k o a
+</span><span class="hs-identifier hs-var">stop</span></span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679130839"><span class="annot"><span class="annottext">oldClosed :: [(n, k, [a], b)]
+</span><a href="#local-6989586621679130839"><span class="hs-identifier hs-var hs-var">oldClosed</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((n, k, [a], b) -&gt; Bool) -&gt; [(n, k, [a], b)] -&gt; [(n, k, [a], b)]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679130838"><span class="annot"><span class="annottext">(n, k, [a], b)
+</span><a href="#local-6989586621679130838"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(n, k, [a], b) -&gt; a -&gt; k
+forall a d. (a, k, [a], d) -&gt; a -&gt; k
+</span><a href="#local-6989586621679130837"><span class="hs-identifier hs-var">totalCost</span></a></span><span> </span><span class="annot"><span class="annottext">(n, k, [a], b)
+</span><a href="#local-6989586621679130838"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130842"><span class="hs-identifier hs-var">candidate</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130848"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(n, k, [a], b)]
+</span><a href="#local-6989586621679130845"><span class="hs-identifier hs-var">pfxs</span></a></span><span>
+</span><span id="line-77"></span><span>              </span><span id="local-6989586621679130836"><span class="annot"><span class="annottext">gate :: Maybe b
+</span><a href="#local-6989586621679130836"><span class="hs-identifier hs-var hs-var">gate</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[b] -&gt; Maybe b
+forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">minimumMay</span></span><span> </span><span class="annot"><span class="annottext">([b] -&gt; Maybe b) -&gt; [b] -&gt; Maybe b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((n, k, [a], b) -&gt; b) -&gt; [(n, k, [a], b)] -&gt; [b]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(n, k, [a], b) -&gt; b
+forall a b c d. (a, b, c, d) -&gt; d
+</span><a href="#local-6989586621679130835"><span class="hs-identifier hs-var">prefixOnset</span></a></span><span> </span><span class="annot"><span class="annottext">[(n, k, [a], b)]
+</span><a href="#local-6989586621679130839"><span class="hs-identifier hs-var">oldClosed</span></a></span><span>
+</span><span id="line-78"></span><span>              </span><span class="hs-special">(</span><span id="local-6989586621679130834"><span class="annot"><span class="annottext">Map b [[a]]
+</span><a href="#local-6989586621679130834"><span class="hs-identifier hs-var">q'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130833"><span class="annot"><span class="annottext">[[[a]]]
+</span><a href="#local-6989586621679130833"><span class="hs-identifier hs-var">rels</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe b
+</span><a href="#local-6989586621679130836"><span class="hs-identifier hs-var">gate</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-79"></span><span>                             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679130832"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679130832"><span class="hs-identifier hs-var">g</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Map b [[a]] -&gt; b -&gt; (Map b [[a]], [[[a]]])
+forall k v. Ord k =&gt; Map k v -&gt; k -&gt; (Map k v, [v])
+</span><a href="Musicology.Internal.Helpers.html#release"><span class="hs-identifier hs-var">release</span></a></span><span> </span><span class="annot"><span class="annottext">Map b [[a]]
+</span><a href="#local-6989586621679130843"><span class="hs-identifier hs-var">queue</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679130832"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-80"></span><span>                             </span><span class="annot"><span class="annottext">Maybe b
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Map b [[a]]
+forall k a. Map k a
+</span><span class="hs-identifier hs-var">M.empty</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Map b [[a]] -&gt; [[[a]]]
+forall k a. Map k a -&gt; [a]
+</span><span class="hs-identifier hs-var">M.elems</span></span><span> </span><span class="annot"><span class="annottext">Map b [[a]]
+</span><a href="#local-6989586621679130843"><span class="hs-identifier hs-var">queue</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>          </span><span class="annot"><span class="annottext">([[a]] -&gt; PlanT (k a) [a] m ()) -&gt; [[[a]]] -&gt; PlanT (k a) [a] m ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">([a] -&gt; PlanT (k a) [a] m ()) -&gt; [[a]] -&gt; PlanT (k a) [a] m ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; PlanT (k a) [a] m ()
+forall o (k :: * -&gt; *). o -&gt; Plan k o ()
+</span><span class="hs-identifier hs-var">yield</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[[[a]]]
+</span><a href="#local-6989586621679130833"><span class="hs-identifier hs-var">rels</span></a></span><span>
+</span><span id="line-82"></span><span>          </span><span id="local-6989586621679130831"><span class="annot"><span class="annottext">[(n, k, [a], b)]
+</span><a href="#local-6989586621679130831"><span class="hs-identifier hs-var">extendable</span></a></span></span><span>    </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">((n, k, [a], b) -&gt; PlanT (k a) [a] m Bool)
+-&gt; [(n, k, [a], b)] -&gt; PlanT (k a) [a] m [(n, k, [a], b)]
+forall (m :: * -&gt; *) a.
+Applicative m =&gt;
+(a -&gt; m Bool) -&gt; [a] -&gt; m [a]
+</span><span class="hs-identifier hs-var">filterM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; (n, k, [a], b) -&gt; PlanT (k a) [a] m Bool
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) a b d.
+(MonadTrans t, Monad (t m)) =&gt;
+a -&gt; (a, b, [a], d) -&gt; t m Bool
+</span><a href="#local-6989586621679130830"><span class="hs-identifier hs-var">doesExtend</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130842"><span class="hs-identifier hs-var">candidate</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(n, k, [a], b)]
+</span><a href="#local-6989586621679130839"><span class="hs-identifier hs-var">oldClosed</span></a></span><span>
+</span><span id="line-83"></span><span>          </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679130829"><span class="annot"><span class="annottext">extended :: [(n, k, [a], b)]
+</span><a href="#local-6989586621679130829"><span class="hs-identifier hs-var hs-var">extended</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; (n, k, [a], b)
+forall b a. Num b =&gt; a -&gt; (n, b, [a], b)
+</span><a href="#local-6989586621679130828"><span class="hs-identifier hs-var">mkPrefix</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130842"><span class="hs-identifier hs-var">candidate</span></a></span><span> </span><span class="annot"><span class="annottext">(n, k, [a], b) -&gt; [(n, k, [a], b)] -&gt; [(n, k, [a], b)]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">((n, k, [a], b) -&gt; (n, k, [a], b))
+-&gt; [(n, k, [a], b)] -&gt; [(n, k, [a], b)]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; (n, k, [a], b) -&gt; (n, k, [a], b)
+forall a d. Num a =&gt; a -&gt; (a, k, [a], d) -&gt; (a, k, [a], d)
+</span><a href="#local-6989586621679130827"><span class="hs-identifier hs-var">extendPrefix</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130842"><span class="hs-identifier hs-var">candidate</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(n, k, [a], b)]
+</span><a href="#local-6989586621679130831"><span class="hs-identifier hs-var">extendable</span></a></span><span>
+</span><span id="line-84"></span><span>              </span><span id="local-6989586621679130826"><span class="annot"><span class="annottext">pfxs' :: [(n, k, [a], b)]
+</span><a href="#local-6989586621679130826"><span class="hs-identifier hs-var hs-var">pfxs'</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(n, k, [a], b)]
+</span><a href="#local-6989586621679130839"><span class="hs-identifier hs-var">oldClosed</span></a></span><span> </span><span class="annot"><span class="annottext">[(n, k, [a], b)] -&gt; [(n, k, [a], b)] -&gt; [(n, k, [a], b)]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">((n, k, [a], b) -&gt; Bool) -&gt; [(n, k, [a], b)] -&gt; [(n, k, [a], b)]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool)
+-&gt; ((n, k, [a], b) -&gt; Bool) -&gt; (n, k, [a], b) -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(n, k, [a], b) -&gt; Bool
+forall a b c d. (Eq a, Num a) =&gt; (a, b, c, d) -&gt; Bool
+</span><a href="#local-6989586621679130825"><span class="hs-identifier hs-var">pfxComplete</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(n, k, [a], b)]
+</span><a href="#local-6989586621679130829"><span class="hs-identifier hs-var">extended</span></a></span><span>
+</span><span id="line-85"></span><span>              </span><span id="local-6989586621679130824"><span class="annot"><span class="annottext">queue' :: Map b [[a]]
+</span><a href="#local-6989586621679130824"><span class="hs-identifier hs-var hs-var">queue'</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map b [[a]] -&gt; [(n, k, [a], b)] -&gt; Map b [[a]]
+forall k a a b.
+Ord k =&gt;
+Map k [[a]] -&gt; [(a, b, [a], k)] -&gt; Map k [[a]]
+</span><a href="#local-6989586621679130823"><span class="hs-identifier hs-var">enqueueGrams</span></a></span><span> </span><span class="annot"><span class="annottext">Map b [[a]]
+</span><a href="#local-6989586621679130834"><span class="hs-identifier hs-var">q'</span></a></span><span> </span><span class="annot"><span class="annottext">([(n, k, [a], b)] -&gt; Map b [[a]])
+-&gt; [(n, k, [a], b)] -&gt; Map b [[a]]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((n, k, [a], b) -&gt; Bool) -&gt; [(n, k, [a], b)] -&gt; [(n, k, [a], b)]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="annot"><span class="annottext">(n, k, [a], b) -&gt; Bool
+forall a b c d. (Eq a, Num a) =&gt; (a, b, c, d) -&gt; Bool
+</span><a href="#local-6989586621679130825"><span class="hs-identifier hs-var">pfxComplete</span></a></span><span> </span><span class="annot"><span class="annottext">[(n, k, [a], b)]
+</span><a href="#local-6989586621679130829"><span class="hs-identifier hs-var">extended</span></a></span><span>
+</span><span id="line-86"></span><span>          </span><span class="annot"><span class="annottext">([(n, k, [a], b)], b, Map b [[a]])
+-&gt; PlanT (k a) [a] m ([(n, k, [a], b)], b, Map b [[a]])
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[(n, k, [a], b)]
+</span><a href="#local-6989586621679130826"><span class="hs-identifier hs-var">pfxs'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679130844"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">b -&gt; b -&gt; b
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">b
+</span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Map b [[a]]
+</span><a href="#local-6989586621679130824"><span class="hs-identifier hs-var">queue'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>          </span><span class="hs-keyword">where</span><span>
+</span><span id="line-88"></span><span>            </span><span id="local-6989586621679130828"><span class="annot"><span class="annottext">mkPrefix :: a -&gt; (n, b, [a], b)
+</span><a href="#local-6989586621679130828"><span class="hs-identifier hs-var hs-var">mkPrefix</span></a></span></span><span> </span><span id="local-6989586621679130822"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130822"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130849"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">n -&gt; n -&gt; n
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">n
+</span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130822"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679130844"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>        </span><span id="local-6989586621679130837"><span class="annot"><span class="annottext">totalCost :: (a, k, [a], d) -&gt; a -&gt; k
+</span><a href="#local-6989586621679130837"><span class="hs-identifier hs-var hs-var">totalCost</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130821"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130821"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130820"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130820"><span class="hs-identifier hs-var">prev</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[a]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">d
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679130819"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130819"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130821"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; k
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130850"><span class="hs-identifier hs-var">cost</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130820"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130819"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-90"></span><span>        </span><span id="local-6989586621679130835"><span class="annot"><span class="annottext">prefixOnset :: (a, b, c, d) -&gt; d
+</span><a href="#local-6989586621679130835"><span class="hs-identifier hs-var hs-var">prefixOnset</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">c
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130818"><span class="annot"><span class="annottext">d
+</span><a href="#local-6989586621679130818"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">d
+</span><a href="#local-6989586621679130818"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-91"></span><span>        </span><span id="local-6989586621679130827"><span class="annot"><span class="annottext">extendPrefix :: a -&gt; (a, k, [a], d) -&gt; (a, k, [a], d)
+</span><a href="#local-6989586621679130827"><span class="hs-identifier hs-var hs-var">extendPrefix</span></a></span></span><span> </span><span id="local-6989586621679130817"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130817"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679130816"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130816"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130815"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130815"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130814"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130814"><span class="hs-identifier hs-var">p</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679130813"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130813"><span class="hs-identifier hs-var">fx</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130812"><span class="annot"><span class="annottext">d
+</span><a href="#local-6989586621679130812"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130816"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130815"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; k
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130850"><span class="hs-identifier hs-var">cost</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130814"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130817"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130817"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130814"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130813"><span class="hs-identifier hs-var">fx</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">d
+</span><a href="#local-6989586621679130812"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-92"></span><span>        </span><span id="local-6989586621679130825"><span class="annot"><span class="annottext">pfxComplete :: (a, b, c, d) -&gt; Bool
+</span><a href="#local-6989586621679130825"><span class="hs-identifier hs-var hs-var">pfxComplete</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679130811"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130811"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">c
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">d
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130811"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-93"></span><span>        </span><span id="local-6989586621679130830"><span class="annot"><span class="annottext">doesExtend :: a -&gt; (a, b, [a], d) -&gt; t m Bool
+</span><a href="#local-6989586621679130830"><span class="hs-identifier hs-var hs-var">doesExtend</span></a></span></span><span> </span><span id="local-6989586621679130810"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130810"><span class="hs-identifier hs-var">cand</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130809"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130809"><span class="hs-identifier hs-var">pfx</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">d
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-94"></span><span>          </span><span id="local-6989586621679130808"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679130808"><span class="hs-identifier hs-var">isHeads</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m Bool -&gt; t m Bool
+forall (t :: (* -&gt; *) -&gt; * -&gt; *) (m :: * -&gt; *) a.
+(MonadTrans t, Monad m) =&gt;
+m a -&gt; t m a
+</span><span class="hs-identifier hs-var">lift</span></span><span> </span><span class="annot"><span class="annottext">m Bool
+</span><a href="#local-6989586621679130852"><span class="hs-identifier hs-var">coin</span></a></span><span>
+</span><span id="line-95"></span><span>          </span><span class="annot"><span class="annottext">Bool -&gt; t m Bool
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; t m Bool) -&gt; Bool -&gt; t m Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; Bool
+</span><a href="#local-6989586621679130851"><span class="hs-identifier hs-var">pred</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Bool) -&gt; [a] -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130810"><span class="hs-identifier hs-var">cand</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130809"><span class="hs-identifier hs-var">pfx</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679130808"><span class="hs-identifier hs-var">isHeads</span></a></span><span>
+</span><span id="line-96"></span><span>        </span><span id="local-6989586621679130823"><span class="annot"><span class="annottext">enqueueGrams :: Map k [[a]] -&gt; [(a, b, [a], k)] -&gt; Map k [[a]]
+</span><a href="#local-6989586621679130823"><span class="hs-identifier hs-var hs-var">enqueueGrams</span></a></span></span><span> </span><span id="local-6989586621679130807"><span class="annot"><span class="annottext">Map k [[a]]
+</span><a href="#local-6989586621679130807"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679130806"><span class="annot"><span class="annottext">[(a, b, [a], k)]
+</span><a href="#local-6989586621679130806"><span class="hs-identifier hs-var">pfxs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([[a]] -&gt; [[a]] -&gt; [[a]])
+-&gt; Map k [[a]] -&gt; Map k [[a]] -&gt; Map k [[a]]
+forall k a. Ord k =&gt; (a -&gt; a -&gt; a) -&gt; Map k a -&gt; Map k a -&gt; Map k a
+</span><span class="hs-identifier hs-var">M.unionWith</span></span><span> </span><span class="annot"><span class="annottext">[[a]] -&gt; [[a]] -&gt; [[a]]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(++)</span></span><span> </span><span class="annot"><span class="annottext">Map k [[a]]
+</span><a href="#local-6989586621679130807"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Map k [[a]]
+</span><a href="#local-6989586621679130804"><span class="hs-identifier hs-var">gramq</span></a></span><span>
+</span><span id="line-97"></span><span>          </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679130803"><span class="annot"><span class="annottext">grams :: [(k, [[a]])]
+</span><a href="#local-6989586621679130803"><span class="hs-identifier hs-var hs-var">grams</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a, b, [a], k) -&gt; (k, [[a]])) -&gt; [(a, b, [a], k)] -&gt; [(k, [[a]])]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130802"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130802"><span class="hs-identifier hs-var">pfx</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130801"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130801"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679130801"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">[a] -&gt; [a]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130802"><span class="hs-identifier hs-var">pfx</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(a, b, [a], k)]
+</span><a href="#local-6989586621679130806"><span class="hs-identifier hs-var">pfxs</span></a></span><span>
+</span><span id="line-98"></span><span>                </span><span id="local-6989586621679130804"><span class="annot"><span class="annottext">gramq :: Map k [[a]]
+</span><a href="#local-6989586621679130804"><span class="hs-identifier hs-var hs-var">gramq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([[a]] -&gt; [[a]] -&gt; [[a]]) -&gt; [(k, [[a]])] -&gt; Map k [[a]]
+forall k a. Ord k =&gt; (a -&gt; a -&gt; a) -&gt; [(k, a)] -&gt; Map k a
+</span><span class="hs-identifier hs-var">M.fromListWith</span></span><span> </span><span class="annot"><span class="annottext">[[a]] -&gt; [[a]] -&gt; [[a]]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">(++)</span></span><span> </span><span class="annot"><span class="annottext">[(k, [[a]])]
+</span><a href="#local-6989586621679130803"><span class="hs-identifier hs-var">grams</span></a></span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- special cases: deterministic</span><span>
+</span><span id="line-101"></span><span class="hs-comment">-------------------------------</span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span id="local-6989586621679130988"><span id="local-6989586621679130989"><span id="local-6989586621679130990"><span class="annot"><a href="Musicology.Grams.html#skipgramsMach"><span class="hs-identifier hs-type">skipgramsMach</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679130990"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679130990"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679130989"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-104"></span><span>                 </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130988"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679130988"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130988"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130990"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130989"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130990"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Process</span></span><span> </span><span class="annot"><a href="#local-6989586621679130988"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130988"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-105"></span><span id="skipgramsMach"><span class="annot"><span class="annottext">skipgramsMach :: ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; Process a [a]
+</span><a href="Musicology.Grams.html#skipgramsMach"><span class="hs-identifier hs-var hs-var">skipgramsMach</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m Bool
+-&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; ProcessT m a [a]
+forall k n (m :: * -&gt; *) a.
+(Num k, Ord k, Integral n, Monad m) =&gt;
+m Bool
+-&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; ProcessT m a [a]
+</span><a href="Musicology.Grams.html#skipgramsRMach"><span class="hs-identifier hs-var">skipgramsRMach</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; m Bool
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span id="local-6989586621679130796"><span id="local-6989586621679130797"><span id="local-6989586621679130798"><span class="annot"><a href="Musicology.Grams.html#skipgramsSMach"><span class="hs-identifier hs-type">skipgramsSMach</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679130798"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679130798"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679130797"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-108"></span><span>                  </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130796"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679130796"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130796"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130798"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130797"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130798"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Process</span></span><span> </span><span class="annot"><a href="#local-6989586621679130796"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130796"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-109"></span><span id="skipgramsSMach"><span class="annot"><span class="annottext">skipgramsSMach :: ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; Process a [a]
+</span><a href="Musicology.Grams.html#skipgramsSMach"><span class="hs-identifier hs-var hs-var">skipgramsSMach</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m Bool
+-&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; ProcessT m a [a]
+forall k n (m :: * -&gt; *) a.
+(Num k, Ord k, Integral n, Monad m) =&gt;
+m Bool
+-&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; ProcessT m a [a]
+</span><a href="Musicology.Grams.html#skipgramsRSMach"><span class="hs-identifier hs-var">skipgramsRSMach</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; m Bool
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span id="local-6989586621679130965"><span id="local-6989586621679130966"><span id="local-6989586621679130967"><span id="local-6989586621679130968"><span class="annot"><a href="Musicology.Grams.html#skipgrams"><span class="hs-identifier hs-type">skipgrams</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679130968"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679130967"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679130967"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679130966"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-112"></span><span>             </span><span class="annot"><a href="#local-6989586621679130968"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679130965"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130965"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679130965"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130965"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130967"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130966"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130967"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130965"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span></span></span></span><span>
+</span><span id="line-113"></span><span id="skipgrams"><span class="annot"><span class="annottext">skipgrams :: t a -&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; [[a]]
+</span><a href="Musicology.Grams.html#skipgrams"><span class="hs-identifier hs-var hs-var">skipgrams</span></a></span></span><span> </span><span id="local-6989586621679130793"><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130793"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">t a -&gt; MachineT Identity (Is a) [a] -&gt; [[a]]
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+t a -&gt; MachineT Identity (Is a) b -&gt; [b]
+</span><a href="Musicology.Internal.Helpers.html#processFoldable"><span class="hs-identifier hs-var">processFoldable</span></a></span><span> </span><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130793"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT Identity (Is a) [a] -&gt; [[a]])
+-&gt; (([a] -&gt; Bool)
+    -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; MachineT Identity (Is a) [a])
+-&gt; ([a] -&gt; Bool)
+-&gt; (a -&gt; a -&gt; k)
+-&gt; n
+-&gt; k
+-&gt; [[a]]
+forall b c a a a a.
+(b -&gt; c) -&gt; (a -&gt; a -&gt; a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; a -&gt; a -&gt; c
+</span><a href="Musicology.Grams.html#.%3A%3A"><span class="hs-operator hs-var">.::</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Bool)
+-&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; MachineT Identity (Is a) [a]
+forall k n a.
+(Num k, Ord k, Integral n) =&gt;
+([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; Process a [a]
+</span><a href="Musicology.Grams.html#skipgramsMach"><span class="hs-identifier hs-var">skipgramsMach</span></a></span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span id="local-6989586621679130789"><span id="local-6989586621679130790"><span id="local-6989586621679130791"><span id="local-6989586621679130792"><span class="annot"><a href="Musicology.Grams.html#skipgramsS"><span class="hs-identifier hs-type">skipgramsS</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679130792"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679130791"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679130791"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679130790"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-116"></span><span>              </span><span class="annot"><a href="#local-6989586621679130792"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679130789"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130789"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679130789"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130789"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130791"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130790"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130791"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130789"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span></span></span></span><span>
+</span><span id="line-117"></span><span id="skipgramsS"><span class="annot"><span class="annottext">skipgramsS :: t a -&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; [[a]]
+</span><a href="Musicology.Grams.html#skipgramsS"><span class="hs-identifier hs-var hs-var">skipgramsS</span></a></span></span><span> </span><span id="local-6989586621679130787"><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130787"><span class="hs-identifier hs-var">xs</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">t a -&gt; MachineT Identity (Is a) [a] -&gt; [[a]]
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+t a -&gt; MachineT Identity (Is a) b -&gt; [b]
+</span><a href="Musicology.Internal.Helpers.html#processFoldable"><span class="hs-identifier hs-var">processFoldable</span></a></span><span> </span><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130787"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT Identity (Is a) [a] -&gt; [[a]])
+-&gt; (([a] -&gt; Bool)
+    -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; MachineT Identity (Is a) [a])
+-&gt; ([a] -&gt; Bool)
+-&gt; (a -&gt; a -&gt; k)
+-&gt; n
+-&gt; k
+-&gt; [[a]]
+forall b c a a a a.
+(b -&gt; c) -&gt; (a -&gt; a -&gt; a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; a -&gt; a -&gt; c
+</span><a href="Musicology.Grams.html#.%3A%3A"><span class="hs-operator hs-var">.::</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Bool)
+-&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; MachineT Identity (Is a) [a]
+forall k n a.
+(Num k, Ord k, Integral n) =&gt;
+([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; Process a [a]
+</span><a href="Musicology.Grams.html#skipgramsSMach"><span class="hs-identifier hs-var">skipgramsSMach</span></a></span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span class="hs-comment">-- special cases: stochastic sampling</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-------------------------------------</span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span id="local-6989586621679130959"><span id="local-6989586621679130960"><span class="annot"><a href="Musicology.Grams.html#mkCoin"><span class="hs-identifier hs-type">mkCoin</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PrimMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621679130960"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679130959"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130959"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PrimState</span></span><span> </span><span class="annot"><a href="#local-6989586621679130960"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130960"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-123"></span><span id="mkCoin"><span class="annot"><span class="annottext">mkCoin :: Double -&gt; n -&gt; Gen (PrimState m) -&gt; m Bool
+</span><a href="Musicology.Grams.html#mkCoin"><span class="hs-identifier hs-var hs-var">mkCoin</span></a></span></span><span> </span><span id="local-6989586621679130785"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130785"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679130784"><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130784"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679130783"><span class="annot"><span class="annottext">Gen (PrimState m)
+</span><a href="#local-6989586621679130783"><span class="hs-identifier hs-var">gen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Gen (PrimState m) -&gt; m Bool
+forall (m :: * -&gt; *).
+PrimMonad m =&gt;
+Double -&gt; Gen (PrimState m) -&gt; m Bool
+</span><span class="hs-identifier hs-var">bernoulli</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130782"><span class="hs-identifier hs-var">bias</span></a></span><span> </span><span class="annot"><span class="annottext">Gen (PrimState m)
+</span><a href="#local-6989586621679130783"><span class="hs-identifier hs-var">gen</span></a></span><span>
+</span><span id="line-124"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679130782"><span class="annot"><span class="annottext">bias :: Double
+</span><a href="#local-6989586621679130782"><span class="hs-identifier hs-var hs-var">bias</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130785"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+forall a. Floating a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">**</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">n -&gt; Double
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130784"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">n -&gt; n -&gt; n
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">n
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span id="local-6989586621679130930"><span id="local-6989586621679130931"><span id="local-6989586621679130932"><span id="local-6989586621679130933"><span id="local-6989586621679130934"><span class="annot"><a href="Musicology.Grams.html#skipgramsR"><span class="hs-identifier hs-type">skipgramsR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679130934"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679130933"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679130933"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679130932"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PrimMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621679130931"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-127"></span><span>              </span><span class="annot"><a href="#local-6989586621679130934"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679130930"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PrimState</span></span><span> </span><span class="annot"><a href="#local-6989586621679130931"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-128"></span><span>              </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130930"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679130930"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130930"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130933"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130932"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130933"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130931"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130930"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span></span></span></span></span><span>
+</span><span id="line-129"></span><span id="skipgramsR"><span class="annot"><span class="annottext">skipgramsR :: t a
+-&gt; Double
+-&gt; Gen (PrimState m)
+-&gt; ([a] -&gt; Bool)
+-&gt; (a -&gt; a -&gt; k)
+-&gt; n
+-&gt; k
+-&gt; m [[a]]
+</span><a href="Musicology.Grams.html#skipgramsR"><span class="hs-identifier hs-var hs-var">skipgramsR</span></a></span></span><span> </span><span id="local-6989586621679130778"><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130778"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><span class="hs-number">1.0</span></span><span> </span><span class="annot"><span class="annottext">Gen (PrimState m)
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679130777"><span class="annot"><span class="annottext">[a] -&gt; Bool
+</span><a href="#local-6989586621679130777"><span class="hs-identifier hs-var">pred</span></a></span></span><span> </span><span id="local-6989586621679130776"><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130776"><span class="hs-identifier hs-var">cost</span></a></span></span><span> </span><span id="local-6989586621679130775"><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130775"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[[a]] -&gt; m [[a]]
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">([[a]] -&gt; m [[a]]) -&gt; (k -&gt; [[a]]) -&gt; k -&gt; m [[a]]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">t a -&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; [[a]]
+forall (t :: * -&gt; *) k n a.
+(Foldable t, Num k, Ord k, Integral n) =&gt;
+t a -&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; [[a]]
+</span><a href="Musicology.Grams.html#skipgrams"><span class="hs-identifier hs-var">skipgrams</span></a></span><span> </span><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130778"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Bool
+</span><a href="#local-6989586621679130777"><span class="hs-identifier hs-var">pred</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130776"><span class="hs-identifier hs-var">cost</span></a></span><span> </span><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130775"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-130"></span><span class="annot"><a href="Musicology.Grams.html#skipgramsR"><span class="hs-identifier hs-var">skipgramsR</span></a></span><span> </span><span id="local-6989586621679130774"><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130774"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="local-6989586621679130773"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130773"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679130772"><span class="annot"><span class="annottext">Gen (PrimState m)
+</span><a href="#local-6989586621679130772"><span class="hs-identifier hs-var">gen</span></a></span></span><span> </span><span id="local-6989586621679130771"><span class="annot"><span class="annottext">[a] -&gt; Bool
+</span><a href="#local-6989586621679130771"><span class="hs-identifier hs-var">pred</span></a></span></span><span> </span><span id="local-6989586621679130770"><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130770"><span class="hs-identifier hs-var">cost</span></a></span></span><span> </span><span id="local-6989586621679130769"><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130769"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-131"></span><span>  </span><span class="annot"><span class="annottext">t a -&gt; ProcessT m a [a] -&gt; m [[a]]
+forall (m :: * -&gt; *) (t :: * -&gt; *) a b.
+(Monad m, Foldable t) =&gt;
+t a -&gt; ProcessT m a b -&gt; m [b]
+</span><a href="Musicology.Internal.Helpers.html#processFoldableT"><span class="hs-identifier hs-var">processFoldableT</span></a></span><span> </span><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130774"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">(ProcessT m a [a] -&gt; m [[a]])
+-&gt; (k -&gt; ProcessT m a [a]) -&gt; k -&gt; m [[a]]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">m Bool
+-&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; ProcessT m a [a]
+forall k n (m :: * -&gt; *) a.
+(Num k, Ord k, Integral n, Monad m) =&gt;
+m Bool
+-&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; ProcessT m a [a]
+</span><a href="Musicology.Grams.html#skipgramsRMach"><span class="hs-identifier hs-var">skipgramsRMach</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; n -&gt; Gen (PrimState m) -&gt; m Bool
+forall (m :: * -&gt; *) n.
+(PrimMonad m, Integral n) =&gt;
+Double -&gt; n -&gt; Gen (PrimState m) -&gt; m Bool
+</span><a href="Musicology.Grams.html#mkCoin"><span class="hs-identifier hs-var">mkCoin</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130773"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130769"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Gen (PrimState m)
+</span><a href="#local-6989586621679130772"><span class="hs-identifier hs-var">gen</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Bool
+</span><a href="#local-6989586621679130771"><span class="hs-identifier hs-var">pred</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130770"><span class="hs-identifier hs-var">cost</span></a></span><span> </span><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130769"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span id="local-6989586621679130764"><span id="local-6989586621679130765"><span id="local-6989586621679130766"><span id="local-6989586621679130767"><span id="local-6989586621679130768"><span class="annot"><a href="Musicology.Grams.html#skipgramsRS"><span class="hs-identifier hs-type">skipgramsRS</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679130768"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679130767"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679130767"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679130766"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PrimMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621679130765"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-134"></span><span>               </span><span class="annot"><a href="#local-6989586621679130768"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679130764"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PrimState</span></span><span> </span><span class="annot"><a href="#local-6989586621679130765"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-135"></span><span>               </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130764"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679130764"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130764"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130767"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130766"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130767"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130765"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130764"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span></span></span></span></span><span>
+</span><span id="line-136"></span><span id="skipgramsRS"><span class="annot"><span class="annottext">skipgramsRS :: t a
+-&gt; Double
+-&gt; Gen (PrimState m)
+-&gt; ([a] -&gt; Bool)
+-&gt; (a -&gt; a -&gt; k)
+-&gt; n
+-&gt; k
+-&gt; m [[a]]
+</span><a href="Musicology.Grams.html#skipgramsRS"><span class="hs-identifier hs-var hs-var">skipgramsRS</span></a></span></span><span> </span><span id="local-6989586621679130762"><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130762"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><span class="hs-number">1.0</span></span><span> </span><span class="annot"><span class="annottext">Gen (PrimState m)
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679130761"><span class="annot"><span class="annottext">[a] -&gt; Bool
+</span><a href="#local-6989586621679130761"><span class="hs-identifier hs-var">pred</span></a></span></span><span> </span><span id="local-6989586621679130760"><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130760"><span class="hs-identifier hs-var">cost</span></a></span></span><span> </span><span id="local-6989586621679130759"><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130759"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[[a]] -&gt; m [[a]]
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">([[a]] -&gt; m [[a]]) -&gt; (k -&gt; [[a]]) -&gt; k -&gt; m [[a]]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">t a -&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; [[a]]
+forall (t :: * -&gt; *) k n a.
+(Foldable t, Num k, Ord k, Integral n) =&gt;
+t a -&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; [[a]]
+</span><a href="Musicology.Grams.html#skipgramsS"><span class="hs-identifier hs-var">skipgramsS</span></a></span><span> </span><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130762"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Bool
+</span><a href="#local-6989586621679130761"><span class="hs-identifier hs-var">pred</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130760"><span class="hs-identifier hs-var">cost</span></a></span><span> </span><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130759"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-137"></span><span class="annot"><a href="Musicology.Grams.html#skipgramsRS"><span class="hs-identifier hs-var">skipgramsRS</span></a></span><span> </span><span id="local-6989586621679130758"><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130758"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="local-6989586621679130757"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130757"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679130756"><span class="annot"><span class="annottext">Gen (PrimState m)
+</span><a href="#local-6989586621679130756"><span class="hs-identifier hs-var">gen</span></a></span></span><span> </span><span id="local-6989586621679130755"><span class="annot"><span class="annottext">[a] -&gt; Bool
+</span><a href="#local-6989586621679130755"><span class="hs-identifier hs-var">pred</span></a></span></span><span> </span><span id="local-6989586621679130754"><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130754"><span class="hs-identifier hs-var">cost</span></a></span></span><span> </span><span id="local-6989586621679130753"><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130753"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-138"></span><span>  </span><span class="annot"><span class="annottext">t a -&gt; ProcessT m a [a] -&gt; m [[a]]
+forall (m :: * -&gt; *) (t :: * -&gt; *) a b.
+(Monad m, Foldable t) =&gt;
+t a -&gt; ProcessT m a b -&gt; m [b]
+</span><a href="Musicology.Internal.Helpers.html#processFoldableT"><span class="hs-identifier hs-var">processFoldableT</span></a></span><span> </span><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679130758"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">(ProcessT m a [a] -&gt; m [[a]])
+-&gt; (k -&gt; ProcessT m a [a]) -&gt; k -&gt; m [[a]]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">m Bool
+-&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; ProcessT m a [a]
+forall k n (m :: * -&gt; *) a.
+(Num k, Ord k, Integral n, Monad m) =&gt;
+m Bool
+-&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; ProcessT m a [a]
+</span><a href="Musicology.Grams.html#skipgramsRSMach"><span class="hs-identifier hs-var">skipgramsRSMach</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; n -&gt; Gen (PrimState m) -&gt; m Bool
+forall (m :: * -&gt; *) n.
+(PrimMonad m, Integral n) =&gt;
+Double -&gt; n -&gt; Gen (PrimState m) -&gt; m Bool
+</span><a href="Musicology.Grams.html#mkCoin"><span class="hs-identifier hs-var">mkCoin</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130757"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130753"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Gen (PrimState m)
+</span><a href="#local-6989586621679130756"><span class="hs-identifier hs-var">gen</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Bool
+</span><a href="#local-6989586621679130755"><span class="hs-identifier hs-var">pred</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; k
+</span><a href="#local-6989586621679130754"><span class="hs-identifier hs-var">cost</span></a></span><span> </span><span class="annot"><span class="annottext">n
+</span><a href="#local-6989586621679130753"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span class="hs-comment">-- special cases: index-based cost</span><span>
+</span><span id="line-141"></span><span class="hs-comment">----------------------------------</span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span id="enum"><span class="annot"><span class="annottext">enum :: [a] -&gt; [(a, b)]
+</span><a href="Musicology.Grams.html#enum"><span class="hs-identifier hs-var hs-var">enum</span></a></span></span><span> </span><span id="local-6989586621679130751"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130751"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [b] -&gt; [(a, b)]
+forall a b. [a] -&gt; [b] -&gt; [(a, b)]
+</span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130751"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">b
+</span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span>
+</span><span id="line-144"></span><span id="indexCost"><span class="annot"><span class="annottext">indexCost :: (a, a) -&gt; (a, a) -&gt; a
+</span><a href="Musicology.Grams.html#indexCost"><span class="hs-identifier hs-var hs-var">indexCost</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679130749"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130749"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679130748"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130748"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679130747"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130747"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679130746"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130746"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130746"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679130748"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-145"></span><span id="mune"><span class="annot"><span class="annottext">mune :: [[(b, b)]] -&gt; [[b]]
+</span><a href="Musicology.Grams.html#mune"><span class="hs-identifier hs-var hs-var">mune</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([(b, b)] -&gt; [b]) -&gt; [[(b, b)]] -&gt; [[b]]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((b, b) -&gt; b) -&gt; [(b, b)] -&gt; [b]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(b, b) -&gt; b
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>
+</span><span id="line-147"></span><span id="local-6989586621679130744"><span class="annot"><a href="Musicology.Grams.html#indexSkipgrams"><span class="hs-identifier hs-type">indexSkipgrams</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130744"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130744"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span><span>
+</span><span id="line-148"></span><span id="indexSkipgrams"><span class="annot"><span class="annottext">indexSkipgrams :: [a] -&gt; Int -&gt; Int -&gt; [[a]]
+</span><a href="Musicology.Grams.html#indexSkipgrams"><span class="hs-identifier hs-var hs-var">indexSkipgrams</span></a></span></span><span> </span><span id="local-6989586621679130742"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130742"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[[(a, Int)]] -&gt; [[a]]
+forall b b. [[(b, b)]] -&gt; [[b]]
+</span><a href="Musicology.Grams.html#mune"><span class="hs-identifier hs-var">mune</span></a></span><span> </span><span class="annot"><span class="annottext">([[(a, Int)]] -&gt; [[a]])
+-&gt; (Int -&gt; Int -&gt; [[(a, Int)]]) -&gt; Int -&gt; Int -&gt; [[a]]
+forall b c a a. (b -&gt; c) -&gt; (a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; c
+</span><a href="Musicology.Grams.html#.%3A"><span class="hs-operator hs-var">.:</span></a></span><span> </span><span class="annot"><span class="annottext">[(a, Int)]
+-&gt; ([(a, Int)] -&gt; Bool)
+-&gt; ((a, Int) -&gt; (a, Int) -&gt; Int)
+-&gt; Int
+-&gt; Int
+-&gt; [[(a, Int)]]
+forall (t :: * -&gt; *) k n a.
+(Foldable t, Num k, Ord k, Integral n) =&gt;
+t a -&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; [[a]]
+</span><a href="Musicology.Grams.html#skipgrams"><span class="hs-identifier hs-var">skipgrams</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; [(a, Int)]
+forall b a. (Num b, Enum b) =&gt; [a] -&gt; [(a, b)]
+</span><a href="Musicology.Grams.html#enum"><span class="hs-identifier hs-var">enum</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130742"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; [(a, Int)] -&gt; Bool
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a, Int) -&gt; (a, Int) -&gt; Int
+forall a a a. Num a =&gt; (a, a) -&gt; (a, a) -&gt; a
+</span><a href="Musicology.Grams.html#indexCost"><span class="hs-identifier hs-var">indexCost</span></a></span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span id="local-6989586621679130739"><span id="local-6989586621679130740"><span class="annot"><a href="Musicology.Grams.html#indexSkipgramsR"><span class="hs-identifier hs-type">indexSkipgramsR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PrimMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621679130740"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-151"></span><span>                   </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130739"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PrimState</span></span><span> </span><span class="annot"><a href="#local-6989586621679130740"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130740"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130739"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-152"></span><span id="indexSkipgramsR"><span class="annot"><span class="annottext">indexSkipgramsR :: [a] -&gt; Double -&gt; Gen (PrimState m) -&gt; Int -&gt; Int -&gt; m [[a]]
+</span><a href="Musicology.Grams.html#indexSkipgramsR"><span class="hs-identifier hs-var hs-var">indexSkipgramsR</span></a></span></span><span> </span><span id="local-6989586621679130737"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130737"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="local-6989586621679130736"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130736"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679130735"><span class="annot"><span class="annottext">Gen (PrimState m)
+</span><a href="#local-6989586621679130735"><span class="hs-identifier hs-var">gen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-153"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[[(a, Int)]] -&gt; [[a]]
+forall b b. [[(b, b)]] -&gt; [[b]]
+</span><a href="Musicology.Grams.html#mune"><span class="hs-identifier hs-var">mune</span></a></span><span> </span><span class="annot"><span class="annottext">([[(a, Int)]] -&gt; [[a]]) -&gt; m [[(a, Int)]] -&gt; m [[a]]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(m [[(a, Int)]] -&gt; m [[a]])
+-&gt; (Int -&gt; Int -&gt; m [[(a, Int)]]) -&gt; Int -&gt; Int -&gt; m [[a]]
+forall b c a a. (b -&gt; c) -&gt; (a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; c
+</span><a href="Musicology.Grams.html#.%3A"><span class="hs-operator hs-var">.:</span></a></span><span> </span><span class="annot"><span class="annottext">[(a, Int)]
+-&gt; Double
+-&gt; Gen (PrimState m)
+-&gt; ([(a, Int)] -&gt; Bool)
+-&gt; ((a, Int) -&gt; (a, Int) -&gt; Int)
+-&gt; Int
+-&gt; Int
+-&gt; m [[(a, Int)]]
+forall (t :: * -&gt; *) k n (m :: * -&gt; *) a.
+(Foldable t, Num k, Ord k, Integral n, PrimMonad m) =&gt;
+t a
+-&gt; Double
+-&gt; Gen (PrimState m)
+-&gt; ([a] -&gt; Bool)
+-&gt; (a -&gt; a -&gt; k)
+-&gt; n
+-&gt; k
+-&gt; m [[a]]
+</span><a href="Musicology.Grams.html#skipgramsR"><span class="hs-identifier hs-var">skipgramsR</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; [(a, Int)]
+forall b a. (Num b, Enum b) =&gt; [a] -&gt; [(a, b)]
+</span><a href="Musicology.Grams.html#enum"><span class="hs-identifier hs-var">enum</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130737"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130736"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Gen (PrimState m)
+</span><a href="#local-6989586621679130735"><span class="hs-identifier hs-var">gen</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; [(a, Int)] -&gt; Bool
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a, Int) -&gt; (a, Int) -&gt; Int
+forall a a a. Num a =&gt; (a, a) -&gt; (a, a) -&gt; a
+</span><a href="Musicology.Grams.html#indexCost"><span class="hs-identifier hs-var">indexCost</span></a></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span id="local-6989586621679130733"><span class="annot"><a href="Musicology.Grams.html#indexSkipgramsS"><span class="hs-identifier hs-type">indexSkipgramsS</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130733"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130733"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span><span>
+</span><span id="line-156"></span><span id="indexSkipgramsS"><span class="annot"><span class="annottext">indexSkipgramsS :: [a] -&gt; Int -&gt; Int -&gt; [[a]]
+</span><a href="Musicology.Grams.html#indexSkipgramsS"><span class="hs-identifier hs-var hs-var">indexSkipgramsS</span></a></span></span><span> </span><span id="local-6989586621679130731"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130731"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[[(a, Int)]] -&gt; [[a]]
+forall b b. [[(b, b)]] -&gt; [[b]]
+</span><a href="Musicology.Grams.html#mune"><span class="hs-identifier hs-var">mune</span></a></span><span> </span><span class="annot"><span class="annottext">([[(a, Int)]] -&gt; [[a]])
+-&gt; (Int -&gt; Int -&gt; [[(a, Int)]]) -&gt; Int -&gt; Int -&gt; [[a]]
+forall b c a a. (b -&gt; c) -&gt; (a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; c
+</span><a href="Musicology.Grams.html#.%3A"><span class="hs-operator hs-var">.:</span></a></span><span> </span><span class="annot"><span class="annottext">[(a, Int)]
+-&gt; ([(a, Int)] -&gt; Bool)
+-&gt; ((a, Int) -&gt; (a, Int) -&gt; Int)
+-&gt; Int
+-&gt; Int
+-&gt; [[(a, Int)]]
+forall (t :: * -&gt; *) k n a.
+(Foldable t, Num k, Ord k, Integral n) =&gt;
+t a -&gt; ([a] -&gt; Bool) -&gt; (a -&gt; a -&gt; k) -&gt; n -&gt; k -&gt; [[a]]
+</span><a href="Musicology.Grams.html#skipgramsS"><span class="hs-identifier hs-var">skipgramsS</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; [(a, Int)]
+forall b a. (Num b, Enum b) =&gt; [a] -&gt; [(a, b)]
+</span><a href="Musicology.Grams.html#enum"><span class="hs-identifier hs-var">enum</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130731"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; [(a, Int)] -&gt; Bool
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a, Int) -&gt; (a, Int) -&gt; Int
+forall a a a. Num a =&gt; (a, a) -&gt; (a, a) -&gt; a
+</span><a href="Musicology.Grams.html#indexCost"><span class="hs-identifier hs-var">indexCost</span></a></span><span>
+</span><span id="line-157"></span><span>
+</span><span id="line-158"></span><span id="local-6989586621679130729"><span id="local-6989586621679130730"><span class="annot"><a href="Musicology.Grams.html#indexSkipgramsRS"><span class="hs-identifier hs-type">indexSkipgramsRS</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PrimMonad</span></span><span> </span><span class="annot"><a href="#local-6989586621679130730"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-159"></span><span>                    </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130729"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Gen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PrimState</span></span><span> </span><span class="annot"><a href="#local-6989586621679130730"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679130730"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130729"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-160"></span><span id="indexSkipgramsRS"><span class="annot"><span class="annottext">indexSkipgramsRS :: [a] -&gt; Double -&gt; Gen (PrimState m) -&gt; Int -&gt; Int -&gt; m [[a]]
+</span><a href="Musicology.Grams.html#indexSkipgramsRS"><span class="hs-identifier hs-var hs-var">indexSkipgramsRS</span></a></span></span><span> </span><span id="local-6989586621679130727"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130727"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="local-6989586621679130726"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130726"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679130725"><span class="annot"><span class="annottext">Gen (PrimState m)
+</span><a href="#local-6989586621679130725"><span class="hs-identifier hs-var">gen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-161"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[[(a, Int)]] -&gt; [[a]]
+forall b b. [[(b, b)]] -&gt; [[b]]
+</span><a href="Musicology.Grams.html#mune"><span class="hs-identifier hs-var">mune</span></a></span><span> </span><span class="annot"><span class="annottext">([[(a, Int)]] -&gt; [[a]]) -&gt; m [[(a, Int)]] -&gt; m [[a]]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(m [[(a, Int)]] -&gt; m [[a]])
+-&gt; (Int -&gt; Int -&gt; m [[(a, Int)]]) -&gt; Int -&gt; Int -&gt; m [[a]]
+forall b c a a. (b -&gt; c) -&gt; (a -&gt; a -&gt; b) -&gt; a -&gt; a -&gt; c
+</span><a href="Musicology.Grams.html#.%3A"><span class="hs-operator hs-var">.:</span></a></span><span> </span><span class="annot"><span class="annottext">[(a, Int)]
+-&gt; Double
+-&gt; Gen (PrimState m)
+-&gt; ([(a, Int)] -&gt; Bool)
+-&gt; ((a, Int) -&gt; (a, Int) -&gt; Int)
+-&gt; Int
+-&gt; Int
+-&gt; m [[(a, Int)]]
+forall (t :: * -&gt; *) k n (m :: * -&gt; *) a.
+(Foldable t, Num k, Ord k, Integral n, PrimMonad m) =&gt;
+t a
+-&gt; Double
+-&gt; Gen (PrimState m)
+-&gt; ([a] -&gt; Bool)
+-&gt; (a -&gt; a -&gt; k)
+-&gt; n
+-&gt; k
+-&gt; m [[a]]
+</span><a href="Musicology.Grams.html#skipgramsRS"><span class="hs-identifier hs-var">skipgramsRS</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a] -&gt; [(a, Int)]
+forall b a. (Num b, Enum b) =&gt; [a] -&gt; [(a, b)]
+</span><a href="Musicology.Grams.html#enum"><span class="hs-identifier hs-var">enum</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679130727"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130726"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Gen (PrimState m)
+</span><a href="#local-6989586621679130725"><span class="hs-identifier hs-var">gen</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; [(a, Int)] -&gt; Bool
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a, Int) -&gt; (a, Int) -&gt; Int
+forall a a a. Num a =&gt; (a, a) -&gt; (a, a) -&gt; a
+</span><a href="Musicology.Grams.html#indexCost"><span class="hs-identifier hs-var">indexCost</span></a></span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span class="hs-comment">---------------</span><span>
+</span><span id="line-164"></span><span class="hs-comment">-- Polygrams --</span><span>
+</span><span id="line-165"></span><span class="hs-comment">---------------</span><span>
+</span><span id="line-166"></span></pre></body></html>

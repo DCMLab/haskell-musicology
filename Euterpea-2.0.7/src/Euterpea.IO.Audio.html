@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Euterpea.IO.Audio</span><span>
+</span><span id="line-2"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.BasicSigFuns.html"><span class="hs-identifier">Euterpea.IO.Audio.BasicSigFuns</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-3"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Basics.html"><span class="hs-identifier">Euterpea.IO.Audio.Basics</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-4"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Types.html"><span class="hs-identifier">Euterpea.IO.Audio.Types</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-5"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.IO.html"><span class="hs-identifier">Euterpea.IO.Audio.IO</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-6"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Render.html"><span class="hs-identifier">Euterpea.IO.Audio.Render</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-7"></span><span>    </span><span class="annot"><a href="Euterpea.IO.Audio.html#writeWav"><span class="hs-identifier">writeWav</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>    </span><span class="annot"><a href="Euterpea.IO.Audio.html#writeWavNorm"><span class="hs-identifier">writeWavNorm</span></a></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.BasicSigFuns.html"><span class="hs-identifier">Euterpea.IO.Audio.BasicSigFuns</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Basics.html"><span class="hs-identifier">Euterpea.IO.Audio.Basics</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Types.html"><span class="hs-identifier">Euterpea.IO.Audio.Types</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.IO.html"><span class="hs-identifier">Euterpea.IO.Audio.IO</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Render.html"><span class="hs-identifier">Euterpea.IO.Audio.Render</span></a></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span id="writeWav"><span class="annot"><span class="annottext">writeWav :: String
+-&gt; [(InstrumentName, Instr (Signal p () a))] -&gt; Music a -&gt; IO ()
+</span><a href="Euterpea.IO.Audio.html#writeWav"><span class="hs-identifier hs-var hs-var">writeWav</span></a></span></span><span> </span><span id="local-6989586621679097273"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097273"><span class="hs-identifier hs-var">fname</span></a></span></span><span> </span><span id="local-6989586621679097272"><span class="annot"><span class="annottext">[(InstrumentName, Instr (Signal p () a))]
+</span><a href="#local-6989586621679097272"><span class="hs-identifier hs-var">iMap</span></a></span></span><span> </span><span id="local-6989586621679097271"><span class="annot"><span class="annottext">Music a
+</span><a href="#local-6989586621679097271"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><span id="line-18"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679097270"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679097270"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679097269"><span class="annot"><span class="annottext">Signal p () a
+</span><a href="#local-6989586621679097269"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Music a
+-&gt; [(InstrumentName, Instr (Signal p () a))]
+-&gt; (Double, Signal p () a)
+forall p a b.
+(Clock p, ToMusic1 a, AudioSample b) =&gt;
+Music a -&gt; InstrMap (Signal p () b) -&gt; (Double, Signal p () b)
+</span><a href="Euterpea.IO.Audio.Render.html#renderSF"><span class="hs-identifier hs-var">renderSF</span></a></span><span> </span><span class="annot"><span class="annottext">Music a
+</span><a href="#local-6989586621679097271"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">[(InstrumentName, Instr (Signal p () a))]
+</span><a href="#local-6989586621679097272"><span class="hs-identifier hs-var">iMap</span></a></span><span>
+</span><span id="line-19"></span><span>    </span><span class="hs-keyword">in</span><span>  </span><span class="annot"><span class="annottext">String -&gt; Double -&gt; Signal p () a -&gt; IO ()
+forall a p.
+(AudioSample a, Clock p) =&gt;
+String -&gt; Double -&gt; Signal p () a -&gt; IO ()
+</span><a href="Euterpea.IO.Audio.IO.html#outFile"><span class="hs-identifier hs-var">outFile</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097273"><span class="hs-identifier hs-var">fname</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679097270"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Signal p () a
+</span><a href="#local-6989586621679097269"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span id="writeWavNorm"><span class="annot"><span class="annottext">writeWavNorm :: String
+-&gt; [(InstrumentName, Instr (Signal p () a))] -&gt; Music a -&gt; IO ()
+</span><a href="Euterpea.IO.Audio.html#writeWavNorm"><span class="hs-identifier hs-var hs-var">writeWavNorm</span></a></span></span><span> </span><span id="local-6989586621679097266"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097266"><span class="hs-identifier hs-var">fname</span></a></span></span><span> </span><span id="local-6989586621679097265"><span class="annot"><span class="annottext">[(InstrumentName, Instr (Signal p () a))]
+</span><a href="#local-6989586621679097265"><span class="hs-identifier hs-var">iMap</span></a></span></span><span> </span><span id="local-6989586621679097264"><span class="annot"><span class="annottext">Music a
+</span><a href="#local-6989586621679097264"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><span id="line-22"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679097263"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679097263"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679097262"><span class="annot"><span class="annottext">Signal p () a
+</span><a href="#local-6989586621679097262"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Music a
+-&gt; [(InstrumentName, Instr (Signal p () a))]
+-&gt; (Double, Signal p () a)
+forall p a b.
+(Clock p, ToMusic1 a, AudioSample b) =&gt;
+Music a -&gt; InstrMap (Signal p () b) -&gt; (Double, Signal p () b)
+</span><a href="Euterpea.IO.Audio.Render.html#renderSF"><span class="hs-identifier hs-var">renderSF</span></a></span><span> </span><span class="annot"><span class="annottext">Music a
+</span><a href="#local-6989586621679097264"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">[(InstrumentName, Instr (Signal p () a))]
+</span><a href="#local-6989586621679097265"><span class="hs-identifier hs-var">iMap</span></a></span><span>
+</span><span id="line-23"></span><span>    </span><span class="hs-keyword">in</span><span>  </span><span class="annot"><span class="annottext">String -&gt; Double -&gt; Signal p () a -&gt; IO ()
+forall a p.
+(AudioSample a, Clock p) =&gt;
+String -&gt; Double -&gt; Signal p () a -&gt; IO ()
+</span><a href="Euterpea.IO.Audio.IO.html#outFileNorm"><span class="hs-identifier hs-var">outFileNorm</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097266"><span class="hs-identifier hs-var">fname</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679097263"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Signal p () a
+</span><a href="#local-6989586621679097262"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span></pre></body></html>

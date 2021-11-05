@@ -1,0 +1,478 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- | A flexible implementation of min-, max-, min-priority, max-priority and</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- custom-priority heaps based on the leftist-heaps from Chris Okasaki's book</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- \&quot;Purely Functional Data Structures\&quot;, Cambridge University Press, 1998,</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- chapter 3.1.</span><span>
+</span><span id="line-5"></span><span class="hs-comment">--</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- There are different flavours of 'Heap's, each of them following a different</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- strategy when ordering its elements:</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--  * Choose 'MinHeap' or 'MaxHeap' if you need a simple minimum or maximum heap</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--    (which always keeps the minimum/maximum element at the head of the 'Heap').</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--  * If you wish to manually annotate a value with a priority, e. g. an @IO ()@</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--    action with an 'Int' use 'MinPrioHeap' or 'MaxPrioHeap'. They manage</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--    @(prio, val)@ tuples so that only the priority (and not the value)</span><span>
+</span><span id="line-15"></span><span class="hs-comment">--    influences the order of elements.</span><span>
+</span><span id="line-16"></span><span class="hs-comment">--</span><span>
+</span><span id="line-17"></span><span class="hs-comment">--  * If you still need something different, define a custom order for the heap</span><span>
+</span><span id="line-18"></span><span class="hs-comment">--    elements by implementing an instance of 'HeapItem' and let the maintainer</span><span>
+</span><span id="line-19"></span><span class="hs-comment">--    know what's missing.</span><span>
+</span><span id="line-20"></span><span class="hs-comment">--</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- All sorts of heaps mentioned above ('MinHeap', 'MaxHeap', 'MinPrioHeap' and</span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- 'MaxPrioHeap') are built on the same underlying type: @'HeapT' prio val@. It is</span><span>
+</span><span id="line-23"></span><span class="hs-comment">-- a simple minimum priority heap. The trick is, that you never insert @(prio,</span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- val)@ pairs directly: You only insert an \&quot;external representation\&quot;, usually</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- called @item@, and an appropriate 'HeapItem' instance is used to 'split' the</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- @item@ to a @(prio, val)@ pair. For details refer to the documentation of</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- 'HeapItem'.</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Heap</span><span>
+</span><span id="line-29"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Types</span></span><span>
+</span><span id="line-30"></span><span>      </span><span class="annot"><span class="hs-comment">-- ** Various heap flavours</span></span><span>
+</span><span id="line-31"></span><span>      </span><span class="annot"><a href="Data.Heap.Internal.html#HeapT"><span class="hs-identifier">HeapT</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier">Heap</span></a></span><span>
+</span><span id="line-32"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#MinHeap"><span class="hs-identifier">MinHeap</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#MaxHeap"><span class="hs-identifier">MaxHeap</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#MinPrioHeap"><span class="hs-identifier">MinPrioHeap</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#MaxPrioHeap"><span class="hs-identifier">MaxPrioHeap</span></a></span><span>
+</span><span id="line-33"></span><span>      </span><span class="annot"><span class="hs-comment">-- ** Ordering strategies</span></span><span>
+</span><span id="line-34"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier">HeapItem</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#MinPolicy"><span class="hs-identifier">MinPolicy</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#MaxPolicy"><span class="hs-identifier">MaxPolicy</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#FstMinPolicy"><span class="hs-identifier">FstMinPolicy</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#FstMaxPolicy"><span class="hs-identifier">FstMaxPolicy</span></a></span><span>
+</span><span id="line-35"></span><span>      </span><span class="annot"><span class="hs-comment">-- * Query</span></span><span>
+</span><span id="line-36"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Internal.html#isEmpty"><span class="hs-identifier">I.isEmpty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#null"><span class="hs-identifier">null</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Internal.html#size"><span class="hs-identifier">I.size</span></a></span><span>
+</span><span id="line-37"></span><span>      </span><span class="annot"><span class="hs-comment">-- * Construction</span></span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Internal.html#empty"><span class="hs-identifier">I.empty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#singleton"><span class="hs-identifier">singleton</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#insert"><span class="hs-identifier">insert</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Internal.html#union"><span class="hs-identifier">I.union</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Internal.html#unions"><span class="hs-identifier">I.unions</span></a></span><span>
+</span><span id="line-39"></span><span>      </span><span class="annot"><span class="hs-comment">-- * Deconstruction</span></span><span>
+</span><span id="line-40"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#view"><span class="hs-identifier">view</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#viewHead"><span class="hs-identifier">viewHead</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#viewTail"><span class="hs-identifier">viewTail</span></a></span><span>
+</span><span id="line-41"></span><span>      </span><span class="annot"><span class="hs-comment">-- * Filter</span></span><span>
+</span><span id="line-42"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#filter"><span class="hs-identifier">filter</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#partition"><span class="hs-identifier">partition</span></a></span><span>
+</span><span id="line-43"></span><span>      </span><span class="annot"><span class="hs-comment">-- * Subranges</span></span><span>
+</span><span id="line-44"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#take"><span class="hs-identifier">take</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#drop"><span class="hs-identifier">drop</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#splitAt"><span class="hs-identifier">splitAt</span></a></span><span>
+</span><span id="line-45"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#takeWhile"><span class="hs-identifier">takeWhile</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#dropWhile"><span class="hs-identifier">dropWhile</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#span"><span class="hs-identifier">span</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#break"><span class="hs-identifier">break</span></a></span><span>
+</span><span id="line-46"></span><span>      </span><span class="annot"><span class="hs-comment">-- * Conversion</span></span><span>
+</span><span id="line-47"></span><span>      </span><span class="annot"><span class="hs-comment">-- ** List</span></span><span>
+</span><span id="line-48"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#fromList"><span class="hs-identifier">fromList</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#toList"><span class="hs-identifier">toList</span></a></span><span>
+</span><span id="line-49"></span><span>      </span><span class="annot"><span class="hs-comment">-- ** Ordered list</span></span><span>
+</span><span id="line-50"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#fromAscList"><span class="hs-identifier">fromAscList</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#toAscList"><span class="hs-identifier">toAscList</span></a></span><span>
+</span><span id="line-51"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#fromDescList"><span class="hs-identifier">fromDescList</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.html#toDescList"><span class="hs-identifier">toDescList</span></a></span><span>
+</span><span id="line-52"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Heap.Item.html"><span class="hs-identifier">Data.Heap.Item</span></a></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Heap.Internal.html"><span class="hs-identifier">Data.Heap.Internal</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Heap.Internal.html#HeapT"><span class="hs-identifier">HeapT</span></a></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Data.Heap.Internal.html"><span class="hs-identifier">Data.Heap.Internal</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">I</span></span><span>
+</span><span id="line-57"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span>
+</span><span id="line-58"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">break</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">drop</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">dropWhile</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">filter</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">null</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">span</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">splitAt</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">take</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">takeWhile</span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- | /O(1)/. Is the 'HeapT' empty?</span><span>
+</span><span id="line-61"></span><span id="local-6989586621679037427"><span id="local-6989586621679037428"><span class="annot"><a href="Data.Heap.html#null"><span class="hs-identifier hs-type">null</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Heap.Internal.html#HeapT"><span class="hs-identifier hs-type">HeapT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037428"><span class="hs-identifier hs-type">prio</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037427"><span class="hs-identifier hs-type">val</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-62"></span><span id="null"><span class="annot"><span class="annottext">null :: HeapT prio val -&gt; Bool
+</span><a href="Data.Heap.html#null"><span class="hs-identifier hs-var hs-var">null</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HeapT prio val -&gt; Bool
+forall prio val. HeapT prio val -&gt; Bool
+</span><a href="Data.Heap.Internal.html#isEmpty"><span class="hs-identifier hs-var">I.isEmpty</span></a></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- | /O(1)/. Create a singleton 'HeapT'.</span><span>
+</span><span id="line-65"></span><span id="local-6989586621679037544"><span id="local-6989586621679037545"><span class="annot"><a href="Data.Heap.html#singleton"><span class="hs-identifier hs-type">singleton</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037545"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037544"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679037544"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037545"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037544"><span class="hs-identifier hs-type">item</span></a></span></span></span><span>
+</span><span id="line-66"></span><span id="singleton"><span class="annot"><span class="annottext">singleton :: item -&gt; Heap pol item
+</span><a href="Data.Heap.html#singleton"><span class="hs-identifier hs-var hs-var">singleton</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Prio pol item -&gt; Val pol item -&gt; Heap pol item)
+-&gt; (Prio pol item, Val pol item) -&gt; Heap pol item
+forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
+</span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="annot"><span class="annottext">Prio pol item -&gt; Val pol item -&gt; Heap pol item
+forall prio val. prio -&gt; val -&gt; HeapT prio val
+</span><a href="Data.Heap.Internal.html#singleton"><span class="hs-identifier hs-var">I.singleton</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Prio pol item, Val pol item) -&gt; Heap pol item)
+-&gt; (item -&gt; (Prio pol item, Val pol item)) -&gt; item -&gt; Heap pol item
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">item -&gt; (Prio pol item, Val pol item)
+forall pol item.
+HeapItem pol item =&gt;
+item -&gt; (Prio pol item, Val pol item)
+</span><a href="Data.Heap.Item.html#split"><span class="hs-identifier hs-var">split</span></a></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- | /O(log n)/. Insert a single item into the 'HeapT'.</span><span>
+</span><span id="line-69"></span><span id="local-6989586621679037421"><span id="local-6989586621679037422"><span class="annot"><a href="Data.Heap.html#insert"><span class="hs-identifier hs-type">insert</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037422"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037421"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679037421"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037422"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037421"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037422"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037421"><span class="hs-identifier hs-type">item</span></a></span></span></span><span>
+</span><span id="line-70"></span><span id="insert"><span class="annot"><span class="annottext">insert :: item -&gt; Heap pol item -&gt; Heap pol item
+</span><a href="Data.Heap.html#insert"><span class="hs-identifier hs-var hs-var">insert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Heap pol item -&gt; Heap pol item -&gt; Heap pol item
+forall prio val.
+Ord prio =&gt;
+HeapT prio val -&gt; HeapT prio val -&gt; HeapT prio val
+</span><a href="Data.Heap.Internal.html#union"><span class="hs-identifier hs-var">I.union</span></a></span><span> </span><span class="annot"><span class="annottext">(Heap pol item -&gt; Heap pol item -&gt; Heap pol item)
+-&gt; (item -&gt; Heap pol item)
+-&gt; item
+-&gt; Heap pol item
+-&gt; Heap pol item
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">item -&gt; Heap pol item
+forall pol item. HeapItem pol item =&gt; item -&gt; Heap pol item
+</span><a href="Data.Heap.html#singleton"><span class="hs-identifier hs-var">singleton</span></a></span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- | /O(1)/ for the head, /O(log n)/ for the tail. Find the item with minimal</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- associated priority and remove it from the 'Heap' (i. e. find head and tail</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- of the heap) if it is not empty. Otherwise, 'Nothing' is returned.</span><span>
+</span><span id="line-75"></span><span id="local-6989586621679037531"><span id="local-6989586621679037532"><span class="annot"><a href="Data.Heap.html#view"><span class="hs-identifier hs-type">view</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037532"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037531"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037532"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037531"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679037531"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037532"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037531"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-76"></span><span id="view"><span class="annot"><span class="annottext">view :: Heap pol item -&gt; Maybe (item, Heap pol item)
+</span><a href="Data.Heap.html#view"><span class="hs-identifier hs-var hs-var">view</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Prio pol item, Val pol item, Heap pol item)
+ -&gt; (item, Heap pol item))
+-&gt; Maybe (Prio pol item, Val pol item, Heap pol item)
+-&gt; Maybe (item, Heap pol item)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679037420"><span class="annot"><span class="annottext">Prio pol item
+</span><a href="#local-6989586621679037420"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037419"><span class="annot"><span class="annottext">Val pol item
+</span><a href="#local-6989586621679037419"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037418"><span class="annot"><span class="annottext">Heap pol item
+</span><a href="#local-6989586621679037418"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Prio pol item, Val pol item) -&gt; item
+forall pol item.
+HeapItem pol item =&gt;
+(Prio pol item, Val pol item) -&gt; item
+</span><a href="Data.Heap.Item.html#merge"><span class="hs-identifier hs-var">merge</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Prio pol item
+</span><a href="#local-6989586621679037420"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Val pol item
+</span><a href="#local-6989586621679037419"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Heap pol item
+</span><a href="#local-6989586621679037418"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (Prio pol item, Val pol item, Heap pol item)
+ -&gt; Maybe (item, Heap pol item))
+-&gt; (Heap pol item
+    -&gt; Maybe (Prio pol item, Val pol item, Heap pol item))
+-&gt; Heap pol item
+-&gt; Maybe (item, Heap pol item)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Heap pol item -&gt; Maybe (Prio pol item, Val pol item, Heap pol item)
+forall prio val.
+Ord prio =&gt;
+HeapT prio val -&gt; Maybe (prio, val, HeapT prio val)
+</span><a href="Data.Heap.Internal.html#view"><span class="hs-identifier hs-var">I.view</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- | /O(1)/. Find the item with minimal associated priority on the 'Heap' (i. e.</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- its head) if it is not empty. Otherwise, 'Nothing' is returned.</span><span>
+</span><span id="line-80"></span><span id="local-6989586621679037414"><span id="local-6989586621679037415"><span class="annot"><a href="Data.Heap.html#viewHead"><span class="hs-identifier hs-type">viewHead</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037415"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037414"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037415"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037414"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679037414"><span class="hs-identifier hs-type">item</span></a></span></span></span><span>
+</span><span id="line-81"></span><span id="viewHead"><span class="annot"><span class="annottext">viewHead :: Heap pol item -&gt; Maybe item
+</span><a href="Data.Heap.html#viewHead"><span class="hs-identifier hs-var hs-var">viewHead</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((item, Heap pol item) -&gt; item)
+-&gt; Maybe (item, Heap pol item) -&gt; Maybe item
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(item, Heap pol item) -&gt; item
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">(Maybe (item, Heap pol item) -&gt; Maybe item)
+-&gt; (Heap pol item -&gt; Maybe (item, Heap pol item))
+-&gt; Heap pol item
+-&gt; Maybe item
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Heap pol item -&gt; Maybe (item, Heap pol item)
+forall pol item.
+HeapItem pol item =&gt;
+Heap pol item -&gt; Maybe (item, Heap pol item)
+</span><a href="Data.Heap.html#view"><span class="hs-identifier hs-var">view</span></a></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- | /O(log n)/. Remove the item with minimal associated priority and from the</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- 'Heap' (i. e. its tail) if it is not empty. Otherwise, 'Nothing' is returned.</span><span>
+</span><span id="line-85"></span><span id="local-6989586621679037412"><span id="local-6989586621679037413"><span class="annot"><a href="Data.Heap.html#viewTail"><span class="hs-identifier hs-type">viewTail</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037413"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037412"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037413"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037412"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037413"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037412"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-86"></span><span id="viewTail"><span class="annot"><span class="annottext">viewTail :: Heap pol item -&gt; Maybe (Heap pol item)
+</span><a href="Data.Heap.html#viewTail"><span class="hs-identifier hs-var hs-var">viewTail</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((item, Heap pol item) -&gt; Heap pol item)
+-&gt; Maybe (item, Heap pol item) -&gt; Maybe (Heap pol item)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(item, Heap pol item) -&gt; Heap pol item
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">(Maybe (item, Heap pol item) -&gt; Maybe (Heap pol item))
+-&gt; (Heap pol item -&gt; Maybe (item, Heap pol item))
+-&gt; Heap pol item
+-&gt; Maybe (Heap pol item)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Heap pol item -&gt; Maybe (item, Heap pol item)
+forall pol item.
+HeapItem pol item =&gt;
+Heap pol item -&gt; Maybe (item, Heap pol item)
+</span><a href="Data.Heap.html#view"><span class="hs-identifier hs-var">view</span></a></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- | Remove all items from a 'HeapT' not fulfilling a predicate.</span><span>
+</span><span id="line-89"></span><span id="local-6989586621679037410"><span id="local-6989586621679037411"><span class="annot"><a href="Data.Heap.html#filter"><span class="hs-identifier hs-type">filter</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037411"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037410"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679037410"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037411"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037410"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037411"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037410"><span class="hs-identifier hs-type">item</span></a></span></span></span><span>
+</span><span id="line-90"></span><span id="filter"><span class="annot"><span class="annottext">filter :: (item -&gt; Bool) -&gt; Heap pol item -&gt; Heap pol item
+</span><a href="Data.Heap.html#filter"><span class="hs-identifier hs-var hs-var">filter</span></a></span></span><span> </span><span id="local-6989586621679037409"><span class="annot"><span class="annottext">item -&gt; Bool
+</span><a href="#local-6989586621679037409"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Heap pol item, Heap pol item) -&gt; Heap pol item
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">((Heap pol item, Heap pol item) -&gt; Heap pol item)
+-&gt; (Heap pol item -&gt; (Heap pol item, Heap pol item))
+-&gt; Heap pol item
+-&gt; Heap pol item
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(item -&gt; Bool) -&gt; Heap pol item -&gt; (Heap pol item, Heap pol item)
+forall pol item.
+HeapItem pol item =&gt;
+(item -&gt; Bool) -&gt; Heap pol item -&gt; (Heap pol item, Heap pol item)
+</span><a href="Data.Heap.html#partition"><span class="hs-identifier hs-var">partition</span></a></span><span> </span><span class="annot"><span class="annottext">item -&gt; Bool
+</span><a href="#local-6989586621679037409"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- | Partition the 'Heap' into two. @'partition' p h = (h1, h2)@: All items in</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- @h1@ fulfil the predicate @p@, those in @h2@ don't. @'union' h1 h2 = h@.</span><span>
+</span><span id="line-94"></span><span id="local-6989586621679037523"><span id="local-6989586621679037524"><span class="annot"><a href="Data.Heap.html#partition"><span class="hs-identifier hs-type">partition</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037524"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037523"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679037523"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037524"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037523"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037524"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037523"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037524"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037523"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-96"></span><span id="partition"><span class="annot"><span class="annottext">partition :: (item -&gt; Bool) -&gt; Heap pol item -&gt; (Heap pol item, Heap pol item)
+</span><a href="Data.Heap.html#partition"><span class="hs-identifier hs-var hs-var">partition</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Prio pol item, Val pol item) -&gt; Bool)
+-&gt; Heap pol item -&gt; (Heap pol item, Heap pol item)
+forall prio val.
+Ord prio =&gt;
+((prio, val) -&gt; Bool)
+-&gt; HeapT prio val -&gt; (HeapT prio val, HeapT prio val)
+</span><a href="Data.Heap.Internal.html#partition"><span class="hs-identifier hs-var">I.partition</span></a></span><span> </span><span class="annot"><span class="annottext">(((Prio pol item, Val pol item) -&gt; Bool)
+ -&gt; Heap pol item -&gt; (Heap pol item, Heap pol item))
+-&gt; ((item -&gt; Bool) -&gt; (Prio pol item, Val pol item) -&gt; Bool)
+-&gt; (item -&gt; Bool)
+-&gt; Heap pol item
+-&gt; (Heap pol item, Heap pol item)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(item -&gt; Bool) -&gt; (Prio pol item, Val pol item) -&gt; Bool
+forall pol item a.
+HeapItem pol item =&gt;
+(item -&gt; a) -&gt; (Prio pol item, Val pol item) -&gt; a
+</span><a href="Data.Heap.Item.html#splitF"><span class="hs-identifier hs-var">splitF</span></a></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span class="hs-comment">-- | Take the first @n@ items from the 'Heap'.</span><span>
+</span><span id="line-99"></span><span id="local-6989586621679037405"><span id="local-6989586621679037406"><span class="annot"><a href="Data.Heap.html#take"><span class="hs-identifier hs-type">take</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037406"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037405"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037406"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037405"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679037405"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-100"></span><span id="take"><span class="annot"><span class="annottext">take :: Int -&gt; Heap pol item -&gt; [item]
+</span><a href="Data.Heap.html#take"><span class="hs-identifier hs-var hs-var">take</span></a></span></span><span> </span><span id="local-6989586621679037404"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679037404"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([item], Heap pol item) -&gt; [item]
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">(([item], Heap pol item) -&gt; [item])
+-&gt; (Heap pol item -&gt; ([item], Heap pol item))
+-&gt; Heap pol item
+-&gt; [item]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Heap pol item -&gt; ([item], Heap pol item)
+forall pol item.
+HeapItem pol item =&gt;
+Int -&gt; Heap pol item -&gt; ([item], Heap pol item)
+</span><a href="Data.Heap.html#splitAt"><span class="hs-identifier hs-var">splitAt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679037404"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- | Remove first @n@ items from the 'Heap'.</span><span>
+</span><span id="line-103"></span><span id="local-6989586621679037402"><span id="local-6989586621679037403"><span class="annot"><a href="Data.Heap.html#drop"><span class="hs-identifier hs-type">drop</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037403"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037402"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037403"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037402"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037403"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037402"><span class="hs-identifier hs-type">item</span></a></span></span></span><span>
+</span><span id="line-104"></span><span id="drop"><span class="annot"><span class="annottext">drop :: Int -&gt; Heap pol item -&gt; Heap pol item
+</span><a href="Data.Heap.html#drop"><span class="hs-identifier hs-var hs-var">drop</span></a></span></span><span> </span><span id="local-6989586621679037401"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679037401"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([item], Heap pol item) -&gt; Heap pol item
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">(([item], Heap pol item) -&gt; Heap pol item)
+-&gt; (Heap pol item -&gt; ([item], Heap pol item))
+-&gt; Heap pol item
+-&gt; Heap pol item
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Heap pol item -&gt; ([item], Heap pol item)
+forall pol item.
+HeapItem pol item =&gt;
+Int -&gt; Heap pol item -&gt; ([item], Heap pol item)
+</span><a href="Data.Heap.html#splitAt"><span class="hs-identifier hs-var">splitAt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679037401"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- | @'splitAt' n h@: Return a list of the first @n@ items of @h@ and @h@, with</span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- those elements removed.</span><span>
+</span><span id="line-108"></span><span id="local-6989586621679037512"><span id="local-6989586621679037513"><span class="annot"><a href="Data.Heap.html#splitAt"><span class="hs-identifier hs-type">splitAt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037513"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037512"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037513"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037512"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679037512"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037513"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037512"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-109"></span><span id="splitAt"><span class="annot"><span class="annottext">splitAt :: Int -&gt; Heap pol item -&gt; ([item], Heap pol item)
+</span><a href="Data.Heap.html#splitAt"><span class="hs-identifier hs-var hs-var">splitAt</span></a></span></span><span> </span><span id="local-6989586621679037400"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679037400"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679037399"><span class="annot"><span class="annottext">Heap pol item
+</span><a href="#local-6989586621679037399"><span class="hs-identifier hs-var">heap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679037398"><span class="annot"><span class="annottext">[(Prio pol item, Val pol item)]
+</span><a href="#local-6989586621679037398"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037397"><span class="annot"><span class="annottext">Heap pol item
+</span><a href="#local-6989586621679037397"><span class="hs-identifier hs-var">heap'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+-&gt; Heap pol item
+-&gt; ([(Prio pol item, Val pol item)], Heap pol item)
+forall prio val.
+Ord prio =&gt;
+Int -&gt; HeapT prio val -&gt; ([(prio, val)], HeapT prio val)
+</span><a href="Data.Heap.Internal.html#splitAt"><span class="hs-identifier hs-var">I.splitAt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679037400"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Heap pol item
+</span><a href="#local-6989586621679037399"><span class="hs-identifier hs-var">heap</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Prio pol item, Val pol item) -&gt; item)
+-&gt; [(Prio pol item, Val pol item)] -&gt; [item]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(Prio pol item, Val pol item) -&gt; item
+forall pol item.
+HeapItem pol item =&gt;
+(Prio pol item, Val pol item) -&gt; item
+</span><a href="Data.Heap.Item.html#merge"><span class="hs-identifier hs-var">merge</span></a></span><span> </span><span class="annot"><span class="annottext">[(Prio pol item, Val pol item)]
+</span><a href="#local-6989586621679037398"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Heap pol item
+</span><a href="#local-6989586621679037397"><span class="hs-identifier hs-var">heap'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- | @'takeWhile' p h@: List the longest prefix of items in @h@ that satisfy @p@.</span><span>
+</span><span id="line-112"></span><span id="local-6989586621679037394"><span id="local-6989586621679037395"><span class="annot"><a href="Data.Heap.html#takeWhile"><span class="hs-identifier hs-type">takeWhile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037395"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037394"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679037394"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037395"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037394"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679037394"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-113"></span><span id="takeWhile"><span class="annot"><span class="annottext">takeWhile :: (item -&gt; Bool) -&gt; Heap pol item -&gt; [item]
+</span><a href="Data.Heap.html#takeWhile"><span class="hs-identifier hs-var hs-var">takeWhile</span></a></span></span><span> </span><span id="local-6989586621679037393"><span class="annot"><span class="annottext">item -&gt; Bool
+</span><a href="#local-6989586621679037393"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([item], Heap pol item) -&gt; [item]
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">(([item], Heap pol item) -&gt; [item])
+-&gt; (Heap pol item -&gt; ([item], Heap pol item))
+-&gt; Heap pol item
+-&gt; [item]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(item -&gt; Bool) -&gt; Heap pol item -&gt; ([item], Heap pol item)
+forall pol item.
+HeapItem pol item =&gt;
+(item -&gt; Bool) -&gt; Heap pol item -&gt; ([item], Heap pol item)
+</span><a href="Data.Heap.html#span"><span class="hs-identifier hs-var">span</span></a></span><span> </span><span class="annot"><span class="annottext">item -&gt; Bool
+</span><a href="#local-6989586621679037393"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- | @'dropWhile' p h@: Remove the longest prefix of items in @h@ that satisfy</span><span>
+</span><span id="line-116"></span><span class="hs-comment">-- @p@.</span><span>
+</span><span id="line-117"></span><span id="local-6989586621679037391"><span id="local-6989586621679037392"><span class="annot"><a href="Data.Heap.html#dropWhile"><span class="hs-identifier hs-type">dropWhile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037392"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037391"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-118"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679037391"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037392"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037391"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037392"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037391"><span class="hs-identifier hs-type">item</span></a></span></span></span><span>
+</span><span id="line-119"></span><span id="dropWhile"><span class="annot"><span class="annottext">dropWhile :: (item -&gt; Bool) -&gt; Heap pol item -&gt; Heap pol item
+</span><a href="Data.Heap.html#dropWhile"><span class="hs-identifier hs-var hs-var">dropWhile</span></a></span></span><span> </span><span id="local-6989586621679037390"><span class="annot"><span class="annottext">item -&gt; Bool
+</span><a href="#local-6989586621679037390"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([item], Heap pol item) -&gt; Heap pol item
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">(([item], Heap pol item) -&gt; Heap pol item)
+-&gt; (Heap pol item -&gt; ([item], Heap pol item))
+-&gt; Heap pol item
+-&gt; Heap pol item
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(item -&gt; Bool) -&gt; Heap pol item -&gt; ([item], Heap pol item)
+forall pol item.
+HeapItem pol item =&gt;
+(item -&gt; Bool) -&gt; Heap pol item -&gt; ([item], Heap pol item)
+</span><a href="Data.Heap.html#span"><span class="hs-identifier hs-var">span</span></a></span><span> </span><span class="annot"><span class="annottext">item -&gt; Bool
+</span><a href="#local-6989586621679037390"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- | @'span' p h@: Return the longest prefix of items in @h@ that satisfy @p@ and</span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- @h@, with those elements removed.</span><span>
+</span><span id="line-123"></span><span id="local-6989586621679037502"><span id="local-6989586621679037503"><span class="annot"><a href="Data.Heap.html#span"><span class="hs-identifier hs-type">span</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037503"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037502"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679037502"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037503"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037502"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679037502"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037503"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037502"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-125"></span><span id="span"><span class="annot"><span class="annottext">span :: (item -&gt; Bool) -&gt; Heap pol item -&gt; ([item], Heap pol item)
+</span><a href="Data.Heap.html#span"><span class="hs-identifier hs-var hs-var">span</span></a></span></span><span> </span><span id="local-6989586621679037389"><span class="annot"><span class="annottext">item -&gt; Bool
+</span><a href="#local-6989586621679037389"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679037388"><span class="annot"><span class="annottext">Heap pol item
+</span><a href="#local-6989586621679037388"><span class="hs-identifier hs-var">heap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679037387"><span class="annot"><span class="annottext">[(Prio pol item, Val pol item)]
+</span><a href="#local-6989586621679037387"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679037386"><span class="annot"><span class="annottext">Heap pol item
+</span><a href="#local-6989586621679037386"><span class="hs-identifier hs-var">heap'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Prio pol item, Val pol item) -&gt; Bool)
+-&gt; Heap pol item
+-&gt; ([(Prio pol item, Val pol item)], Heap pol item)
+forall prio val.
+Ord prio =&gt;
+((prio, val) -&gt; Bool)
+-&gt; HeapT prio val -&gt; ([(prio, val)], HeapT prio val)
+</span><a href="Data.Heap.Internal.html#span"><span class="hs-identifier hs-var">I.span</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(item -&gt; Bool) -&gt; (Prio pol item, Val pol item) -&gt; Bool
+forall pol item a.
+HeapItem pol item =&gt;
+(item -&gt; a) -&gt; (Prio pol item, Val pol item) -&gt; a
+</span><a href="Data.Heap.Item.html#splitF"><span class="hs-identifier hs-var">splitF</span></a></span><span> </span><span class="annot"><span class="annottext">item -&gt; Bool
+</span><a href="#local-6989586621679037389"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Heap pol item
+</span><a href="#local-6989586621679037388"><span class="hs-identifier hs-var">heap</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Prio pol item, Val pol item) -&gt; item)
+-&gt; [(Prio pol item, Val pol item)] -&gt; [item]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(Prio pol item, Val pol item) -&gt; item
+forall pol item.
+HeapItem pol item =&gt;
+(Prio pol item, Val pol item) -&gt; item
+</span><a href="Data.Heap.Item.html#merge"><span class="hs-identifier hs-var">merge</span></a></span><span> </span><span class="annot"><span class="annottext">[(Prio pol item, Val pol item)]
+</span><a href="#local-6989586621679037387"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Heap pol item
+</span><a href="#local-6989586621679037386"><span class="hs-identifier hs-var">heap'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- | @'break' p h@: The longest prefix of items in @h@ that do /not/ satisfy @p@</span><span>
+</span><span id="line-128"></span><span class="hs-comment">-- and @h@, with those elements removed.</span><span>
+</span><span id="line-129"></span><span id="local-6989586621679037383"><span id="local-6989586621679037384"><span class="annot"><a href="Data.Heap.html#break"><span class="hs-identifier hs-type">break</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037384"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037383"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679037383"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037384"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037383"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679037383"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037384"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037383"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-131"></span><span id="break"><span class="annot"><span class="annottext">break :: (item -&gt; Bool) -&gt; Heap pol item -&gt; ([item], Heap pol item)
+</span><a href="Data.Heap.html#break"><span class="hs-identifier hs-var hs-var">break</span></a></span></span><span> </span><span id="local-6989586621679037382"><span class="annot"><span class="annottext">item -&gt; Bool
+</span><a href="#local-6989586621679037382"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(item -&gt; Bool) -&gt; Heap pol item -&gt; ([item], Heap pol item)
+forall pol item.
+HeapItem pol item =&gt;
+(item -&gt; Bool) -&gt; Heap pol item -&gt; ([item], Heap pol item)
+</span><a href="Data.Heap.html#span"><span class="hs-identifier hs-var">span</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool) -&gt; (item -&gt; Bool) -&gt; item -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">item -&gt; Bool
+</span><a href="#local-6989586621679037382"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- | /O(n log n)/. Build a 'Heap' from the given items. Assuming you have a</span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- sorted list, you probably want to use 'fromDescList' or 'fromAscList', they</span><span>
+</span><span id="line-135"></span><span class="hs-comment">-- are faster than this function.</span><span>
+</span><span id="line-136"></span><span id="local-6989586621679037379"><span id="local-6989586621679037380"><span class="annot"><a href="Data.Heap.html#fromList"><span class="hs-identifier hs-type">fromList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037380"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037379"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679037379"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037380"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037379"><span class="hs-identifier hs-type">item</span></a></span></span></span><span>
+</span><span id="line-137"></span><span id="fromList"><span class="annot"><span class="annottext">fromList :: [item] -&gt; Heap pol item
+</span><a href="Data.Heap.html#fromList"><span class="hs-identifier hs-var hs-var">fromList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Prio pol item, Val pol item)] -&gt; Heap pol item
+forall prio val. Ord prio =&gt; [(prio, val)] -&gt; HeapT prio val
+</span><a href="Data.Heap.Internal.html#fromList"><span class="hs-identifier hs-var">I.fromList</span></a></span><span> </span><span class="annot"><span class="annottext">([(Prio pol item, Val pol item)] -&gt; Heap pol item)
+-&gt; ([item] -&gt; [(Prio pol item, Val pol item)])
+-&gt; [item]
+-&gt; Heap pol item
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(item -&gt; (Prio pol item, Val pol item))
+-&gt; [item] -&gt; [(Prio pol item, Val pol item)]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">item -&gt; (Prio pol item, Val pol item)
+forall pol item.
+HeapItem pol item =&gt;
+item -&gt; (Prio pol item, Val pol item)
+</span><a href="Data.Heap.Item.html#split"><span class="hs-identifier hs-var">split</span></a></span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- | /O(n log n)/. List all items of the 'Heap' in no specific order.</span><span>
+</span><span id="line-140"></span><span id="local-6989586621679037376"><span id="local-6989586621679037377"><span class="annot"><a href="Data.Heap.html#toList"><span class="hs-identifier hs-type">toList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037377"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037376"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037377"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037376"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679037376"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-141"></span><span id="toList"><span class="annot"><span class="annottext">toList :: Heap pol item -&gt; [item]
+</span><a href="Data.Heap.html#toList"><span class="hs-identifier hs-var hs-var">toList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Prio pol item, Val pol item) -&gt; item)
+-&gt; [(Prio pol item, Val pol item)] -&gt; [item]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(Prio pol item, Val pol item) -&gt; item
+forall pol item.
+HeapItem pol item =&gt;
+(Prio pol item, Val pol item) -&gt; item
+</span><a href="Data.Heap.Item.html#merge"><span class="hs-identifier hs-var">merge</span></a></span><span> </span><span class="annot"><span class="annottext">([(Prio pol item, Val pol item)] -&gt; [item])
+-&gt; (Heap pol item -&gt; [(Prio pol item, Val pol item)])
+-&gt; Heap pol item
+-&gt; [item]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Heap pol item -&gt; [(Prio pol item, Val pol item)]
+forall prio val. HeapT prio val -&gt; [(prio, val)]
+</span><a href="Data.Heap.Internal.html#toList"><span class="hs-identifier hs-var">I.toList</span></a></span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span class="hs-comment">-- | /O(n)/. Create a 'Heap' from a list providing its items in ascending order</span><span>
+</span><span id="line-144"></span><span class="hs-comment">-- of priority (i. e. in the same order they will be removed from the 'Heap').</span><span>
+</span><span id="line-145"></span><span class="hs-comment">-- This function is faster than 'fromList' but not as fast as 'fromDescList'.</span><span>
+</span><span id="line-146"></span><span class="hs-comment">--</span><span>
+</span><span id="line-147"></span><span class="hs-comment">-- /The precondition is not checked/.</span><span>
+</span><span id="line-148"></span><span id="local-6989586621679037373"><span id="local-6989586621679037374"><span class="annot"><a href="Data.Heap.html#fromAscList"><span class="hs-identifier hs-type">fromAscList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037374"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037373"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679037373"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037374"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037373"><span class="hs-identifier hs-type">item</span></a></span></span></span><span>
+</span><span id="line-149"></span><span id="fromAscList"><span class="annot"><span class="annottext">fromAscList :: [item] -&gt; Heap pol item
+</span><a href="Data.Heap.html#fromAscList"><span class="hs-identifier hs-var hs-var">fromAscList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[item] -&gt; Heap pol item
+forall pol item. HeapItem pol item =&gt; [item] -&gt; Heap pol item
+</span><a href="Data.Heap.html#fromDescList"><span class="hs-identifier hs-var">fromDescList</span></a></span><span> </span><span class="annot"><span class="annottext">([item] -&gt; Heap pol item)
+-&gt; ([item] -&gt; [item]) -&gt; [item] -&gt; Heap pol item
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[item] -&gt; [item]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span class="hs-comment">-- | /O(n log n)/. List the items of the 'Heap' in ascending order of priority.</span><span>
+</span><span id="line-152"></span><span id="local-6989586621679037471"><span id="local-6989586621679037472"><span class="annot"><a href="Data.Heap.html#toAscList"><span class="hs-identifier hs-type">toAscList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037472"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037471"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037472"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037471"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679037471"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-153"></span><span id="toAscList"><span class="annot"><span class="annottext">toAscList :: Heap pol item -&gt; [item]
+</span><a href="Data.Heap.html#toAscList"><span class="hs-identifier hs-var hs-var">toAscList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Prio pol item, Val pol item) -&gt; item)
+-&gt; [(Prio pol item, Val pol item)] -&gt; [item]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(Prio pol item, Val pol item) -&gt; item
+forall pol item.
+HeapItem pol item =&gt;
+(Prio pol item, Val pol item) -&gt; item
+</span><a href="Data.Heap.Item.html#merge"><span class="hs-identifier hs-var">merge</span></a></span><span> </span><span class="annot"><span class="annottext">([(Prio pol item, Val pol item)] -&gt; [item])
+-&gt; (Heap pol item -&gt; [(Prio pol item, Val pol item)])
+-&gt; Heap pol item
+-&gt; [item]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Heap pol item -&gt; [(Prio pol item, Val pol item)]
+forall prio val. Ord prio =&gt; HeapT prio val -&gt; [(prio, val)]
+</span><a href="Data.Heap.Internal.html#toAscList"><span class="hs-identifier hs-var">I.toAscList</span></a></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span class="hs-comment">-- | /O(n)/. Create a 'Heap' from a list providing its items in descending order</span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- of priority (i. e. they will be removed inversely from the 'Heap'). Prefer</span><span>
+</span><span id="line-157"></span><span class="hs-comment">-- this function over 'fromList' and 'fromAscList', it's faster.</span><span>
+</span><span id="line-158"></span><span class="hs-comment">--</span><span>
+</span><span id="line-159"></span><span class="hs-comment">-- /The precondition is not checked/.</span><span>
+</span><span id="line-160"></span><span id="local-6989586621679037482"><span id="local-6989586621679037483"><span class="annot"><a href="Data.Heap.html#fromDescList"><span class="hs-identifier hs-type">fromDescList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037483"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037482"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679037482"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037483"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037482"><span class="hs-identifier hs-type">item</span></a></span></span></span><span>
+</span><span id="line-161"></span><span id="fromDescList"><span class="annot"><span class="annottext">fromDescList :: [item] -&gt; Heap pol item
+</span><a href="Data.Heap.html#fromDescList"><span class="hs-identifier hs-var hs-var">fromDescList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Prio pol item, Val pol item)] -&gt; Heap pol item
+forall prio val. Ord prio =&gt; [(prio, val)] -&gt; HeapT prio val
+</span><a href="Data.Heap.Internal.html#fromDescList"><span class="hs-identifier hs-var">I.fromDescList</span></a></span><span> </span><span class="annot"><span class="annottext">([(Prio pol item, Val pol item)] -&gt; Heap pol item)
+-&gt; ([item] -&gt; [(Prio pol item, Val pol item)])
+-&gt; [item]
+-&gt; Heap pol item
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(item -&gt; (Prio pol item, Val pol item))
+-&gt; [item] -&gt; [(Prio pol item, Val pol item)]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">item -&gt; (Prio pol item, Val pol item)
+forall pol item.
+HeapItem pol item =&gt;
+item -&gt; (Prio pol item, Val pol item)
+</span><a href="Data.Heap.Item.html#split"><span class="hs-identifier hs-var">split</span></a></span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span class="hs-comment">-- | /O(n log n)/. List the items of the 'Heap' in descending order of priority.</span><span>
+</span><span id="line-164"></span><span class="hs-comment">-- Note that this function is not especially efficient (it is implemented in</span><span>
+</span><span id="line-165"></span><span class="hs-comment">-- terms of 'reverse' and 'toAscList'), it is provided as a counterpart of the</span><span>
+</span><span id="line-166"></span><span class="hs-comment">-- efficient 'fromDescList' function.</span><span>
+</span><span id="line-167"></span><span id="local-6989586621679037368"><span id="local-6989586621679037369"><span class="annot"><a href="Data.Heap.html#toDescList"><span class="hs-identifier hs-type">toDescList</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Heap.Item.html#HeapItem"><span class="hs-identifier hs-type">HeapItem</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037369"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037368"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Heap.Item.html#Heap"><span class="hs-identifier hs-type">Heap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037369"><span class="hs-identifier hs-type">pol</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679037368"><span class="hs-identifier hs-type">item</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679037368"><span class="hs-identifier hs-type">item</span></a></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-168"></span><span id="toDescList"><span class="annot"><span class="annottext">toDescList :: Heap pol item -&gt; [item]
+</span><a href="Data.Heap.html#toDescList"><span class="hs-identifier hs-var hs-var">toDescList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[item] -&gt; [item]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="annot"><span class="annottext">([item] -&gt; [item])
+-&gt; (Heap pol item -&gt; [item]) -&gt; Heap pol item -&gt; [item]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Heap pol item -&gt; [item]
+forall pol item. HeapItem pol item =&gt; Heap pol item -&gt; [item]
+</span><a href="Data.Heap.html#toAscList"><span class="hs-identifier hs-var">toAscList</span></a></span><span>
+</span><span id="line-169"></span></pre></body></html>

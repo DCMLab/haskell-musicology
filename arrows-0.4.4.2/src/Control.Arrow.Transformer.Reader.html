@@ -1,0 +1,620 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Module      :  Control.Arrow.Transformer.Reader</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Copyright   :  (c) Ross Paterson 2003</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- License     :  BSD-style (see the LICENSE file in the distribution)</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Maintainer  :  R.Paterson@city.ac.uk</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- Portability :  non-portable (multi-parameter type classes)</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Arrow transformer that adds a read-only state (i.e. an environment).</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Control.Arrow.Transformer.Reader</span><span class="hs-special">(</span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier">ReaderArrow</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier">ReaderArrow</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#runReader"><span class="hs-identifier">runReader</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddReader"><span class="hs-identifier">ArrowAddReader</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-20"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Control.Arrow.Internals.html"><span class="hs-identifier">Control.Arrow.Internals</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html"><span class="hs-identifier">Control.Arrow.Operations</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Control.Arrow.Transformer.html"><span class="hs-identifier">Control.Arrow.Transformer</span></a></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Applicative</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Arrow</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Category</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span class="hs-cpp">
+#if (MIN_VERSION_base(4,9,0)) &amp;&amp; !(MIN_VERSION_base(4,11,0))
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Semigroup</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">id</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-operator">(.)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- | An arrow type that augments an existing arrow with a read-only state</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- (or environment).  The 'ArrowReader' class contains the operations</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- on this state.</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">newtype</span><span> </span><span id="ReaderArrow"><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span></span><span> </span><span id="local-6989586621679056282"><span class="annot"><a href="#local-6989586621679056282"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679056284"><span class="annot"><a href="#local-6989586621679056284"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679056283"><span class="annot"><a href="#local-6989586621679056283"><span class="hs-identifier hs-type">b</span></a></span></span><span> </span><span id="local-6989586621679056281"><span class="annot"><a href="#local-6989586621679056281"><span class="hs-identifier hs-type">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ReaderArrow"><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056284"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056283"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056282"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679056281"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- | Encapsulation of a state-reading computation, taking a value for the</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- state.</span><span>
+</span><span id="line-44"></span><span class="hs-comment">--</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- Typical usage in arrow notation:</span><span>
+</span><span id="line-46"></span><span class="hs-comment">--</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- &gt;    proc p -&gt; ...</span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- &gt;        (|runReader cmd|) env</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span id="local-6989586621679056117"><span id="local-6989586621679056118"><span id="local-6989586621679056119"><span id="local-6989586621679056120"><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#runReader"><span class="hs-identifier hs-type">runReader</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679056120"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056119"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056120"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056118"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056117"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679056120"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056118"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679056119"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679056117"><span class="hs-identifier hs-type">b</span></a></span></span></span></span></span><span>
+</span><span id="line-51"></span><span id="runReader"><span class="annot"><span class="annottext">runReader :: ReaderArrow r a e b -&gt; a (e, r) b
+</span><a href="Control.Arrow.Transformer.Reader.html#runReader"><span class="hs-identifier hs-var hs-var">runReader</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055952"><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055952"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055952"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- arrow transformer</span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679055950"><span id="local-6989586621679055951"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679055951"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Transformer.html#ArrowTransformer"><span class="hs-identifier hs-type">ArrowTransformer</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055950"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679055951"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>    </span><span id="local-6989586621679055945"><span class="annot"><span class="annottext">lift :: a b c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var hs-var hs-var hs-var">lift</span></a></span></span><span> </span><span id="local-6989586621679055943"><span class="annot"><span class="annottext">a b c
+</span><a href="#local-6989586621679055943"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (b, r) c -&gt; ReaderArrow r a b c
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((b, r) -&gt; b) -&gt; a (b, r) b
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">(b, r) -&gt; b
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">a (b, r) b -&gt; a b c -&gt; a (b, r) c
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a b c
+</span><a href="#local-6989586621679055943"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- liftings of standard classes</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span id="local-6989586621679055940"><span id="local-6989586621679055941"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679055941"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Category</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055940"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055941"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>    </span><span id="local-6989586621679055936"><span class="annot"><span class="annottext">id :: ReaderArrow r a a a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">id</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (a, r) a -&gt; ReaderArrow r a a a
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((a, r) -&gt; a) -&gt; a (a, r) a
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">(a, r) -&gt; a
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>    </span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055934"><span class="annot"><span class="annottext">a (b, r) c
+</span><a href="#local-6989586621679055934"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679055933"><span class="annot"><span class="annottext">. :: ReaderArrow r a b c -&gt; ReaderArrow r a a b -&gt; ReaderArrow r a a c
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">.</span></span></span><span> </span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055931"><span class="annot"><span class="annottext">a (a, r) b
+</span><a href="#local-6989586621679055931"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (a, r) c -&gt; ReaderArrow r a a c
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (b, r) c
+</span><a href="#local-6989586621679055934"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a (b, r) c -&gt; a (a, r) (b, r) -&gt; a (a, r) c
+forall k (cat :: k -&gt; k -&gt; *) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a (a, r) b -&gt; a ((a, r), r) (b, r)
+forall (a :: * -&gt; * -&gt; *) b c d.
+Arrow a =&gt;
+a b c -&gt; a (b, d) (c, d)
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="annot"><span class="annottext">a (a, r) b
+</span><a href="#local-6989586621679055931"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">a ((a, r), r) (b, r) -&gt; a (a, r) ((a, r), r) -&gt; a (a, r) (b, r)
+forall k (cat :: k -&gt; k -&gt; *) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((a, r) -&gt; ((a, r), r)) -&gt; a (a, r) ((a, r), r)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">(a, r) -&gt; ((a, r), r)
+forall a b. (a, b) -&gt; ((a, b), b)
+</span><a href="#local-6989586621679055930"><span class="hs-identifier hs-var">dupenv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>        </span><span id="local-6989586621679055930"><span class="annot"><span class="annottext">dupenv :: (a, b) -&gt; ((a, b), b)
+</span><a href="#local-6989586621679055930"><span class="hs-identifier hs-var hs-var">dupenv</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679055929"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679055929"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679055928"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679055928"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679055929"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679055928"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679055928"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span id="local-6989586621679055926"><span id="local-6989586621679055927"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679055917"><span id="local-6989586621679055919"><span id="local-6989586621679055921"><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679055927"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055926"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055927"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-67"></span><span>    </span><span id="local-6989586621679055915"><span class="annot"><span class="annottext">arr :: (b -&gt; c) -&gt; ReaderArrow r a b c
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">arr</span></span></span><span> </span><span id="local-6989586621679055914"><span class="annot"><span class="annottext">b -&gt; c
+</span><a href="#local-6989586621679055914"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (b, r) c -&gt; ReaderArrow r a b c
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((b, r) -&gt; c) -&gt; a (b, r) c
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; c
+</span><a href="#local-6989586621679055914"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; c) -&gt; ((b, r) -&gt; b) -&gt; (b, r) -&gt; c
+forall k (cat :: k -&gt; k -&gt; *) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(b, r) -&gt; b
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>    </span><span id="local-6989586621679055913"><span class="annot"><span class="annottext">first :: ReaderArrow r a b c -&gt; ReaderArrow r a (b, d) (c, d)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">first</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055912"><span class="annot"><span class="annottext">a (b, r) c
+</span><a href="#local-6989586621679055912"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a ((b, d), r) (c, d) -&gt; ReaderArrow r a (b, d) (c, d)
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((b, d), r) -&gt; ((b, r), d)) -&gt; a ((b, d), r) ((b, r), d)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((b, d), r) -&gt; ((b, r), d)
+forall a r b. ((a, r), b) -&gt; ((a, b), r)
+</span><a href="Control.Arrow.Transformer.Reader.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a ((b, d), r) ((b, r), d)
+-&gt; a ((b, r), d) (c, d) -&gt; a ((b, d), r) (c, d)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a (b, r) c -&gt; a ((b, r), d) (c, d)
+forall (a :: * -&gt; * -&gt; *) b c d.
+Arrow a =&gt;
+a b c -&gt; a (b, d) (c, d)
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="annot"><span class="annottext">a (b, r) c
+</span><a href="#local-6989586621679055912"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span id="local-6989586621679056223"><span id="local-6989586621679056224"><span id="local-6989586621679056225"><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#swapsnd"><span class="hs-identifier hs-type">swapsnd</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056225"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056224"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056223"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056225"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056223"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056224"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-71"></span><span id="swapsnd"><span class="annot"><span class="annottext">swapsnd :: ((a, r), b) -&gt; ((a, b), r)
+</span><a href="Control.Arrow.Transformer.Reader.html#swapsnd"><span class="hs-identifier hs-var hs-var">swapsnd</span></a></span></span><span> </span><span class="hs-glyph">~</span><span class="hs-special">(</span><span class="hs-glyph">~</span><span class="hs-special">(</span><span id="local-6989586621679055910"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679055910"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679055909"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679055909"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679055908"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679055908"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679055910"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679055908"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679055909"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span id="local-6989586621679055906"><span id="local-6989586621679055907"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679055898"><span id="local-6989586621679055900"><span id="local-6989586621679055902"><span class="annot"><span class="hs-identifier hs-type">ArrowChoice</span></span><span> </span><span class="annot"><a href="#local-6989586621679055907"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowChoice</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055906"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055907"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span>    </span><span id="local-6989586621679055896"><span class="annot"><span class="annottext">left :: ReaderArrow r a b c -&gt; ReaderArrow r a (Either b d) (Either c d)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">left</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055894"><span class="annot"><span class="annottext">a (b, r) c
+</span><a href="#local-6989586621679055894"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (Either b d, r) (Either c d)
+-&gt; ReaderArrow r a (Either b d) (Either c d)
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Either b d, r) -&gt; Either (b, r) d)
+-&gt; a (Either b d, r) (Either (b, r) d)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">(Either b d, r) -&gt; Either (b, r) d
+forall b c r. (Either b c, r) -&gt; Either (b, r) c
+</span><a href="#local-6989586621679055893"><span class="hs-identifier hs-var">dist'</span></a></span><span> </span><span class="annot"><span class="annottext">a (Either b d, r) (Either (b, r) d)
+-&gt; a (Either (b, r) d) (Either c d)
+-&gt; a (Either b d, r) (Either c d)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a (b, r) c -&gt; a (Either (b, r) d) (Either c d)
+forall (a :: * -&gt; * -&gt; *) b c d.
+ArrowChoice a =&gt;
+a b c -&gt; a (Either b d) (Either c d)
+</span><span class="hs-identifier hs-var">left</span></span><span> </span><span class="annot"><span class="annottext">a (b, r) c
+</span><a href="#local-6989586621679055894"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-76"></span><span>        </span><span id="local-6989586621679056187"><span id="local-6989586621679056188"><span id="local-6989586621679056189"><span class="annot"><a href="#local-6989586621679055893"><span class="hs-identifier hs-type">dist'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="#local-6989586621679056189"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056188"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056187"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056189"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056187"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679056188"><span class="hs-identifier hs-type">c</span></a></span></span></span></span><span>
+</span><span id="line-77"></span><span>        </span><span id="local-6989586621679055893"><span class="annot"><span class="annottext">dist' :: (Either b c, r) -&gt; Either (b, r) c
+</span><a href="#local-6989586621679055893"><span class="hs-identifier hs-var hs-var">dist'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679055892"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679055892"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679055891"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679055891"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(b, r) -&gt; Either (b, r) c
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679055892"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679055891"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>        </span><span class="annot"><a href="#local-6989586621679055893"><span class="hs-identifier hs-var">dist'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679055890"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679055890"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">c -&gt; Either (b, r) c
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679055890"><span class="hs-identifier hs-var">c</span></a></span></span></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span id="local-6989586621679055888"><span id="local-6989586621679055889"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowApply</span></span><span> </span><span class="annot"><a href="#local-6989586621679055889"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowApply</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055888"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055889"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-81"></span><span>    </span><span id="local-6989586621679055884"><span class="annot"><span class="annottext">app :: ReaderArrow r a (ReaderArrow r a b c, b) c
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">app</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a ((ReaderArrow r a b c, b), r) c
+-&gt; ReaderArrow r a (ReaderArrow r a b c, b) c
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span>
+</span><span id="line-82"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((ReaderArrow r a b c, b), r) -&gt; (a (b, r) c, (b, r)))
+-&gt; a ((ReaderArrow r a b c, b), r) (a (b, r) c, (b, r))
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055883"><span class="annot"><span class="annottext">a (b, r) c
+</span><a href="#local-6989586621679055883"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679055882"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679055882"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679055881"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679055881"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (b, r) c
+</span><a href="#local-6989586621679055883"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679055882"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679055881"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a ((ReaderArrow r a b c, b), r) (a (b, r) c, (b, r))
+-&gt; a (a (b, r) c, (b, r)) c -&gt; a ((ReaderArrow r a b c, b), r) c
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a (a (b, r) c, (b, r)) c
+forall (a :: * -&gt; * -&gt; *) b c. ArrowApply a =&gt; a (a b c, b) c
+</span><span class="hs-identifier hs-var">app</span></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span id="local-6989586621679055879"><span id="local-6989586621679055880"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowZero</span></span><span> </span><span class="annot"><a href="#local-6989586621679055880"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowZero</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055879"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055880"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-85"></span><span>    </span><span id="local-6989586621679055875"><span class="annot"><span class="annottext">zeroArrow :: ReaderArrow r a b c
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">zeroArrow</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a b c -&gt; ReaderArrow r a b c
+forall (f :: (* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *) (a :: * -&gt; * -&gt; *) b c.
+ArrowTransformer f a =&gt;
+a b c -&gt; f a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var">lift</span></a></span><span> </span><span class="annot"><span class="annottext">a b c
+forall (a :: * -&gt; * -&gt; *) b c. ArrowZero a =&gt; a b c
+</span><span class="hs-identifier hs-var">zeroArrow</span></span></span></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span id="local-6989586621679055872"><span id="local-6989586621679055873"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679055873"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowPlus</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055872"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055873"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-88"></span><span>    </span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055868"><span class="annot"><span class="annottext">a (b, r) c
+</span><a href="#local-6989586621679055868"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679055867"><span class="annot"><span class="annottext">&lt;+&gt; :: ReaderArrow r a b c -&gt; ReaderArrow r a b c -&gt; ReaderArrow r a b c
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;+&gt;</span></span></span><span> </span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055865"><span class="annot"><span class="annottext">a (b, r) c
+</span><a href="#local-6989586621679055865"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (b, r) c -&gt; ReaderArrow r a b c
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (b, r) c
+</span><a href="#local-6989586621679055868"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a (b, r) c -&gt; a (b, r) c -&gt; a (b, r) c
+forall (a :: * -&gt; * -&gt; *) b c.
+ArrowPlus a =&gt;
+a b c -&gt; a b c -&gt; a b c
+</span><span class="hs-operator hs-var">&lt;+&gt;</span></span><span> </span><span class="annot"><span class="annottext">a (b, r) c
+</span><a href="#local-6989586621679055865"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span id="local-6989586621679055863"><span id="local-6989586621679055864"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowLoop</span></span><span> </span><span class="annot"><a href="#local-6989586621679055864"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowLoop</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055863"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055864"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-91"></span><span>    </span><span id="local-6989586621679055859"><span class="annot"><span class="annottext">loop :: ReaderArrow r a (b, d) (c, d) -&gt; ReaderArrow r a b c
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">loop</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055858"><span class="annot"><span class="annottext">a ((b, d), r) (c, d)
+</span><a href="#local-6989586621679055858"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (b, r) c -&gt; ReaderArrow r a b c
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a ((b, r), d) (c, d) -&gt; a (b, r) c
+forall (a :: * -&gt; * -&gt; *) b d c.
+ArrowLoop a =&gt;
+a (b, d) (c, d) -&gt; a b c
+</span><span class="hs-identifier hs-var">loop</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((b, r), d) -&gt; ((b, d), r)) -&gt; a ((b, r), d) ((b, d), r)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((b, r), d) -&gt; ((b, d), r)
+forall a r b. ((a, r), b) -&gt; ((a, b), r)
+</span><a href="Control.Arrow.Transformer.Reader.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a ((b, r), d) ((b, d), r)
+-&gt; a ((b, d), r) (c, d) -&gt; a ((b, r), d) (c, d)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a ((b, d), r) (c, d)
+</span><a href="#local-6989586621679055858"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- new instances</span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span id="local-6989586621679055856"><span id="local-6989586621679055857"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679055857"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowReader"><span class="hs-identifier hs-type">ArrowReader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055856"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055856"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055857"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-96"></span><span>    </span><span id="local-6989586621679055851"><span class="annot"><span class="annottext">readState :: ReaderArrow r a b r
+</span><a href="Control.Arrow.Operations.html#readState"><span class="hs-identifier hs-var hs-var hs-var hs-var">readState</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (b, r) r -&gt; ReaderArrow r a b r
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((b, r) -&gt; r) -&gt; a (b, r) r
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">(b, r) -&gt; r
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span class="hs-special">)</span><span>
+</span><span id="line-97"></span><span>    </span><span id="local-6989586621679055849"><span class="annot"><span class="annottext">newReader :: ReaderArrow r a e b -&gt; ReaderArrow r a (e, r) b
+</span><a href="Control.Arrow.Operations.html#newReader"><span class="hs-identifier hs-var hs-var hs-var hs-var">newReader</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055847"><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055847"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a ((e, r), r) b -&gt; ReaderArrow r a (e, r) b
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((e, r), r) -&gt; (e, r)) -&gt; a ((e, r), r) (e, r)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((e, r), r) -&gt; (e, r)
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">a ((e, r), r) (e, r) -&gt; a (e, r) b -&gt; a ((e, r), r) b
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055847"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span id="local-6989586621679055845"><span id="local-6989586621679055846"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679055846"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddReader"><span class="hs-identifier hs-type">ArrowAddReader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055845"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055845"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055846"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679055846"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-100"></span><span>    </span><span id="local-6989586621679055839"><span class="annot"><span class="annottext">liftReader :: a e b -&gt; ReaderArrow r a e b
+</span><a href="Control.Arrow.Internals.html#liftReader"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftReader</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a e b -&gt; ReaderArrow r a e b
+forall (f :: (* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *) (a :: * -&gt; * -&gt; *) b c.
+ArrowTransformer f a =&gt;
+a b c -&gt; f a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var">lift</span></a></span><span>
+</span><span id="line-101"></span><span>    </span><span id="local-6989586621679055837"><span class="annot"><span class="annottext">elimReader :: ReaderArrow r a e b -&gt; a (e, r) b
+</span><a href="Control.Arrow.Internals.html#elimReader"><span class="hs-identifier hs-var hs-var hs-var hs-var">elimReader</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a e b -&gt; a (e, r) b
+forall (a :: * -&gt; * -&gt; *) r e b.
+Arrow a =&gt;
+ReaderArrow r a e b -&gt; a (e, r) b
+</span><a href="Control.Arrow.Transformer.Reader.html#runReader"><span class="hs-identifier hs-var">runReader</span></a></span></span></span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span class="hs-comment">-- liftings of other classes</span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span id="local-6989586621679055834"><span id="local-6989586621679055835"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowCircuit"><span class="hs-identifier hs-type">ArrowCircuit</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055835"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowCircuit"><span class="hs-identifier hs-type">ArrowCircuit</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055834"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055835"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-106"></span><span>    </span><span id="local-6989586621679055830"><span class="annot"><span class="annottext">delay :: b -&gt; ReaderArrow r a b b
+</span><a href="Control.Arrow.Operations.html#delay"><span class="hs-identifier hs-var hs-var hs-var hs-var">delay</span></a></span></span><span> </span><span id="local-6989586621679055828"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679055828"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a b b -&gt; ReaderArrow r a b b
+forall (f :: (* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *) (a :: * -&gt; * -&gt; *) b c.
+ArrowTransformer f a =&gt;
+a b c -&gt; f a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var">lift</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; a b b
+forall (a :: * -&gt; * -&gt; *) b. ArrowCircuit a =&gt; b -&gt; a b b
+</span><a href="Control.Arrow.Operations.html#delay"><span class="hs-identifier hs-var">delay</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679055828"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span id="local-6989586621679055825"><span id="local-6989586621679055826"><span id="local-6989586621679055827"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowError"><span class="hs-identifier hs-type">ArrowError</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055827"><span class="hs-identifier hs-type">ex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055826"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowError"><span class="hs-identifier hs-type">ArrowError</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055827"><span class="hs-identifier hs-type">ex</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055825"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055826"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-109"></span><span>    </span><span id="local-6989586621679055818"><span class="annot"><span class="annottext">raise :: ReaderArrow r a ex b
+</span><a href="Control.Arrow.Operations.html#raise"><span class="hs-identifier hs-var hs-var hs-var hs-var">raise</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a ex b -&gt; ReaderArrow r a ex b
+forall (f :: (* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *) (a :: * -&gt; * -&gt; *) b c.
+ArrowTransformer f a =&gt;
+a b c -&gt; f a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var">lift</span></a></span><span> </span><span class="annot"><span class="annottext">a ex b
+forall ex (a :: * -&gt; * -&gt; *) b. ArrowError ex a =&gt; a ex b
+</span><a href="Control.Arrow.Operations.html#raise"><span class="hs-identifier hs-var">raise</span></a></span><span>
+</span><span id="line-110"></span><span>    </span><span id="local-6989586621679055816"><span class="annot"><span class="annottext">handle :: ReaderArrow r a e b
+-&gt; ReaderArrow r a (e, ex) b -&gt; ReaderArrow r a e b
+</span><a href="Control.Arrow.Operations.html#handle"><span class="hs-identifier hs-var hs-var hs-var hs-var">handle</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055814"><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055814"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055813"><span class="annot"><span class="annottext">a ((e, ex), r) b
+</span><a href="#local-6989586621679055813"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-111"></span><span>        </span><span class="annot"><span class="annottext">a (e, r) b -&gt; ReaderArrow r a e b
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (e, r) b -&gt; a ((e, r), ex) b -&gt; a (e, r) b
+forall ex (a :: * -&gt; * -&gt; *) e b.
+ArrowError ex a =&gt;
+a e b -&gt; a (e, ex) b -&gt; a e b
+</span><a href="Control.Arrow.Operations.html#handle"><span class="hs-identifier hs-var">handle</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055814"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((e, r), ex) -&gt; ((e, ex), r)) -&gt; a ((e, r), ex) ((e, ex), r)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((e, r), ex) -&gt; ((e, ex), r)
+forall a r b. ((a, r), b) -&gt; ((a, b), r)
+</span><a href="Control.Arrow.Transformer.Reader.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a ((e, r), ex) ((e, ex), r) -&gt; a ((e, ex), r) b -&gt; a ((e, r), ex) b
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a ((e, ex), r) b
+</span><a href="#local-6989586621679055813"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>    </span><span id="local-6989586621679055812"><span class="annot"><span class="annottext">tryInUnless :: ReaderArrow r a e b
+-&gt; ReaderArrow r a (e, b) c
+-&gt; ReaderArrow r a (e, ex) c
+-&gt; ReaderArrow r a e c
+</span><a href="Control.Arrow.Operations.html#tryInUnless"><span class="hs-identifier hs-var hs-var hs-var hs-var">tryInUnless</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055810"><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055810"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055809"><span class="annot"><span class="annottext">a ((e, b), r) c
+</span><a href="#local-6989586621679055809"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055808"><span class="annot"><span class="annottext">a ((e, ex), r) c
+</span><a href="#local-6989586621679055808"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-113"></span><span>        </span><span class="annot"><span class="annottext">a (e, r) c -&gt; ReaderArrow r a e c
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (e, r) b -&gt; a ((e, r), b) c -&gt; a ((e, r), ex) c -&gt; a (e, r) c
+forall ex (a :: * -&gt; * -&gt; *) e b c.
+ArrowError ex a =&gt;
+a e b -&gt; a (e, b) c -&gt; a (e, ex) c -&gt; a e c
+</span><a href="Control.Arrow.Operations.html#tryInUnless"><span class="hs-identifier hs-var">tryInUnless</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055810"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((e, r), b) -&gt; ((e, b), r)) -&gt; a ((e, r), b) ((e, b), r)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((e, r), b) -&gt; ((e, b), r)
+forall a r b. ((a, r), b) -&gt; ((a, b), r)
+</span><a href="Control.Arrow.Transformer.Reader.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a ((e, r), b) ((e, b), r) -&gt; a ((e, b), r) c -&gt; a ((e, r), b) c
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a ((e, b), r) c
+</span><a href="#local-6989586621679055809"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((e, r), ex) -&gt; ((e, ex), r)) -&gt; a ((e, r), ex) ((e, ex), r)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((e, r), ex) -&gt; ((e, ex), r)
+forall a r b. ((a, r), b) -&gt; ((a, b), r)
+</span><a href="Control.Arrow.Transformer.Reader.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a ((e, r), ex) ((e, ex), r) -&gt; a ((e, ex), r) c -&gt; a ((e, r), ex) c
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a ((e, ex), r) c
+</span><a href="#local-6989586621679055808"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>    </span><span id="local-6989586621679055807"><span class="annot"><span class="annottext">newError :: ReaderArrow r a e b -&gt; ReaderArrow r a e (Either ex b)
+</span><a href="Control.Arrow.Operations.html#newError"><span class="hs-identifier hs-var hs-var hs-var hs-var">newError</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055805"><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055805"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, r) (Either ex b) -&gt; ReaderArrow r a e (Either ex b)
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (e, r) b -&gt; a (e, r) (Either ex b)
+forall ex (a :: * -&gt; * -&gt; *) e b.
+ArrowError ex a =&gt;
+a e b -&gt; a e (Either ex b)
+</span><a href="Control.Arrow.Operations.html#newError"><span class="hs-identifier hs-var">newError</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055805"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span id="local-6989586621679055802"><span id="local-6989586621679055803"><span id="local-6989586621679055804"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowState"><span class="hs-identifier hs-type">ArrowState</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055804"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055803"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowState"><span class="hs-identifier hs-type">ArrowState</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055804"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055802"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055803"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-117"></span><span>    </span><span id="local-6989586621679055797"><span class="annot"><span class="annottext">fetch :: ReaderArrow r a e s
+</span><a href="Control.Arrow.Operations.html#fetch"><span class="hs-identifier hs-var hs-var hs-var hs-var">fetch</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a e s -&gt; ReaderArrow r a e s
+forall (f :: (* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *) (a :: * -&gt; * -&gt; *) b c.
+ArrowTransformer f a =&gt;
+a b c -&gt; f a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var">lift</span></a></span><span> </span><span class="annot"><span class="annottext">a e s
+forall s (a :: * -&gt; * -&gt; *) e. ArrowState s a =&gt; a e s
+</span><a href="Control.Arrow.Operations.html#fetch"><span class="hs-identifier hs-var">fetch</span></a></span><span>
+</span><span id="line-118"></span><span>    </span><span id="local-6989586621679055795"><span class="annot"><span class="annottext">store :: ReaderArrow r a s ()
+</span><a href="Control.Arrow.Operations.html#store"><span class="hs-identifier hs-var hs-var hs-var hs-var">store</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a s () -&gt; ReaderArrow r a s ()
+forall (f :: (* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *) (a :: * -&gt; * -&gt; *) b c.
+ArrowTransformer f a =&gt;
+a b c -&gt; f a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var">lift</span></a></span><span> </span><span class="annot"><span class="annottext">a s ()
+forall s (a :: * -&gt; * -&gt; *). ArrowState s a =&gt; a s ()
+</span><a href="Control.Arrow.Operations.html#store"><span class="hs-identifier hs-var">store</span></a></span></span></span></span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span id="local-6989586621679055791"><span id="local-6989586621679055792"><span id="local-6989586621679055793"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowWriter"><span class="hs-identifier hs-type">ArrowWriter</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055793"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055792"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowWriter"><span class="hs-identifier hs-type">ArrowWriter</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055793"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055791"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055792"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-121"></span><span>    </span><span id="local-6989586621679055785"><span class="annot"><span class="annottext">write :: ReaderArrow r a s ()
+</span><a href="Control.Arrow.Operations.html#write"><span class="hs-identifier hs-var hs-var hs-var hs-var">write</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a s () -&gt; ReaderArrow r a s ()
+forall (f :: (* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *) (a :: * -&gt; * -&gt; *) b c.
+ArrowTransformer f a =&gt;
+a b c -&gt; f a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var">lift</span></a></span><span> </span><span class="annot"><span class="annottext">a s ()
+forall w (a :: * -&gt; * -&gt; *). ArrowWriter w a =&gt; a w ()
+</span><a href="Control.Arrow.Operations.html#write"><span class="hs-identifier hs-var">write</span></a></span><span>
+</span><span id="line-122"></span><span>    </span><span id="local-6989586621679055783"><span class="annot"><span class="annottext">newWriter :: ReaderArrow r a e b -&gt; ReaderArrow r a e (b, s)
+</span><a href="Control.Arrow.Operations.html#newWriter"><span class="hs-identifier hs-var hs-var hs-var hs-var">newWriter</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055781"><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055781"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, r) (b, s) -&gt; ReaderArrow r a e (b, s)
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (e, r) b -&gt; a (e, r) (b, s)
+forall w (a :: * -&gt; * -&gt; *) e b.
+ArrowWriter w a =&gt;
+a e b -&gt; a e (b, w)
+</span><a href="Control.Arrow.Operations.html#newWriter"><span class="hs-identifier hs-var">newWriter</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055781"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-123"></span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- Promotions of encapsulation operators.</span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span id="local-6989586621679055777"><span id="local-6989586621679055778"><span id="local-6989586621679055779"><span id="local-6989586621679055780"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddError"><span class="hs-identifier hs-type">ArrowAddError</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055780"><span class="hs-identifier hs-type">ex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055779"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055778"><span class="hs-identifier hs-type">a'</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-127"></span><span>        </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddError"><span class="hs-identifier hs-type">ArrowAddError</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055780"><span class="hs-identifier hs-type">ex</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055777"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055779"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055777"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055778"><span class="hs-identifier hs-type">a'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-128"></span><span>    </span><span id="local-6989586621679055771"><span class="annot"><span class="annottext">liftError :: ReaderArrow r a' e b -&gt; ReaderArrow r a e b
+</span><a href="Control.Arrow.Internals.html#liftError"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftError</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055769"><span class="annot"><span class="annottext">a' (e, r) b
+</span><a href="#local-6989586621679055769"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, r) b -&gt; ReaderArrow r a e b
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a' (e, r) b -&gt; a (e, r) b
+forall ex (a :: * -&gt; * -&gt; *) (a' :: * -&gt; * -&gt; *) e b.
+ArrowAddError ex a a' =&gt;
+a' e b -&gt; a e b
+</span><a href="Control.Arrow.Internals.html#liftError"><span class="hs-identifier hs-var">liftError</span></a></span><span> </span><span class="annot"><span class="annottext">a' (e, r) b
+</span><a href="#local-6989586621679055769"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-129"></span><span>    </span><span id="local-6989586621679055768"><span class="annot"><span class="annottext">elimError :: ReaderArrow r a e b
+-&gt; ReaderArrow r a' (e, ex) b -&gt; ReaderArrow r a' e b
+</span><a href="Control.Arrow.Internals.html#elimError"><span class="hs-identifier hs-var hs-var hs-var hs-var">elimError</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055766"><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055766"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055765"><span class="annot"><span class="annottext">a' ((e, ex), r) b
+</span><a href="#local-6989586621679055765"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-130"></span><span>        </span><span class="annot"><span class="annottext">a' (e, r) b -&gt; ReaderArrow r a' e b
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (e, r) b -&gt; a' ((e, r), ex) b -&gt; a' (e, r) b
+forall ex (a :: * -&gt; * -&gt; *) (a' :: * -&gt; * -&gt; *) e b.
+ArrowAddError ex a a' =&gt;
+a e b -&gt; a' (e, ex) b -&gt; a' e b
+</span><a href="Control.Arrow.Internals.html#elimError"><span class="hs-identifier hs-var">elimError</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055766"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((e, r), ex) -&gt; ((e, ex), r)) -&gt; a' ((e, r), ex) ((e, ex), r)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((e, r), ex) -&gt; ((e, ex), r)
+forall a r b. ((a, r), b) -&gt; ((a, b), r)
+</span><a href="Control.Arrow.Transformer.Reader.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a' ((e, r), ex) ((e, ex), r)
+-&gt; a' ((e, ex), r) b -&gt; a' ((e, r), ex) b
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a' ((e, ex), r) b
+</span><a href="#local-6989586621679055765"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span id="local-6989586621679055761"><span id="local-6989586621679055762"><span id="local-6989586621679055763"><span id="local-6989586621679055764"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddState"><span class="hs-identifier hs-type">ArrowAddState</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055764"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055763"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055762"><span class="hs-identifier hs-type">a'</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-133"></span><span>        </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddState"><span class="hs-identifier hs-type">ArrowAddState</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055764"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055761"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055763"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055761"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055762"><span class="hs-identifier hs-type">a'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-134"></span><span>    </span><span id="local-6989586621679055755"><span class="annot"><span class="annottext">liftState :: ReaderArrow r a' e b -&gt; ReaderArrow r a e b
+</span><a href="Control.Arrow.Internals.html#liftState"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftState</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055753"><span class="annot"><span class="annottext">a' (e, r) b
+</span><a href="#local-6989586621679055753"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, r) b -&gt; ReaderArrow r a e b
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a' (e, r) b -&gt; a (e, r) b
+forall s (a :: * -&gt; * -&gt; *) (a' :: * -&gt; * -&gt; *) e b.
+ArrowAddState s a a' =&gt;
+a' e b -&gt; a e b
+</span><a href="Control.Arrow.Internals.html#liftState"><span class="hs-identifier hs-var">liftState</span></a></span><span> </span><span class="annot"><span class="annottext">a' (e, r) b
+</span><a href="#local-6989586621679055753"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>    </span><span id="local-6989586621679055752"><span class="annot"><span class="annottext">elimState :: ReaderArrow r a e b -&gt; ReaderArrow r a' (e, s) (b, s)
+</span><a href="Control.Arrow.Internals.html#elimState"><span class="hs-identifier hs-var hs-var hs-var hs-var">elimState</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055750"><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055750"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a' ((e, s), r) (b, s) -&gt; ReaderArrow r a' (e, s) (b, s)
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((e, s), r) -&gt; ((e, r), s)) -&gt; a' ((e, s), r) ((e, r), s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((e, s), r) -&gt; ((e, r), s)
+forall a r b. ((a, r), b) -&gt; ((a, b), r)
+</span><a href="Control.Arrow.Transformer.Reader.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a' ((e, s), r) ((e, r), s)
+-&gt; a' ((e, r), s) (b, s) -&gt; a' ((e, s), r) (b, s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a (e, r) b -&gt; a' ((e, r), s) (b, s)
+forall s (a :: * -&gt; * -&gt; *) (a' :: * -&gt; * -&gt; *) e b.
+ArrowAddState s a a' =&gt;
+a e b -&gt; a' (e, s) (b, s)
+</span><a href="Control.Arrow.Internals.html#elimState"><span class="hs-identifier hs-var">elimState</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055750"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span class="hs-comment">-- instance ArrowAddReader r a a' =&gt;</span><span>
+</span><span id="line-138"></span><span class="hs-comment">--         ArrowAddReader r (ReaderArrow r a) (ReaderArrow r a') where</span><span>
+</span><span id="line-139"></span><span class="hs-comment">--     elimReader (ReaderArrow f) = ReaderArrow (arr swapsnd &gt;&gt;&gt; elimReader f)</span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span id="local-6989586621679055746"><span id="local-6989586621679055747"><span id="local-6989586621679055748"><span id="local-6989586621679055749"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddWriter"><span class="hs-identifier hs-type">ArrowAddWriter</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055749"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055748"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055747"><span class="hs-identifier hs-type">a'</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-142"></span><span>        </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddWriter"><span class="hs-identifier hs-type">ArrowAddWriter</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055749"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055746"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055748"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055746"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055747"><span class="hs-identifier hs-type">a'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-143"></span><span>    </span><span id="local-6989586621679055740"><span class="annot"><span class="annottext">liftWriter :: ReaderArrow r a' e b -&gt; ReaderArrow r a e b
+</span><a href="Control.Arrow.Internals.html#liftWriter"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftWriter</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055738"><span class="annot"><span class="annottext">a' (e, r) b
+</span><a href="#local-6989586621679055738"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, r) b -&gt; ReaderArrow r a e b
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a' (e, r) b -&gt; a (e, r) b
+forall w (a :: * -&gt; * -&gt; *) (a' :: * -&gt; * -&gt; *) e b.
+ArrowAddWriter w a a' =&gt;
+a' e b -&gt; a e b
+</span><a href="Control.Arrow.Internals.html#liftWriter"><span class="hs-identifier hs-var">liftWriter</span></a></span><span> </span><span class="annot"><span class="annottext">a' (e, r) b
+</span><a href="#local-6989586621679055738"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-144"></span><span>    </span><span id="local-6989586621679055737"><span class="annot"><span class="annottext">elimWriter :: ReaderArrow r a e b -&gt; ReaderArrow r a' e (b, s)
+</span><a href="Control.Arrow.Internals.html#elimWriter"><span class="hs-identifier hs-var hs-var hs-var hs-var">elimWriter</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span id="local-6989586621679055735"><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055735"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a' (e, r) (b, s) -&gt; ReaderArrow r a' e (b, s)
+forall r (a :: * -&gt; * -&gt; *) b c. a (b, r) c -&gt; ReaderArrow r a b c
+</span><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-var">ReaderArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (e, r) b -&gt; a' (e, r) (b, s)
+forall w (a :: * -&gt; * -&gt; *) (a' :: * -&gt; * -&gt; *) e b.
+ArrowAddWriter w a a' =&gt;
+a e b -&gt; a' e (b, w)
+</span><a href="Control.Arrow.Internals.html#elimWriter"><span class="hs-identifier hs-var">elimWriter</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, r) b
+</span><a href="#local-6989586621679055735"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span class="hs-comment">-- Other instances</span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span id="local-6989586621679055732"><span id="local-6989586621679055733"><span id="local-6989586621679055734"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679055729"><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679055734"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055733"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055734"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055732"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-149"></span><span>    </span><span id="local-6989586621679055727"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; ReaderArrow r a b a -&gt; ReaderArrow r a b b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621679055726"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679055726"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679055725"><span class="annot"><span class="annottext">ReaderArrow r a b a
+</span><a href="#local-6989586621679055725"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a b a
+</span><a href="#local-6989586621679055725"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a b a -&gt; ReaderArrow r a a b -&gt; ReaderArrow r a b b
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; ReaderArrow r a a b
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679055726"><span class="hs-identifier hs-var">f</span></a></span></span></span></span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span id="local-6989586621679055722"><span id="local-6989586621679055723"><span id="local-6989586621679055724"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679055713"><span id="local-6989586621679055715"><span id="local-6989586621679055717"><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679055724"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055723"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055724"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055722"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-152"></span><span>    </span><span id="local-6989586621679055711"><span class="annot"><span class="annottext">pure :: a -&gt; ReaderArrow r a b a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pure</span></span></span><span> </span><span id="local-6989586621679055710"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679055710"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(b -&gt; a) -&gt; ReaderArrow r a b a
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b -&gt; a
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679055710"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-153"></span><span>    </span><span id="local-6989586621679055708"><span class="annot"><span class="annottext">ReaderArrow r a b (a -&gt; b)
+</span><a href="#local-6989586621679055708"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679055707"><span class="annot"><span class="annottext">&lt;*&gt; :: ReaderArrow r a b (a -&gt; b)
+-&gt; ReaderArrow r a b a -&gt; ReaderArrow r a b b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;*&gt;</span></span></span><span> </span><span id="local-6989586621679055706"><span class="annot"><span class="annottext">ReaderArrow r a b a
+</span><a href="#local-6989586621679055706"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a b (a -&gt; b)
+</span><a href="#local-6989586621679055708"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a b (a -&gt; b)
+-&gt; ReaderArrow r a b a -&gt; ReaderArrow r a b (a -&gt; b, a)
+forall (a :: * -&gt; * -&gt; *) b c c'.
+Arrow a =&gt;
+a b c -&gt; a b c' -&gt; a b (c, c')
+</span><span class="hs-operator hs-var">&amp;&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a b a
+</span><a href="#local-6989586621679055706"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a b (a -&gt; b, a)
+-&gt; ReaderArrow r a (a -&gt; b, a) b -&gt; ReaderArrow r a b b
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">((a -&gt; b, a) -&gt; b) -&gt; ReaderArrow r a (a -&gt; b, a) b
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((a -&gt; b) -&gt; a -&gt; b) -&gt; (a -&gt; b, a) -&gt; b
+forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
+</span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; a -&gt; b
+forall k (cat :: k -&gt; k -&gt; *) (a :: k). Category cat =&gt; cat a a
+</span><span class="hs-identifier hs-var">id</span></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span id="local-6989586621679055701"><span id="local-6989586621679055702"><span id="local-6989586621679055703"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679055694"><span id="local-6989586621679055696"><span class="annot"><span class="hs-identifier hs-type">ArrowPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679055703"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Alternative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055702"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055703"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055701"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-156"></span><span>    </span><span id="local-6989586621679055692"><span class="annot"><span class="annottext">empty :: ReaderArrow r a b a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">empty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a b a
+forall (a :: * -&gt; * -&gt; *) b c. ArrowZero a =&gt; a b c
+</span><span class="hs-identifier hs-var">zeroArrow</span></span><span>
+</span><span id="line-157"></span><span>    </span><span id="local-6989586621679055690"><span class="annot"><span class="annottext">ReaderArrow r a b a
+</span><a href="#local-6989586621679055690"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679055689"><span class="annot"><span class="annottext">&lt;|&gt; :: ReaderArrow r a b a -&gt; ReaderArrow r a b a -&gt; ReaderArrow r a b a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;|&gt;</span></span></span><span> </span><span id="local-6989586621679055687"><span class="annot"><span class="annottext">ReaderArrow r a b a
+</span><a href="#local-6989586621679055687"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a b a
+</span><a href="#local-6989586621679055690"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a b a -&gt; ReaderArrow r a b a -&gt; ReaderArrow r a b a
+forall (a :: * -&gt; * -&gt; *) b c.
+ArrowPlus a =&gt;
+a b c -&gt; a b c -&gt; a b c
+</span><span class="hs-operator hs-var">&lt;+&gt;</span></span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a b a
+</span><a href="#local-6989586621679055687"><span class="hs-identifier hs-var">g</span></a></span></span></span></span><span class="hs-cpp">
+
+#if MIN_VERSION_base(4,9,0)
+</span><span id="local-6989586621679055683"><span id="local-6989586621679055684"><span id="local-6989586621679055685"><span id="local-6989586621679055686"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679055678"><span id="local-6989586621679055680"><span class="annot"><span class="hs-identifier hs-type">ArrowPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679055686"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055685"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055686"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055684"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055683"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-161"></span><span>    </span><span id="local-6989586621679055676"><span class="annot"><span class="annottext">&lt;&gt; :: ReaderArrow r a b c -&gt; ReaderArrow r a b c -&gt; ReaderArrow r a b c
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a b c -&gt; ReaderArrow r a b c -&gt; ReaderArrow r a b c
+forall (a :: * -&gt; * -&gt; *) b c.
+ArrowPlus a =&gt;
+a b c -&gt; a b c -&gt; a b c
+</span><span class="hs-operator hs-var">(&lt;+&gt;)</span></span></span></span></span></span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-164"></span><span id="local-6989586621679055672"><span id="local-6989586621679055673"><span id="local-6989586621679055674"><span id="local-6989586621679055675"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679055666"><span id="local-6989586621679055668"><span class="annot"><span class="hs-identifier hs-type">ArrowPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679055675"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.Reader.html#ReaderArrow"><span class="hs-identifier hs-type">ReaderArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055674"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055675"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055673"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679055672"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-165"></span><span>    </span><span id="local-6989586621679055664"><span class="annot"><span class="annottext">mempty :: ReaderArrow r a b c
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReaderArrow r a b c
+forall (a :: * -&gt; * -&gt; *) b c. ArrowZero a =&gt; a b c
+</span><span class="hs-identifier hs-var">zeroArrow</span></span></span></span></span></span><span class="hs-cpp">
+#if !(MIN_VERSION_base(4,11,0))
+</span><span>    </span><span class="hs-identifier">mappend</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-operator">&lt;+&gt;</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span></pre></body></html>

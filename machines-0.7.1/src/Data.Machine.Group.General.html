@@ -1,0 +1,871 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP   #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE GADTs #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- | Split up input streams into groups with separator values and process the</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- groups with their own 'MachineT'.</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Machine.Group.General</span><span>
+</span><span id="line-8"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#groupingOn"><span class="hs-identifier">groupingOn</span></a></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#groupingOn_"><span class="hs-identifier">groupingOn_</span></a></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#groupingN"><span class="hs-identifier">groupingN</span></a></span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Tagging a stream</span></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedState"><span class="hs-identifier">taggedState</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedM"><span class="hs-identifier">taggedM</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedOn"><span class="hs-identifier">taggedOn</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedOnM"><span class="hs-identifier">taggedOnM</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedOn_"><span class="hs-identifier">taggedOn_</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedAt"><span class="hs-identifier">taggedAt</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedAt_"><span class="hs-identifier">taggedAt_</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedCount"><span class="hs-identifier">taggedCount</span></a></span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Reset a machine for each group</span></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#partitioning"><span class="hs-identifier">partitioning</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#partitioning_"><span class="hs-identifier">partitioning_</span></a></span><span>
+</span><span id="line-23"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Helpers</span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#starve"><span class="hs-identifier">starve</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#awaitUntil"><span class="hs-identifier">awaitUntil</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">guard</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Machine.html"><span class="hs-identifier">Data.Machine</span></a></span><span class="hs-cpp">
+
+#if __GLASGOW_HASKELL__ &lt; 710
+</span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- &gt;&gt;&gt; import Control.Monad.Trans.Reader (ask, runReader)</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- &gt;&gt;&gt; import Control.Applicative ((&lt;$))</span><span class="hs-cpp">
+#else
+</span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- &gt;&gt;&gt; import Control.Monad.Trans.Reader (ask, runReader)</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- A strict tuple type.</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">data</span><span> </span><span id="Strict2"><span class="annot"><a href="Data.Machine.Group.General.html#Strict2"><span class="hs-identifier hs-var">Strict2</span></a></span></span><span> </span><span id="local-6989586621679092659"><span class="annot"><a href="#local-6989586621679092659"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679092658"><span class="annot"><a href="#local-6989586621679092658"><span class="hs-identifier hs-type">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Strict2"><span class="annot"><a href="Data.Machine.Group.General.html#Strict2"><span class="hs-identifier hs-var">Strict2</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679092659"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679092658"><span class="hs-identifier hs-type">b</span></a></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679092639"><span id="local-6989586621679092640"><span class="annot"><a href="Data.Machine.Group.General.html#isLeft"><span class="hs-identifier hs-type">isLeft</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="#local-6989586621679092640"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092639"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-44"></span><span id="isLeft"><span class="annot"><span class="annottext">isLeft :: Either a b -&gt; Bool
+</span><a href="Data.Machine.Group.General.html#isLeft"><span class="hs-identifier hs-var hs-var">isLeft</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Bool) -&gt; (b -&gt; Bool) -&gt; Either a b -&gt; Bool
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; a -&gt; Bool
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; b -&gt; Bool
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- | Using a function to signal group changes, run a machine independently over</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- each group.</span><span>
+</span><span id="line-48"></span><span id="local-6989586621679092609"><span id="local-6989586621679092610"><span id="local-6989586621679092611"><span class="annot"><a href="Data.Machine.Group.General.html#groupingOn_"><span class="hs-identifier hs-type">groupingOn_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092611"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679092610"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092610"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092611"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092610"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092609"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092611"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092610"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092609"><span class="hs-identifier hs-type">b</span></a></span></span></span></span><span>
+</span><span id="line-49"></span><span id="groupingOn_"><span class="annot"><span class="annottext">groupingOn_ :: (a -&gt; a -&gt; Bool) -&gt; ProcessT m a b -&gt; ProcessT m a b
+</span><a href="Data.Machine.Group.General.html#groupingOn_"><span class="hs-identifier hs-var hs-var">groupingOn_</span></a></span></span><span> </span><span id="local-6989586621679092608"><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679092608"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679092607"><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679092607"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; Bool) -&gt; ProcessT m a (Either () a)
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+(a -&gt; a -&gt; Bool) -&gt; ProcessT m a (Either () a)
+</span><a href="Data.Machine.Group.General.html#taggedOn_"><span class="hs-identifier hs-var">taggedOn_</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679092608"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a (Either () a)
+-&gt; ProcessT m (Either () a) b -&gt; ProcessT m a b
+forall (m :: * -&gt; *) (k :: * -&gt; *) b c.
+Monad m =&gt;
+MachineT m k b -&gt; ProcessT m b c -&gt; MachineT m k c
+</span><a href="Data.Machine.Process.html#~%3E"><span class="hs-operator hs-var">~&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b -&gt; ProcessT m (Either () a) b
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+ProcessT m a b -&gt; ProcessT m (Either () a) b
+</span><a href="Data.Machine.Group.General.html#partitioning_"><span class="hs-identifier hs-var">partitioning_</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679092607"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-50"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#groupingOn_"><span class="hs-pragma hs-type">groupingOn_</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- | Using a function to signal group changes, run a machine independently over</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- each group with the value returned provided.</span><span>
+</span><span id="line-54"></span><span id="local-6989586621679092602"><span id="local-6989586621679092603"><span id="local-6989586621679092604"><span id="local-6989586621679092605"><span class="annot"><a href="Data.Machine.Group.General.html#groupingOn"><span class="hs-identifier hs-type">groupingOn</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092605"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092604"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679092603"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092603"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679092604"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679092604"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092605"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092603"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092602"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092605"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092603"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092602"><span class="hs-identifier hs-type">b</span></a></span></span></span></span></span><span>
+</span><span id="line-55"></span><span id="groupingOn"><span class="annot"><span class="annottext">groupingOn :: i -&gt; (a -&gt; a -&gt; Maybe i) -&gt; (i -&gt; ProcessT m a b) -&gt; ProcessT m a b
+</span><a href="Data.Machine.Group.General.html#groupingOn"><span class="hs-identifier hs-var hs-var">groupingOn</span></a></span></span><span> </span><span id="local-6989586621679092601"><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092601"><span class="hs-identifier hs-var">i0</span></a></span></span><span> </span><span id="local-6989586621679092600"><span class="annot"><span class="annottext">a -&gt; a -&gt; Maybe i
+</span><a href="#local-6989586621679092600"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679092599"><span class="annot"><span class="annottext">i -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092599"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; Maybe i) -&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) a i.
+Monad m =&gt;
+(a -&gt; a -&gt; Maybe i) -&gt; ProcessT m a (Either i a)
+</span><a href="Data.Machine.Group.General.html#taggedOn"><span class="hs-identifier hs-var">taggedOn</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Maybe i
+</span><a href="#local-6989586621679092600"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a (Either i a)
+-&gt; ProcessT m (Either i a) b -&gt; ProcessT m a b
+forall (m :: * -&gt; *) (k :: * -&gt; *) b c.
+Monad m =&gt;
+MachineT m k b -&gt; ProcessT m b c -&gt; MachineT m k c
+</span><a href="Data.Machine.Process.html#~%3E"><span class="hs-operator hs-var">~&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">i -&gt; (i -&gt; ProcessT m a b) -&gt; ProcessT m (Either i a) b
+forall (m :: * -&gt; *) i a b.
+Monad m =&gt;
+i -&gt; (i -&gt; ProcessT m a b) -&gt; ProcessT m (Either i a) b
+</span><a href="Data.Machine.Group.General.html#partitioning"><span class="hs-identifier hs-var">partitioning</span></a></span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092601"><span class="hs-identifier hs-var">i0</span></a></span><span> </span><span class="annot"><span class="annottext">i -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092599"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-56"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#groupingOn"><span class="hs-pragma hs-type">groupingOn</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- | Run a machine repeatedly over 'n'-element segments of the stream, providing</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- an incrementing value to each run.</span><span>
+</span><span id="line-60"></span><span id="local-6989586621679092596"><span id="local-6989586621679092597"><span id="local-6989586621679092598"><span class="annot"><a href="Data.Machine.Group.General.html#groupingN"><span class="hs-identifier hs-type">groupingN</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092598"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092598"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092597"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092596"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092598"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092597"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092596"><span class="hs-identifier hs-type">b</span></a></span></span></span></span><span>
+</span><span id="line-61"></span><span id="groupingN"><span class="annot"><span class="annottext">groupingN :: Int -&gt; (Int -&gt; ProcessT m a b) -&gt; ProcessT m a b
+</span><a href="Data.Machine.Group.General.html#groupingN"><span class="hs-identifier hs-var hs-var">groupingN</span></a></span></span><span> </span><span id="local-6989586621679092595"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679092595"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679092594"><span class="annot"><span class="annottext">Int -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092594"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; (Int -&gt; Int) -&gt; ProcessT m a (Either Int a)
+forall (m :: * -&gt; *) s a.
+Monad m =&gt;
+Int -&gt; s -&gt; (s -&gt; s) -&gt; ProcessT m a (Either s a)
+</span><a href="Data.Machine.Group.General.html#taggedAt"><span class="hs-identifier hs-var">taggedAt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679092595"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
+forall a. Enum a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">succ</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a (Either Int a)
+-&gt; ProcessT m (Either Int a) b -&gt; ProcessT m a b
+forall (m :: * -&gt; *) (k :: * -&gt; *) b c.
+Monad m =&gt;
+MachineT m k b -&gt; ProcessT m b c -&gt; MachineT m k c
+</span><a href="Data.Machine.Process.html#~%3E"><span class="hs-operator hs-var">~&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int -&gt; ProcessT m a b) -&gt; ProcessT m (Either Int a) b
+forall (m :: * -&gt; *) i a b.
+Monad m =&gt;
+i -&gt; (i -&gt; ProcessT m a b) -&gt; ProcessT m (Either i a) b
+</span><a href="Data.Machine.Group.General.html#partitioning"><span class="hs-identifier hs-var">partitioning</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092594"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-62"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#groupingN"><span class="hs-pragma hs-type">groupingN</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- | Mark a transition point between two groups when a state passing function</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- returns a 'Just' i.</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- Examples</span><span>
+</span><span id="line-67"></span><span class="hs-comment">--</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- &gt;&gt;&gt; runT $ supply [1,3,3,2] (taggedState (-1) (\x y -&gt; (even x &lt;$ guard (x /= y), x)))</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- [Left False,Right 1,Left False,Right 3,Right 3,Left True,Right 2]</span><span>
+</span><span id="line-70"></span><span id="local-6989586621679092671"><span id="local-6989586621679092672"><span id="local-6989586621679092673"><span id="local-6989586621679092674"><span class="annot"><a href="Data.Machine.Group.General.html#taggedState"><span class="hs-identifier hs-type">taggedState</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092674"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092673"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679092672"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092673"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679092671"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679092673"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092674"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092672"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="#local-6989586621679092671"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092672"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-71"></span><span id="taggedState"><span class="annot"><span class="annottext">taggedState :: s -&gt; (a -&gt; s -&gt; (Maybe i, s)) -&gt; ProcessT m a (Either i a)
+</span><a href="Data.Machine.Group.General.html#taggedState"><span class="hs-identifier hs-var hs-var">taggedState</span></a></span></span><span> </span><span id="local-6989586621679092592"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092592"><span class="hs-identifier hs-var">s0</span></a></span></span><span> </span><span id="local-6989586621679092591"><span class="annot"><span class="annottext">a -&gt; s -&gt; (Maybe i, s)
+</span><a href="#local-6989586621679092591"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">s -&gt; ProcessT m a (Either i a)
+</span><a href="#local-6989586621679092590"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092592"><span class="hs-identifier hs-var">s0</span></a></span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-73"></span><span>    </span><span id="local-6989586621679092590"><span class="annot"><span class="annottext">go :: s -&gt; ProcessT m a (Either i a)
+</span><a href="#local-6989586621679092590"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679092589"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092589"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span>
+</span><span id="line-74"></span><span>      </span><span class="annot"><span class="annottext">(Step (Is a) (Either i a) (ProcessT m a (Either i a))
+ -&gt; ProcessT m a (Either i a))
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; ProcessT m a (Either i a))
+-&gt; Is a a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679092586"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092586"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+-&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+m (Step k o (MachineT m k o)) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-var">MachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+ -&gt; ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+-&gt; ProcessT m a (Either i a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">a -&gt; s -&gt; (Maybe i, s)
+</span><a href="#local-6989586621679092591"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092586"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092589"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-75"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe i
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679092584"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092584"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step (Is a) (Either i a) (ProcessT m a (Either i a))
+ -&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a))))
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-76"></span><span>                    </span><span class="annot"><span class="annottext">Either i a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Either i a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092586"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; ProcessT m a (Either i a)
+</span><a href="#local-6989586621679092590"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092584"><span class="hs-identifier hs-var">s'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679092582"><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092582"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679092581"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092581"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step (Is a) (Either i a) (ProcessT m a (Either i a))
+ -&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a))))
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-78"></span><span>                    </span><span class="annot"><span class="annottext">Either i a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">i -&gt; Either i a
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092582"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Either i a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Either i a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092586"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092581"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="annot"><span class="annottext">s -&gt; ProcessT m a (Either i a) -&gt; ProcessT m a (Either i a)
+</span><span class="hs-operator hs-var">`seq`</span></span><span> </span><span class="annot"><span class="annottext">s -&gt; ProcessT m a (Either i a)
+</span><a href="#local-6989586621679092590"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092581"><span class="hs-identifier hs-var">s'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-79"></span><span>          </span><span class="annot"><span class="annottext">Is a a
+forall a. Is a a
+</span><a href="Data.Machine.Is.html#Refl"><span class="hs-identifier hs-var">Refl</span></a></span><span>
+</span><span id="line-80"></span><span>          </span><span class="annot"><span class="annottext">ProcessT m a (Either i a)
+forall (k :: * -&gt; *) b. Machine k b
+</span><a href="Data.Machine.Type.html#stopped"><span class="hs-identifier hs-var">stopped</span></a></span><span>
+</span><span id="line-81"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedState"><span class="hs-pragma hs-type">taggedState</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- | Mark a transition point between two groups when an action returns a 'Just'</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- i.  Could be useful for breaking up a stream based on time passed.</span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- Examples</span><span>
+</span><span id="line-86"></span><span class="hs-comment">--</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- &gt;&gt;&gt; let f x = do{ y &lt;- ask; return (even x &lt;$ guard (x &gt; y)) }</span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- &gt;&gt;&gt; flip runReader 1 . runT $ supply [1,3,3,2] (taggedM f)</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- [Right 1,Left False,Right 3,Left False,Right 3,Left True,Right 2]</span><span>
+</span><span id="line-90"></span><span id="local-6989586621679092576"><span id="local-6989586621679092577"><span id="local-6989586621679092578"><span class="annot"><a href="Data.Machine.Group.General.html#taggedM"><span class="hs-identifier hs-type">taggedM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092578"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679092577"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092578"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679092576"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092578"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092577"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="#local-6989586621679092576"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092577"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-91"></span><span id="taggedM"><span class="annot"><span class="annottext">taggedM :: (a -&gt; m (Maybe i)) -&gt; ProcessT m a (Either i a)
+</span><a href="Data.Machine.Group.General.html#taggedM"><span class="hs-identifier hs-var hs-var">taggedM</span></a></span></span><span> </span><span id="local-6989586621679092575"><span class="annot"><span class="annottext">a -&gt; m (Maybe i)
+</span><a href="#local-6989586621679092575"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ProcessT m a (Either i a)
+</span><a href="#local-6989586621679092574"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><span id="line-92"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-93"></span><span>    </span><span id="local-6989586621679092574"><span class="annot"><span class="annottext">go :: ProcessT m a (Either i a)
+</span><a href="#local-6989586621679092574"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span>
+</span><span id="line-94"></span><span>      </span><span class="annot"><span class="annottext">(Step (Is a) (Either i a) (ProcessT m a (Either i a))
+ -&gt; ProcessT m a (Either i a))
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; ProcessT m a (Either i a))
+-&gt; Is a a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679092573"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092573"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+-&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+m (Step k o (MachineT m k o)) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-var">MachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+ -&gt; ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+-&gt; ProcessT m a (Either i a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m (Maybe i)
+</span><a href="#local-6989586621679092575"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092573"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">m (Maybe i)
+-&gt; (Maybe i
+    -&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a))))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679092572"><span class="annot"><span class="annottext">Maybe i
+</span><a href="#local-6989586621679092572"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe i
+</span><a href="#local-6989586621679092572"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-95"></span><span>                  </span><span class="annot"><span class="annottext">Maybe i
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step (Is a) (Either i a) (ProcessT m a (Either i a))
+ -&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a))))
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-96"></span><span>                    </span><span class="annot"><span class="annottext">Either i a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Either i a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092573"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ProcessT m a (Either i a)
+</span><a href="#local-6989586621679092574"><span class="hs-identifier hs-var">go</span></a></span><span>
+</span><span id="line-97"></span><span>                  </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679092571"><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092571"><span class="hs-identifier hs-var">i</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step (Is a) (Either i a) (ProcessT m a (Either i a))
+ -&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a))))
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-98"></span><span>                    </span><span class="annot"><span class="annottext">Either i a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">i -&gt; Either i a
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092571"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Either i a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Either i a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092573"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ProcessT m a (Either i a)
+</span><a href="#local-6989586621679092574"><span class="hs-identifier hs-var">go</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>              </span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span>          </span><span class="annot"><span class="annottext">Is a a
+forall a. Is a a
+</span><a href="Data.Machine.Is.html#Refl"><span class="hs-identifier hs-var">Refl</span></a></span><span>
+</span><span id="line-101"></span><span>          </span><span class="annot"><span class="annottext">ProcessT m a (Either i a)
+forall (k :: * -&gt; *) b. Machine k b
+</span><a href="Data.Machine.Type.html#stopped"><span class="hs-identifier hs-var">stopped</span></a></span><span>
+</span><span id="line-102"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedM"><span class="hs-pragma hs-type">taggedM</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- | Mark a transition point between two groups as a function of adjacent</span><span>
+</span><span id="line-105"></span><span class="hs-comment">-- elements, and insert the value returned as the separator.</span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- Examples</span><span>
+</span><span id="line-107"></span><span class="hs-comment">--</span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- &gt;&gt;&gt; runT $ supply [1,3,3,2] (taggedOn (\x y -&gt; (x &lt; y) &lt;$ guard (x /= y)))</span><span>
+</span><span id="line-109"></span><span class="hs-comment">-- [Right 1,Left True,Right 3,Right 3,Left False,Right 2]</span><span>
+</span><span id="line-110"></span><span id="local-6989586621679092724"><span id="local-6989586621679092725"><span id="local-6989586621679092726"><span class="annot"><a href="Data.Machine.Group.General.html#taggedOn"><span class="hs-identifier hs-type">taggedOn</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092726"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679092725"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092725"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679092724"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092726"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092725"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="#local-6989586621679092724"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092725"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-111"></span><span id="taggedOn"><span class="annot"><span class="annottext">taggedOn :: (a -&gt; a -&gt; Maybe i) -&gt; ProcessT m a (Either i a)
+</span><a href="Data.Machine.Group.General.html#taggedOn"><span class="hs-identifier hs-var hs-var">taggedOn</span></a></span></span><span> </span><span id="local-6989586621679092570"><span class="annot"><span class="annottext">a -&gt; a -&gt; Maybe i
+</span><a href="#local-6989586621679092570"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span>
+</span><span id="line-112"></span><span>  </span><span class="annot"><span class="annottext">(Step (Is a) (Either i a) (ProcessT m a (Either i a))
+ -&gt; ProcessT m a (Either i a))
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; ProcessT m a (Either i a))
+-&gt; Is a a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679092569"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092569"><span class="hs-identifier hs-var">x0</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="annot"><span class="annottext">(Step (Is a) (Either i a) (ProcessT m a (Either i a))
+ -&gt; ProcessT m a (Either i a))
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Either i a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Either i a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092569"><span class="hs-identifier hs-var">x0</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; (a -&gt; a -&gt; (Maybe i, a)) -&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) s a i.
+Monad m =&gt;
+s -&gt; (a -&gt; s -&gt; (Maybe i, s)) -&gt; ProcessT m a (Either i a)
+</span><a href="Data.Machine.Group.General.html#taggedState"><span class="hs-identifier hs-var">taggedState</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092569"><span class="hs-identifier hs-var">x0</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679092568"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092568"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679092567"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092567"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a -&gt; Maybe i
+</span><a href="#local-6989586621679092570"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092567"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092568"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092568"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span><span>      </span><span class="annot"><span class="annottext">Is a a
+forall a. Is a a
+</span><a href="Data.Machine.Is.html#Refl"><span class="hs-identifier hs-var">Refl</span></a></span><span>
+</span><span id="line-114"></span><span>      </span><span class="annot"><span class="annottext">ProcessT m a (Either i a)
+forall (k :: * -&gt; *) b. Machine k b
+</span><a href="Data.Machine.Type.html#stopped"><span class="hs-identifier hs-var">stopped</span></a></span><span>
+</span><span id="line-115"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedOn"><span class="hs-pragma hs-type">taggedOn</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span class="hs-comment">-- | Mark a transition point between two groups using an action on adjacent</span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- elements, and insert the value returned as the separator.</span><span>
+</span><span id="line-119"></span><span class="hs-comment">-- Examples</span><span>
+</span><span id="line-120"></span><span class="hs-comment">--</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- &gt;&gt;&gt; let f x y = do{ z &lt;- ask; return ((x + y &lt;$ guard (z &lt; x + y))) }</span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- &gt;&gt;&gt; flip runReader 5 . runT $ supply [1..5] (taggedOnM f)</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- [Right 1,Right 2,Right 3,Left 7,Right 4,Left 9,Right 5]</span><span>
+</span><span id="line-124"></span><span id="local-6989586621679092564"><span id="local-6989586621679092565"><span id="local-6989586621679092566"><span class="annot"><a href="Data.Machine.Group.General.html#taggedOnM"><span class="hs-identifier hs-type">taggedOnM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092566"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679092565"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092565"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092566"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679092564"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092566"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092565"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="#local-6989586621679092564"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092565"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-125"></span><span id="taggedOnM"><span class="annot"><span class="annottext">taggedOnM :: (a -&gt; a -&gt; m (Maybe i)) -&gt; ProcessT m a (Either i a)
+</span><a href="Data.Machine.Group.General.html#taggedOnM"><span class="hs-identifier hs-var hs-var">taggedOnM</span></a></span></span><span> </span><span id="local-6989586621679092563"><span class="annot"><span class="annottext">a -&gt; a -&gt; m (Maybe i)
+</span><a href="#local-6989586621679092563"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="annot"><span class="annottext">(Step (Is a) (Either i a) (ProcessT m a (Either i a))
+ -&gt; ProcessT m a (Either i a))
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; ProcessT m a (Either i a))
+-&gt; Is a a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; ProcessT m a (Either i a)
+</span><a href="#local-6989586621679092562"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Is a a
+forall a. Is a a
+</span><a href="Data.Machine.Is.html#Refl"><span class="hs-identifier hs-var">Refl</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a (Either i a)
+forall (k :: * -&gt; *) b. Machine k b
+</span><a href="Data.Machine.Type.html#stopped"><span class="hs-identifier hs-var">stopped</span></a></span><span>
+</span><span id="line-126"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-127"></span><span>    </span><span id="local-6989586621679092562"><span class="annot"><span class="annottext">go :: a -&gt; ProcessT m a (Either i a)
+</span><a href="#local-6989586621679092562"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679092561"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092561"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span>
+</span><span id="line-128"></span><span>      </span><span class="annot"><span class="annottext">(Step (Is a) (Either i a) (ProcessT m a (Either i a))
+ -&gt; ProcessT m a (Either i a))
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Either i a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Either i a
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092561"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ProcessT m a (Either i a)
+ -&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span>
+</span><span id="line-129"></span><span>          </span><span class="annot"><span class="annottext">(Step (Is a) (Either i a) (ProcessT m a (Either i a))
+ -&gt; ProcessT m a (Either i a))
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; ProcessT m a (Either i a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; ProcessT m a (Either i a))
+-&gt; Is a a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679092560"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092560"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+-&gt; ProcessT m a (Either i a)
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+m (Step k o (MachineT m k o)) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-var">MachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+ -&gt; ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+-&gt; ProcessT m a (Either i a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; m (Maybe i)
+</span><a href="#local-6989586621679092563"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092561"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092560"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">m (Maybe i)
+-&gt; (Maybe i
+    -&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a))))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679092559"><span class="annot"><span class="annottext">Maybe i
+</span><a href="#local-6989586621679092559"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe i
+</span><a href="#local-6989586621679092559"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-130"></span><span>                      </span><span class="annot"><span class="annottext">Maybe i
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ProcessT m a (Either i a)
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; ProcessT m a (Either i a)
+</span><a href="#local-6989586621679092562"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092560"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>                      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679092557"><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092557"><span class="hs-identifier hs-var">z</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step (Is a) (Either i a) (ProcessT m a (Either i a))
+ -&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a))))
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+-&gt; m (Step (Is a) (Either i a) (ProcessT m a (Either i a)))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Either i a
+-&gt; ProcessT m a (Either i a)
+-&gt; Step (Is a) (Either i a) (ProcessT m a (Either i a))
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">i -&gt; Either i a
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092557"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; ProcessT m a (Either i a)
+</span><a href="#local-6989586621679092562"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092560"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>              </span><span class="annot"><span class="annottext">Is a a
+forall a. Is a a
+</span><a href="Data.Machine.Is.html#Refl"><span class="hs-identifier hs-var">Refl</span></a></span><span>
+</span><span id="line-133"></span><span>              </span><span class="annot"><span class="annottext">ProcessT m a (Either i a)
+forall (k :: * -&gt; *) b. Machine k b
+</span><a href="Data.Machine.Type.html#stopped"><span class="hs-identifier hs-var">stopped</span></a></span><span>
+</span><span id="line-134"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedOnM"><span class="hs-pragma hs-type">taggedOnM</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span class="hs-comment">-- | Mark a transition point between two groups as a function of adjacent</span><span>
+</span><span id="line-137"></span><span class="hs-comment">-- elements.</span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- Examples</span><span>
+</span><span id="line-139"></span><span class="hs-comment">--</span><span>
+</span><span id="line-140"></span><span class="hs-comment">-- &gt;&gt;&gt; runT $ supply [1,2,2] (taggedOn_ (==))</span><span>
+</span><span id="line-141"></span><span class="hs-comment">-- [Right 1,Left (),Right 2,Right 2]</span><span>
+</span><span id="line-142"></span><span id="local-6989586621679092739"><span id="local-6989586621679092740"><span class="annot"><a href="Data.Machine.Group.General.html#taggedOn_"><span class="hs-identifier hs-type">taggedOn_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092740"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679092739"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092739"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092740"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092739"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679092739"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-143"></span><span id="taggedOn_"><span class="annot"><span class="annottext">taggedOn_ :: (a -&gt; a -&gt; Bool) -&gt; ProcessT m a (Either () a)
+</span><a href="Data.Machine.Group.General.html#taggedOn_"><span class="hs-identifier hs-var hs-var">taggedOn_</span></a></span></span><span> </span><span id="local-6989586621679092556"><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679092556"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; Maybe ()) -&gt; ProcessT m a (Either () a)
+forall (m :: * -&gt; *) a i.
+Monad m =&gt;
+(a -&gt; a -&gt; Maybe i) -&gt; ProcessT m a (Either i a)
+</span><a href="Data.Machine.Group.General.html#taggedOn"><span class="hs-identifier hs-var">taggedOn</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679092555"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092555"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679092554"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092554"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Maybe ()
+forall (f :: * -&gt; *). Alternative f =&gt; Bool -&gt; f ()
+</span><span class="hs-identifier hs-var">guard</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679092556"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092555"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092554"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-144"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedOn_"><span class="hs-pragma hs-type">taggedOn_</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span class="hs-comment">-- | Mark a transition point between two groups at every 'n' values, stepping</span><span>
+</span><span id="line-147"></span><span class="hs-comment">-- the separator by a function.</span><span>
+</span><span id="line-148"></span><span class="hs-comment">-- Examples</span><span>
+</span><span id="line-149"></span><span class="hs-comment">--</span><span>
+</span><span id="line-150"></span><span class="hs-comment">-- &gt;&gt;&gt; runT $ supply [1..5] (taggedAt 2 True not)</span><span>
+</span><span id="line-151"></span><span class="hs-comment">-- [Right 1,Right 2,Left True,Right 3,Right 4,Left False,Right 5]</span><span>
+</span><span id="line-152"></span><span id="local-6989586621679092714"><span id="local-6989586621679092715"><span id="local-6989586621679092716"><span class="annot"><a href="Data.Machine.Group.General.html#taggedAt"><span class="hs-identifier hs-type">taggedAt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092716"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092715"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679092715"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092715"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092716"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092714"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="#local-6989586621679092715"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092714"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-153"></span><span id="taggedAt"><span class="annot"><span class="annottext">taggedAt :: Int -&gt; s -&gt; (s -&gt; s) -&gt; ProcessT m a (Either s a)
+</span><a href="Data.Machine.Group.General.html#taggedAt"><span class="hs-identifier hs-var hs-var">taggedAt</span></a></span></span><span> </span><span id="local-6989586621679092552"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679092552"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679092551"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092551"><span class="hs-identifier hs-var">s0</span></a></span></span><span> </span><span id="local-6989586621679092550"><span class="annot"><span class="annottext">s -&gt; s
+</span><a href="#local-6989586621679092550"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Strict2 Int s
+-&gt; (a -&gt; Strict2 Int s -&gt; (Maybe s, Strict2 Int s))
+-&gt; ProcessT m a (Either s a)
+forall (m :: * -&gt; *) s a i.
+Monad m =&gt;
+s -&gt; (a -&gt; s -&gt; (Maybe i, s)) -&gt; ProcessT m a (Either i a)
+</span><a href="Data.Machine.Group.General.html#taggedState"><span class="hs-identifier hs-var">taggedState</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; s -&gt; Strict2 Int s
+forall a b. a -&gt; b -&gt; Strict2 a b
+</span><a href="Data.Machine.Group.General.html#Strict2"><span class="hs-identifier hs-var">Strict2</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679092552"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092551"><span class="hs-identifier hs-var">s0</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; Strict2 Int s -&gt; (Maybe s, Strict2 Int s)
+</span><a href="#local-6989586621679092549"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-154"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-155"></span><span>    </span><span id="local-6989586621679092549"><span class="annot"><span class="annottext">g :: a -&gt; Strict2 Int s -&gt; (Maybe s, Strict2 Int s)
+</span><a href="#local-6989586621679092549"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Group.General.html#Strict2"><span class="hs-identifier hs-type">Strict2</span></a></span><span> </span><span id="local-6989586621679092548"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679092548"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679092547"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092547"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-156"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679092548"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; Maybe s
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092547"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; s -&gt; Strict2 Int s
+forall a b. a -&gt; b -&gt; Strict2 a b
+</span><a href="Data.Machine.Group.General.html#Strict2"><span class="hs-identifier hs-var">Strict2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679092552"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; s
+</span><a href="#local-6989586621679092550"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092547"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-157"></span><span>        </span><span class="hs-keyword">else</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe s
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; s -&gt; Strict2 Int s
+forall a b. a -&gt; b -&gt; Strict2 a b
+</span><a href="Data.Machine.Group.General.html#Strict2"><span class="hs-identifier hs-var">Strict2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679092548"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679092547"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-158"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedAt"><span class="hs-pragma hs-type">taggedAt</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span class="hs-comment">-- | Mark a transition point between two groups at every 'n' values.</span><span>
+</span><span id="line-161"></span><span class="hs-comment">-- Examples</span><span>
+</span><span id="line-162"></span><span class="hs-comment">--</span><span>
+</span><span id="line-163"></span><span class="hs-comment">-- &gt;&gt;&gt; runT $ supply [1..5] (taggedAt_ 2)</span><span>
+</span><span id="line-164"></span><span class="hs-comment">-- [Right 1,Right 2,Left (),Right 3,Right 4,Left (),Right 5]</span><span>
+</span><span id="line-165"></span><span id="local-6989586621679092544"><span id="local-6989586621679092545"><span class="annot"><a href="Data.Machine.Group.General.html#taggedAt_"><span class="hs-identifier hs-type">taggedAt_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092545"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092545"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092544"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679092544"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-166"></span><span id="taggedAt_"><span class="annot"><span class="annottext">taggedAt_ :: Int -&gt; ProcessT m a (Either () a)
+</span><a href="Data.Machine.Group.General.html#taggedAt_"><span class="hs-identifier hs-var hs-var">taggedAt_</span></a></span></span><span> </span><span id="local-6989586621679092543"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679092543"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; () -&gt; (() -&gt; ()) -&gt; ProcessT m a (Either () a)
+forall (m :: * -&gt; *) s a.
+Monad m =&gt;
+Int -&gt; s -&gt; (s -&gt; s) -&gt; ProcessT m a (Either s a)
+</span><a href="Data.Machine.Group.General.html#taggedAt"><span class="hs-identifier hs-var">taggedAt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679092543"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">() -&gt; ()
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-167"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedAt_"><span class="hs-pragma hs-type">taggedAt_</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-168"></span><span>
+</span><span id="line-169"></span><span class="hs-comment">-- | Mark a transition point between two groups at every 'n' values, using the</span><span>
+</span><span id="line-170"></span><span class="hs-comment">-- counter as the separator.</span><span>
+</span><span id="line-171"></span><span class="hs-comment">-- Examples</span><span>
+</span><span id="line-172"></span><span class="hs-comment">--</span><span>
+</span><span id="line-173"></span><span class="hs-comment">-- &gt;&gt;&gt; runT $ supply [1..5] (taggedCount 2)</span><span>
+</span><span id="line-174"></span><span class="hs-comment">-- [Right 1,Right 2,Left 1,Right 3,Right 4,Left 2,Right 5]</span><span>
+</span><span id="line-175"></span><span id="local-6989586621679092540"><span id="local-6989586621679092541"><span class="annot"><a href="Data.Machine.Group.General.html#taggedCount"><span class="hs-identifier hs-type">taggedCount</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092541"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092541"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092540"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><a href="#local-6989586621679092540"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-176"></span><span id="taggedCount"><span class="annot"><span class="annottext">taggedCount :: Int -&gt; ProcessT m a (Either Int a)
+</span><a href="Data.Machine.Group.General.html#taggedCount"><span class="hs-identifier hs-var hs-var">taggedCount</span></a></span></span><span> </span><span id="local-6989586621679092539"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679092539"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; (Int -&gt; Int) -&gt; ProcessT m a (Either Int a)
+forall (m :: * -&gt; *) s a.
+Monad m =&gt;
+Int -&gt; s -&gt; (s -&gt; s) -&gt; ProcessT m a (Either s a)
+</span><a href="Data.Machine.Group.General.html#taggedAt"><span class="hs-identifier hs-var">taggedAt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679092539"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
+forall a. Enum a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">succ</span></span><span>
+</span><span id="line-177"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#taggedCount"><span class="hs-pragma hs-type">taggedCount</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-178"></span><span>
+</span><span id="line-179"></span><span class="hs-comment">-- | Run a machine multiple times over partitions of the input stream specified</span><span>
+</span><span id="line-180"></span><span class="hs-comment">-- by 'Left' () values.</span><span>
+</span><span id="line-181"></span><span class="hs-comment">-- Examples</span><span>
+</span><span id="line-182"></span><span class="hs-comment">--</span><span>
+</span><span id="line-183"></span><span class="hs-comment">-- &gt;&gt;&gt; let input = [Right 1,Left (),Right 3,Right 4,Left ()]</span><span>
+</span><span id="line-184"></span><span class="hs-comment">-- &gt;&gt;&gt; runT $ supply input (partitioning_ (fold (flip (:)) []))</span><span>
+</span><span id="line-185"></span><span class="hs-comment">-- [[1],[4,3],[]]</span><span>
+</span><span id="line-186"></span><span id="local-6989586621679092731"><span id="local-6989586621679092732"><span id="local-6989586621679092733"><span class="annot"><a href="Data.Machine.Group.General.html#partitioning_"><span class="hs-identifier hs-type">partitioning_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092733"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092733"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092732"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092731"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092733"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679092732"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679092731"><span class="hs-identifier hs-type">b</span></a></span></span></span></span><span>
+</span><span id="line-187"></span><span id="partitioning_"><span class="annot"><span class="annottext">partitioning_ :: ProcessT m a b -&gt; ProcessT m (Either () a) b
+</span><a href="Data.Machine.Group.General.html#partitioning_"><span class="hs-identifier hs-var hs-var">partitioning_</span></a></span></span><span> </span><span id="local-6989586621679092538"><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679092538"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">() -&gt; (() -&gt; ProcessT m a b) -&gt; ProcessT m (Either () a) b
+forall (m :: * -&gt; *) i a b.
+Monad m =&gt;
+i -&gt; (i -&gt; ProcessT m a b) -&gt; ProcessT m (Either i a) b
+</span><a href="Data.Machine.Group.General.html#partitioning"><span class="hs-identifier hs-var">partitioning</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ProcessT m a b -&gt; () -&gt; ProcessT m a b
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679092538"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-188"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Group.General.html#partitioning_"><span class="hs-pragma hs-type">partitioning_</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-189"></span><span>
+</span><span id="line-190"></span><span class="hs-comment">-- | Run a machine multiple times over partitions of the input stream specified</span><span>
+</span><span id="line-191"></span><span class="hs-comment">-- by 'Left' i values, passing the 'i's to each 'MachineT' run.</span><span>
+</span><span id="line-192"></span><span class="hs-comment">-- Examples</span><span>
+</span><span id="line-193"></span><span class="hs-comment">--</span><span>
+</span><span id="line-194"></span><span class="hs-comment">-- &gt;&gt;&gt; let input = [Right 1, Right 2,Left 1, Right 3,Left 2, Right 4]</span><span>
+</span><span id="line-195"></span><span class="hs-comment">-- &gt;&gt;&gt; runT $ supply input (partitioning 0 (\x -&gt; mapping (\y -&gt; (x,y))))</span><span>
+</span><span id="line-196"></span><span class="hs-comment">-- [(0,1),(0,2),(1,3),(2,4)]</span><span>
+</span><span id="line-197"></span><span id="local-6989586621679092720"><span id="local-6989586621679092721"><span id="local-6989586621679092722"><span id="local-6989586621679092723"><span class="annot"><a href="Data.Machine.Group.General.html#partitioning"><span class="hs-identifier hs-type">partitioning</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092723"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679092722"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679092722"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092723"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092721"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092720"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092723"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="#local-6989586621679092722"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092721"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679092720"><span class="hs-identifier hs-type">b</span></a></span></span></span></span></span><span>
+</span><span id="line-198"></span><span id="partitioning"><span class="annot"><span class="annottext">partitioning :: i -&gt; (i -&gt; ProcessT m a b) -&gt; ProcessT m (Either i a) b
+</span><a href="Data.Machine.Group.General.html#partitioning"><span class="hs-identifier hs-var hs-var">partitioning</span></a></span></span><span> </span><span id="local-6989586621679092537"><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092537"><span class="hs-identifier hs-var">i0</span></a></span></span><span> </span><span id="local-6989586621679092536"><span class="annot"><span class="annottext">i -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092536"><span class="hs-identifier hs-var">k0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ProcessT m a b -&gt; ProcessT m (Either i a) b
+</span><a href="#local-6989586621679092535"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">i -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092536"><span class="hs-identifier hs-var">k0</span></a></span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092537"><span class="hs-identifier hs-var">i0</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-199"></span><span>  </span><span id="local-6989586621679092535"><span class="annot"><span class="annottext">go :: ProcessT m a b -&gt; ProcessT m (Either i a) b
+</span><a href="#local-6989586621679092535"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679092534"><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679092534"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (Step (Is (Either i a)) b (ProcessT m (Either i a) b))
+-&gt; ProcessT m (Either i a) b
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+m (Step k o (MachineT m k o)) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-var">MachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(m (Step (Is (Either i a)) b (ProcessT m (Either i a) b))
+ -&gt; ProcessT m (Either i a) b)
+-&gt; m (Step (Is (Either i a)) b (ProcessT m (Either i a) b))
+-&gt; ProcessT m (Either i a) b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b -&gt; m (Step (Is a) b (ProcessT m a b))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679092534"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">m (Step (Is a) b (ProcessT m a b))
+-&gt; (Step (Is a) b (ProcessT m a b)
+    -&gt; m (Step (Is (Either i a)) b (ProcessT m (Either i a) b)))
+-&gt; m (Step (Is (Either i a)) b (ProcessT m (Either i a) b))
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679092533"><span class="annot"><span class="annottext">Step (Is a) b (ProcessT m a b)
+</span><a href="#local-6989586621679092533"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Step (Is a) b (ProcessT m a b)
+</span><a href="#local-6989586621679092533"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-200"></span><span>    </span><span class="hs-comment">-- Machine stops (possibly before inputs)</span><span>
+</span><span id="line-201"></span><span>    </span><span class="annot"><span class="annottext">Step (Is a) b (ProcessT m a b)
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ProcessT m (Either i a) b
+-&gt; m (Step (Is (Either i a)) b (ProcessT m (Either i a) b))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(ProcessT m (Either i a) b
+ -&gt; m (Step (Is (Either i a)) b (ProcessT m (Either i a) b)))
+-&gt; ProcessT m (Either i a) b
+-&gt; m (Step (Is (Either i a)) b (ProcessT m (Either i a) b))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Either i a -&gt; Bool)
+-&gt; (Either i a -&gt; ProcessT m (Either i a) b)
+-&gt; ProcessT m (Either i a) b
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; Bool) -&gt; (a -&gt; ProcessT m a b) -&gt; ProcessT m a b
+</span><a href="Data.Machine.Group.General.html#awaitUntil"><span class="hs-identifier hs-var">awaitUntil</span></a></span><span> </span><span class="annot"><span class="annottext">Either i a -&gt; Bool
+forall a b. Either a b -&gt; Bool
+</span><a href="Data.Machine.Group.General.html#isLeft"><span class="hs-identifier hs-var">isLeft</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ProcessT m (Either i a) b
+-&gt; Either i a -&gt; ProcessT m (Either i a) b
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">(ProcessT m (Either i a) b
+ -&gt; Either i a -&gt; ProcessT m (Either i a) b)
+-&gt; ProcessT m (Either i a) b
+-&gt; Either i a
+-&gt; ProcessT m (Either i a) b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b -&gt; ProcessT m (Either i a) b
+</span><a href="#local-6989586621679092535"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">i -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092536"><span class="hs-identifier hs-var">k0</span></a></span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092537"><span class="hs-identifier hs-var">i0</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-202"></span><span>
+</span><span id="line-203"></span><span>    </span><span class="hs-comment">-- Machine yields a value</span><span>
+</span><span id="line-204"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-type">Yield</span></a></span><span> </span><span id="local-6989586621679092531"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679092531"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span id="local-6989586621679092530"><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679092530"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step (Is (Either i a)) b (ProcessT m (Either i a) b)
+-&gt; m (Step (Is (Either i a)) b (ProcessT m (Either i a) b))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step (Is (Either i a)) b (ProcessT m (Either i a) b)
+ -&gt; m (Step (Is (Either i a)) b (ProcessT m (Either i a) b)))
+-&gt; Step (Is (Either i a)) b (ProcessT m (Either i a) b)
+-&gt; m (Step (Is (Either i a)) b (ProcessT m (Either i a) b))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">b
+-&gt; ProcessT m (Either i a) b
+-&gt; Step (Is (Either i a)) b (ProcessT m (Either i a) b)
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679092531"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ProcessT m a b -&gt; ProcessT m (Either i a) b
+</span><a href="#local-6989586621679092535"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679092530"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-205"></span><span>
+</span><span id="line-206"></span><span>    </span><span class="hs-comment">-- Machine waits for a value</span><span>
+</span><span id="line-207"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span id="local-6989586621679092529"><span class="annot"><span class="annottext">t -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092529"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="annot"><span class="annottext">Is a t
+</span><a href="Data.Machine.Is.html#Refl"><span class="hs-identifier hs-var">Refl</span></a></span><span> </span><span id="local-6989586621679092528"><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679092528"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step (Is (Either i t)) b (ProcessT m (Either i a) b)
+-&gt; m (Step (Is (Either i t)) b (ProcessT m (Either i a) b))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step (Is (Either i t)) b (ProcessT m (Either i a) b)
+ -&gt; m (Step (Is (Either i t)) b (ProcessT m (Either i a) b)))
+-&gt; Step (Is (Either i t)) b (ProcessT m (Either i a) b)
+-&gt; m (Step (Is (Either i t)) b (ProcessT m (Either i a) b))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Either i t -&gt; ProcessT m (Either i a) b)
+-&gt; Is (Either i t) (Either i t)
+-&gt; ProcessT m (Either i a) b
+-&gt; Step (Is (Either i t)) b (ProcessT m (Either i a) b)
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="annot"><span class="annottext">Either i t -&gt; ProcessT m (Either i a) b
+</span><a href="#local-6989586621679092527"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Is (Either i t) (Either i t)
+forall a. Is a a
+</span><a href="Data.Machine.Is.html#Refl"><span class="hs-identifier hs-var">Refl</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ProcessT m a b
+-&gt; ProcessT m (Either i a) b -&gt; ProcessT m (Either i a) b
+forall (m :: * -&gt; *) (k0 :: * -&gt; *) b (k :: * -&gt; *).
+Monad m =&gt;
+MachineT m k0 b -&gt; MachineT m k b -&gt; MachineT m k b
+</span><a href="Data.Machine.Type.html#starve"><span class="hs-identifier hs-var">starve</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679092528"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">(ProcessT m (Either i a) b -&gt; ProcessT m (Either i a) b)
+-&gt; ProcessT m (Either i a) b -&gt; ProcessT m (Either i a) b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Step (Is (Either i a)) b (ProcessT m (Either i a) b)
+-&gt; ProcessT m (Either i a) b
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="annot"><span class="annottext">Step (Is (Either i a)) b (ProcessT m (Either i a) b)
+forall (k :: * -&gt; *) o r. Step k o r
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-208"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-209"></span><span>        </span><span class="hs-comment">-- No change: unwrap input and give to underlying machine.</span><span>
+</span><span id="line-210"></span><span>        </span><span id="local-6989586621679092527"><span class="annot"><span class="annottext">g :: Either i t -&gt; ProcessT m (Either i a) b
+</span><a href="#local-6989586621679092527"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679092526"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679092526"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ProcessT m a b -&gt; ProcessT m (Either i a) b
+</span><a href="#local-6989586621679092535"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092529"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679092526"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-211"></span><span>        </span><span class="hs-comment">-- New group: starve r, then wait for more input, restarting machine</span><span>
+</span><span id="line-212"></span><span>        </span><span class="hs-comment">-- with next input.</span><span>
+</span><span id="line-213"></span><span>        </span><span class="annot"><a href="#local-6989586621679092527"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679092525"><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092525"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ProcessT m a b
+-&gt; ProcessT m (Either i a) b -&gt; ProcessT m (Either i a) b
+forall (m :: * -&gt; *) (k0 :: * -&gt; *) b (k :: * -&gt; *).
+Monad m =&gt;
+MachineT m k0 b -&gt; MachineT m k b -&gt; MachineT m k b
+</span><a href="Data.Machine.Type.html#starve"><span class="hs-identifier hs-var">starve</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679092528"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">(ProcessT m (Either i a) b -&gt; ProcessT m (Either i a) b)
+-&gt; ProcessT m (Either i a) b -&gt; ProcessT m (Either i a) b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b -&gt; ProcessT m (Either i a) b
+</span><a href="#local-6989586621679092535"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">i -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092536"><span class="hs-identifier hs-var">k0</span></a></span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679092525"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-214"></span><span>
+</span><span id="line-215"></span><span class="hs-comment">-- | Read inputs until a condition is met, then behave as cont with input</span><span>
+</span><span id="line-216"></span><span class="hs-comment">-- matching condition as first input of cont.  If await fails, stop.</span><span>
+</span><span id="line-217"></span><span id="local-6989586621679092641"><span id="local-6989586621679092642"><span id="local-6989586621679092643"><span class="annot"><a href="Data.Machine.Group.General.html#awaitUntil"><span class="hs-identifier hs-type">awaitUntil</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679092643"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679092642"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679092642"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092643"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092642"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092641"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092643"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092642"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679092641"><span class="hs-identifier hs-type">b</span></a></span></span></span></span><span>
+</span><span id="line-218"></span><span id="awaitUntil"><span class="annot"><span class="annottext">awaitUntil :: (a -&gt; Bool) -&gt; (a -&gt; ProcessT m a b) -&gt; ProcessT m a b
+</span><a href="Data.Machine.Group.General.html#awaitUntil"><span class="hs-identifier hs-var hs-var">awaitUntil</span></a></span></span><span> </span><span id="local-6989586621679092524"><span class="annot"><span class="annottext">a -&gt; Bool
+</span><a href="#local-6989586621679092524"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679092523"><span class="annot"><span class="annottext">a -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092523"><span class="hs-identifier hs-var">cont</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Step (Is a) b (ProcessT m a b) -&gt; ProcessT m a b
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="annot"><span class="annottext">(Step (Is a) b (ProcessT m a b) -&gt; ProcessT m a b)
+-&gt; Step (Is a) b (ProcessT m a b) -&gt; ProcessT m a b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; ProcessT m a b)
+-&gt; Is a a -&gt; ProcessT m a b -&gt; Step (Is a) b (ProcessT m a b)
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092522"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Is a a
+forall a. Is a a
+</span><a href="Data.Machine.Is.html#Refl"><span class="hs-identifier hs-var">Refl</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b
+forall (k :: * -&gt; *) b. Machine k b
+</span><a href="Data.Machine.Type.html#stopped"><span class="hs-identifier hs-var">stopped</span></a></span><span>
+</span><span id="line-219"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679092522"><span class="annot"><span class="annottext">g :: a -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092522"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679092521"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092521"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">a -&gt; Bool
+</span><a href="#local-6989586621679092524"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092521"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">a -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092523"><span class="hs-identifier hs-var">cont</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679092521"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Bool) -&gt; (a -&gt; ProcessT m a b) -&gt; ProcessT m a b
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; Bool) -&gt; (a -&gt; ProcessT m a b) -&gt; ProcessT m a b
+</span><a href="Data.Machine.Group.General.html#awaitUntil"><span class="hs-identifier hs-var">awaitUntil</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Bool
+</span><a href="#local-6989586621679092524"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; ProcessT m a b
+</span><a href="#local-6989586621679092523"><span class="hs-identifier hs-var">cont</span></a></span><span>
+</span><span id="line-220"></span></pre></body></html>

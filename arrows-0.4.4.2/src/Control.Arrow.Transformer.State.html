@@ -1,0 +1,736 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Module      :  Control.Arrow.Transformer.State</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Copyright   :  (c) Ross Paterson 2003</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- License     :  BSD-style (see the LICENSE file in the distribution)</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Maintainer  :  R.Paterson@city.ac.uk</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- Portability :  non-portable (multi-parameter type classes)</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- An arrow transformer that adds a modifiable state,</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- based of section 9 of /Generalising Monads to Arrows/, by John Hughes,</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- /Science of Computer Programming/ 37:67-111, May 2000.</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Control.Arrow.Transformer.State</span><span class="hs-special">(</span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier">StateArrow</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier">StateArrow</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><a href="Control.Arrow.Transformer.State.html#runState"><span class="hs-identifier">runState</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-21"></span><span>    </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddState"><span class="hs-identifier">ArrowAddState</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-22"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Control.Arrow.Internals.html"><span class="hs-identifier">Control.Arrow.Internals</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html"><span class="hs-identifier">Control.Arrow.Operations</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Control.Arrow.Transformer.html"><span class="hs-identifier">Control.Arrow.Transformer</span></a></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Applicative</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Arrow</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Category</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span class="hs-cpp">
+#if (MIN_VERSION_base(4,9,0)) &amp;&amp; !(MIN_VERSION_base(4,11,0))
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Semigroup</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">id</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-operator">(.)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- | An arrow type that augments an existing arrow with a modifiable</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- state.  The 'ArrowState' class contains the operations on this state.</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">newtype</span><span> </span><span id="StateArrow"><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span></span><span> </span><span id="local-6989586621679056938"><span class="annot"><a href="#local-6989586621679056938"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679056940"><span class="annot"><a href="#local-6989586621679056940"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679056939"><span class="annot"><a href="#local-6989586621679056939"><span class="hs-identifier hs-type">b</span></a></span></span><span> </span><span id="local-6989586621679056937"><span class="annot"><a href="#local-6989586621679056937"><span class="hs-identifier hs-type">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="StateArrow"><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056940"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056939"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056938"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056937"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056938"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679056897"><span id="local-6989586621679056898"><span id="local-6989586621679056899"><span class="annot"><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-type">swapsnd</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056899"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056898"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056897"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056899"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056897"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679056898"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-44"></span><span id="swapsnd"><span class="annot"><span class="annottext">swapsnd :: ((a, b), c) -&gt; ((a, c), b)
+</span><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-var hs-var">swapsnd</span></a></span></span><span> </span><span class="hs-glyph">~</span><span class="hs-special">(</span><span class="hs-glyph">~</span><span class="hs-special">(</span><span id="local-6989586621679056603"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056603"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679056602"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056602"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679056601"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679056601"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056603"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679056601"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056602"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span id="local-6989586621679056599"><span id="local-6989586621679056600"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Category</span></span><span> </span><span class="annot"><a href="#local-6989586621679056600"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Category</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056599"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056600"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-47"></span><span>    </span><span id="local-6989586621679056595"><span class="annot"><span class="annottext">id :: StateArrow s a a a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">id</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (a, s) (a, s) -&gt; StateArrow s a a a
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="annot"><span class="annottext">a (a, s) (a, s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k). Category cat =&gt; cat a a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-48"></span><span>    </span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056593"><span class="annot"><span class="annottext">a (b, s) (c, s)
+</span><a href="#local-6989586621679056593"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679056592"><span class="annot"><span class="annottext">. :: StateArrow s a b c -&gt; StateArrow s a a b -&gt; StateArrow s a a c
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">.</span></span></span><span> </span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056590"><span class="annot"><span class="annottext">a (a, s) (b, s)
+</span><a href="#local-6989586621679056590"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (a, s) (c, s) -&gt; StateArrow s a a c
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (b, s) (c, s)
+</span><a href="#local-6989586621679056593"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a (b, s) (c, s) -&gt; a (a, s) (b, s) -&gt; a (a, s) (c, s)
+forall k (cat :: k -&gt; k -&gt; *) (b :: k) (c :: k) (a :: k).
+Category cat =&gt;
+cat b c -&gt; cat a b -&gt; cat a c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a (a, s) (b, s)
+</span><a href="#local-6989586621679056590"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span id="local-6989586621679056588"><span id="local-6989586621679056589"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679056579"><span id="local-6989586621679056581"><span id="local-6989586621679056583"><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679056589"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056588"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056589"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621679056577"><span class="annot"><span class="annottext">arr :: (b -&gt; c) -&gt; StateArrow s a b c
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">arr</span></span></span><span> </span><span id="local-6989586621679056576"><span class="annot"><span class="annottext">b -&gt; c
+</span><a href="#local-6989586621679056576"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (b, s) (c, s) -&gt; StateArrow s a b c
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((b, s) -&gt; (c, s)) -&gt; a (b, s) (c, s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679056575"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056575"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679056574"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679056574"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; c
+</span><a href="#local-6989586621679056576"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056575"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679056574"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>    </span><span id="local-6989586621679056573"><span class="annot"><span class="annottext">first :: StateArrow s a b c -&gt; StateArrow s a (b, d) (c, d)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">first</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056572"><span class="annot"><span class="annottext">a (b, s) (c, s)
+</span><a href="#local-6989586621679056572"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-53"></span><span>        </span><span class="annot"><span class="annottext">a ((b, d), s) ((c, d), s) -&gt; StateArrow s a (b, d) (c, d)
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((b, d), s) -&gt; ((b, s), d)) -&gt; a ((b, d), s) ((b, s), d)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((b, d), s) -&gt; ((b, s), d)
+forall a b c. ((a, b), c) -&gt; ((a, c), b)
+</span><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a ((b, d), s) ((b, s), d)
+-&gt; a ((b, s), d) ((c, d), s) -&gt; a ((b, d), s) ((c, d), s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a (b, s) (c, s) -&gt; a ((b, s), d) ((c, s), d)
+forall (a :: * -&gt; * -&gt; *) b c d.
+Arrow a =&gt;
+a b c -&gt; a (b, d) (c, d)
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="annot"><span class="annottext">a (b, s) (c, s)
+</span><a href="#local-6989586621679056572"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a ((b, s), d) ((c, s), d)
+-&gt; a ((c, s), d) ((c, d), s) -&gt; a ((b, s), d) ((c, d), s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(((c, s), d) -&gt; ((c, d), s)) -&gt; a ((c, s), d) ((c, d), s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((c, s), d) -&gt; ((c, d), s)
+forall a b c. ((a, b), c) -&gt; ((a, c), b)
+</span><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679056569"><span id="local-6989586621679056570"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679056570"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Transformer.html#ArrowTransformer"><span class="hs-identifier hs-type">ArrowTransformer</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056569"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679056570"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>    </span><span id="local-6989586621679056564"><span class="annot"><span class="annottext">lift :: a b c -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var hs-var hs-var hs-var">lift</span></a></span></span><span> </span><span id="local-6989586621679056562"><span class="annot"><span class="annottext">a b c
+</span><a href="#local-6989586621679056562"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (b, s) (c, s) -&gt; StateArrow s a b c
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a b c -&gt; a (b, s) (c, s)
+forall (a :: * -&gt; * -&gt; *) b c d.
+Arrow a =&gt;
+a b c -&gt; a (b, d) (c, d)
+</span><span class="hs-identifier hs-var">first</span></span><span> </span><span class="annot"><span class="annottext">a b c
+</span><a href="#local-6989586621679056562"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- | Encapsulation of a state-using computation, exposing the initial</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- and final states.</span><span>
+</span><span id="line-60"></span><span class="hs-comment">--</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- Typical usage in arrow notation:</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- &gt;    proc p -&gt; do</span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- &gt;        ...</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- &gt;        (result, final_state) &lt;- (|runState cmd|) init_state</span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span id="local-6989586621679056854"><span id="local-6989586621679056855"><span id="local-6989586621679056856"><span id="local-6989586621679056857"><span class="annot"><a href="Control.Arrow.Transformer.State.html#runState"><span class="hs-identifier hs-type">runState</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679056857"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056856"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056857"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056855"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056854"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679056857"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056855"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679056856"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679056854"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679056856"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-68"></span><span id="runState"><span class="annot"><span class="annottext">runState :: StateArrow s a e b -&gt; a (e, s) (b, s)
+</span><a href="Control.Arrow.Transformer.State.html#runState"><span class="hs-identifier hs-var hs-var">runState</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056561"><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056561"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056561"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- operations</span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span id="local-6989586621679056559"><span id="local-6989586621679056560"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679056560"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowState"><span class="hs-identifier hs-type">ArrowState</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056559"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056559"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056560"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-73"></span><span>    </span><span id="local-6989586621679056554"><span class="annot"><span class="annottext">fetch :: StateArrow s a e s
+</span><a href="Control.Arrow.Operations.html#fetch"><span class="hs-identifier hs-var hs-var hs-var hs-var">fetch</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, s) (s, s) -&gt; StateArrow s a e s
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((e, s) -&gt; (s, s)) -&gt; a (e, s) (s, s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="annottext">e
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679056552"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679056552"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679056552"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679056552"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>    </span><span id="local-6989586621679056551"><span class="annot"><span class="annottext">store :: StateArrow s a s ()
+</span><a href="Control.Arrow.Operations.html#store"><span class="hs-identifier hs-var hs-var hs-var hs-var">store</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (s, s) ((), s) -&gt; StateArrow s a s ()
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((s, s) -&gt; ((), s)) -&gt; a (s, s) ((), s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679056549"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679056549"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">s
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679056549"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span id="local-6989586621679056547"><span id="local-6989586621679056548"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679056548"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddState"><span class="hs-identifier hs-type">ArrowAddState</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056547"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056547"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056548"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679056548"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-77"></span><span>    </span><span id="local-6989586621679056541"><span class="annot"><span class="annottext">liftState :: a e b -&gt; StateArrow s a e b
+</span><a href="Control.Arrow.Internals.html#liftState"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftState</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a e b -&gt; StateArrow s a e b
+forall (f :: (* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *) (a :: * -&gt; * -&gt; *) b c.
+ArrowTransformer f a =&gt;
+a b c -&gt; f a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var">lift</span></a></span><span>
+</span><span id="line-78"></span><span>    </span><span id="local-6989586621679056539"><span class="annot"><span class="annottext">elimState :: StateArrow s a e b -&gt; a (e, s) (b, s)
+</span><a href="Control.Arrow.Internals.html#elimState"><span class="hs-identifier hs-var hs-var hs-var hs-var">elimState</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StateArrow s a e b -&gt; a (e, s) (b, s)
+forall (a :: * -&gt; * -&gt; *) s e b.
+Arrow a =&gt;
+StateArrow s a e b -&gt; a (e, s) (b, s)
+</span><a href="Control.Arrow.Transformer.State.html#runState"><span class="hs-identifier hs-var">runState</span></a></span></span></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- The following promotions follow directly from the arrow transformer.</span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span id="local-6989586621679056536"><span id="local-6989586621679056537"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowZero</span></span><span> </span><span class="annot"><a href="#local-6989586621679056537"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowZero</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056536"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056537"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-83"></span><span>    </span><span id="local-6989586621679056532"><span class="annot"><span class="annottext">zeroArrow :: StateArrow s a b c
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">zeroArrow</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (b, s) (c, s) -&gt; StateArrow s a b c
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="annot"><span class="annottext">a (b, s) (c, s)
+forall (a :: * -&gt; * -&gt; *) b c. ArrowZero a =&gt; a b c
+</span><span class="hs-identifier hs-var">zeroArrow</span></span></span></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span id="local-6989586621679056529"><span id="local-6989586621679056530"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowCircuit"><span class="hs-identifier hs-type">ArrowCircuit</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056530"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowCircuit"><span class="hs-identifier hs-type">ArrowCircuit</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056529"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056530"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-86"></span><span>    </span><span id="local-6989586621679056525"><span class="annot"><span class="annottext">delay :: b -&gt; StateArrow s a b b
+</span><a href="Control.Arrow.Operations.html#delay"><span class="hs-identifier hs-var hs-var hs-var hs-var">delay</span></a></span></span><span> </span><span id="local-6989586621679056523"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056523"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a b b -&gt; StateArrow s a b b
+forall (f :: (* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *) (a :: * -&gt; * -&gt; *) b c.
+ArrowTransformer f a =&gt;
+a b c -&gt; f a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var">lift</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; a b b
+forall (a :: * -&gt; * -&gt; *) b. ArrowCircuit a =&gt; b -&gt; a b b
+</span><a href="Control.Arrow.Operations.html#delay"><span class="hs-identifier hs-var">delay</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056523"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span id="local-6989586621679056520"><span id="local-6989586621679056521"><span id="local-6989586621679056522"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowError"><span class="hs-identifier hs-type">ArrowError</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056522"><span class="hs-identifier hs-type">ex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056521"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowError"><span class="hs-identifier hs-type">ArrowError</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056522"><span class="hs-identifier hs-type">ex</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056520"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056521"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-89"></span><span>    </span><span id="local-6989586621679056513"><span class="annot"><span class="annottext">raise :: StateArrow s a ex b
+</span><a href="Control.Arrow.Operations.html#raise"><span class="hs-identifier hs-var hs-var hs-var hs-var">raise</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a ex b -&gt; StateArrow s a ex b
+forall (f :: (* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *) (a :: * -&gt; * -&gt; *) b c.
+ArrowTransformer f a =&gt;
+a b c -&gt; f a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var">lift</span></a></span><span> </span><span class="annot"><span class="annottext">a ex b
+forall ex (a :: * -&gt; * -&gt; *) b. ArrowError ex a =&gt; a ex b
+</span><a href="Control.Arrow.Operations.html#raise"><span class="hs-identifier hs-var">raise</span></a></span><span>
+</span><span id="line-90"></span><span>    </span><span id="local-6989586621679056511"><span class="annot"><span class="annottext">handle :: StateArrow s a e b
+-&gt; StateArrow s a (e, ex) b -&gt; StateArrow s a e b
+</span><a href="Control.Arrow.Operations.html#handle"><span class="hs-identifier hs-var hs-var hs-var hs-var">handle</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056509"><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056509"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056508"><span class="annot"><span class="annottext">a ((e, ex), s) (b, s)
+</span><a href="#local-6989586621679056508"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-91"></span><span>        </span><span class="annot"><span class="annottext">a (e, s) (b, s) -&gt; StateArrow s a e b
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (e, s) (b, s) -&gt; a ((e, s), ex) (b, s) -&gt; a (e, s) (b, s)
+forall ex (a :: * -&gt; * -&gt; *) e b.
+ArrowError ex a =&gt;
+a e b -&gt; a (e, ex) b -&gt; a e b
+</span><a href="Control.Arrow.Operations.html#handle"><span class="hs-identifier hs-var">handle</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056509"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((e, s), ex) -&gt; ((e, ex), s)) -&gt; a ((e, s), ex) ((e, ex), s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((e, s), ex) -&gt; ((e, ex), s)
+forall a b c. ((a, b), c) -&gt; ((a, c), b)
+</span><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a ((e, s), ex) ((e, ex), s)
+-&gt; a ((e, ex), s) (b, s) -&gt; a ((e, s), ex) (b, s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a ((e, ex), s) (b, s)
+</span><a href="#local-6989586621679056508"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-92"></span><span>    </span><span id="local-6989586621679056507"><span class="annot"><span class="annottext">tryInUnless :: StateArrow s a e b
+-&gt; StateArrow s a (e, b) c
+-&gt; StateArrow s a (e, ex) c
+-&gt; StateArrow s a e c
+</span><a href="Control.Arrow.Operations.html#tryInUnless"><span class="hs-identifier hs-var hs-var hs-var hs-var">tryInUnless</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056505"><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056505"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056504"><span class="annot"><span class="annottext">a ((e, b), s) (c, s)
+</span><a href="#local-6989586621679056504"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056503"><span class="annot"><span class="annottext">a ((e, ex), s) (c, s)
+</span><a href="#local-6989586621679056503"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-93"></span><span>        </span><span class="annot"><span class="annottext">a (e, s) (c, s) -&gt; StateArrow s a e c
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (e, s) (b, s)
+-&gt; a ((e, s), (b, s)) (c, s)
+-&gt; a ((e, s), ex) (c, s)
+-&gt; a (e, s) (c, s)
+forall ex (a :: * -&gt; * -&gt; *) e b c.
+ArrowError ex a =&gt;
+a e b -&gt; a (e, b) c -&gt; a (e, ex) c -&gt; a e c
+</span><a href="Control.Arrow.Operations.html#tryInUnless"><span class="hs-identifier hs-var">tryInUnless</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056505"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((e, s), (b, s)) -&gt; ((e, b), s)) -&gt; a ((e, s), (b, s)) ((e, b), s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((e, s), (b, s)) -&gt; ((e, b), s)
+forall a b b b. ((a, b), (b, b)) -&gt; ((a, b), b)
+</span><a href="#local-6989586621679056502"><span class="hs-identifier hs-var">new_state</span></a></span><span> </span><span class="annot"><span class="annottext">a ((e, s), (b, s)) ((e, b), s)
+-&gt; a ((e, b), s) (c, s) -&gt; a ((e, s), (b, s)) (c, s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a ((e, b), s) (c, s)
+</span><a href="#local-6989586621679056504"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((e, s), ex) -&gt; ((e, ex), s)) -&gt; a ((e, s), ex) ((e, ex), s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((e, s), ex) -&gt; ((e, ex), s)
+forall a b c. ((a, b), c) -&gt; ((a, c), b)
+</span><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a ((e, s), ex) ((e, ex), s)
+-&gt; a ((e, ex), s) (c, s) -&gt; a ((e, s), ex) (c, s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a ((e, ex), s) (c, s)
+</span><a href="#local-6989586621679056503"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-95"></span><span>        </span><span id="local-6989586621679056502"><span class="annot"><span class="annottext">new_state :: ((a, b), (b, b)) -&gt; ((a, b), b)
+</span><a href="#local-6989586621679056502"><span class="hs-identifier hs-var hs-var">new_state</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679056501"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056501"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span class="hs-special">(</span><span id="local-6989586621679056500"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056500"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679056499"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056499"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056501"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056500"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056499"><span class="hs-identifier hs-var">s'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>    </span><span id="local-6989586621679056498"><span class="annot"><span class="annottext">newError :: StateArrow s a e b -&gt; StateArrow s a e (Either ex b)
+</span><a href="Control.Arrow.Operations.html#newError"><span class="hs-identifier hs-var hs-var hs-var hs-var">newError</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056496"><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056496"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, s) (Either ex b, s) -&gt; StateArrow s a e (Either ex b)
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (e, s) (b, s) -&gt; a (e, s) (Either ex (b, s))
+forall ex (a :: * -&gt; * -&gt; *) e b.
+ArrowError ex a =&gt;
+a e b -&gt; a e (Either ex b)
+</span><a href="Control.Arrow.Operations.html#newError"><span class="hs-identifier hs-var">newError</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056496"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, s) (Either ex (b, s))
+-&gt; a (e, s) s -&gt; a (e, s) (Either ex (b, s), s)
+forall (a :: * -&gt; * -&gt; *) b c c'.
+Arrow a =&gt;
+a b c -&gt; a b c' -&gt; a b (c, c')
+</span><span class="hs-operator hs-var">&amp;&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">((e, s) -&gt; s) -&gt; a (e, s) s
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">(e, s) -&gt; s
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">a (e, s) (Either ex (b, s), s)
+-&gt; a (Either ex (b, s), s) (Either ex b, s)
+-&gt; a (e, s) (Either ex b, s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">((Either ex (b, s), s) -&gt; (Either ex b, s))
+-&gt; a (Either ex (b, s), s) (Either ex b, s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">(Either ex (b, s), s) -&gt; (Either ex b, s)
+forall a b b. (Either a (b, b), b) -&gt; (Either a b, b)
+</span><a href="#local-6989586621679056494"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-97"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-98"></span><span>        </span><span id="local-6989586621679056494"><span class="annot"><span class="annottext">h :: (Either a (b, b), b) -&gt; (Either a b, b)
+</span><a href="#local-6989586621679056494"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679056493"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056493"><span class="hs-identifier hs-var">ex</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679056492"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056492"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Either a b
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056493"><span class="hs-identifier hs-var">ex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056492"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>        </span><span class="annot"><a href="#local-6989586621679056494"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679056491"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056491"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679056490"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056490"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; Either a b
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056491"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056490"><span class="hs-identifier hs-var">s'</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- Note that in each case the error handler gets the original state.</span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span id="local-6989586621679056487"><span id="local-6989586621679056488"><span id="local-6989586621679056489"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowReader"><span class="hs-identifier hs-type">ArrowReader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056489"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056488"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowReader"><span class="hs-identifier hs-type">ArrowReader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056489"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056487"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056488"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-104"></span><span>    </span><span id="local-6989586621679056482"><span class="annot"><span class="annottext">readState :: StateArrow s a b r
+</span><a href="Control.Arrow.Operations.html#readState"><span class="hs-identifier hs-var hs-var hs-var hs-var">readState</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a b r -&gt; StateArrow s a b r
+forall (f :: (* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *) (a :: * -&gt; * -&gt; *) b c.
+ArrowTransformer f a =&gt;
+a b c -&gt; f a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var">lift</span></a></span><span> </span><span class="annot"><span class="annottext">a b r
+forall r (a :: * -&gt; * -&gt; *) b. ArrowReader r a =&gt; a b r
+</span><a href="Control.Arrow.Operations.html#readState"><span class="hs-identifier hs-var">readState</span></a></span><span>
+</span><span id="line-105"></span><span>    </span><span id="local-6989586621679056480"><span class="annot"><span class="annottext">newReader :: StateArrow s a e b -&gt; StateArrow s a (e, r) b
+</span><a href="Control.Arrow.Operations.html#newReader"><span class="hs-identifier hs-var hs-var hs-var hs-var">newReader</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056478"><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056478"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a ((e, r), s) (b, s) -&gt; StateArrow s a (e, r) b
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((e, r), s) -&gt; ((e, s), r)) -&gt; a ((e, r), s) ((e, s), r)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((e, r), s) -&gt; ((e, s), r)
+forall a b c. ((a, b), c) -&gt; ((a, c), b)
+</span><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a ((e, r), s) ((e, s), r)
+-&gt; a ((e, s), r) (b, s) -&gt; a ((e, r), s) (b, s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s) -&gt; a ((e, s), r) (b, s)
+forall r (a :: * -&gt; * -&gt; *) e b.
+ArrowReader r a =&gt;
+a e b -&gt; a (e, r) b
+</span><a href="Control.Arrow.Operations.html#newReader"><span class="hs-identifier hs-var">newReader</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056478"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span id="local-6989586621679056475"><span id="local-6989586621679056476"><span id="local-6989586621679056477"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowWriter"><span class="hs-identifier hs-type">ArrowWriter</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056477"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056476"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Control.Arrow.Operations.html#ArrowWriter"><span class="hs-identifier hs-type">ArrowWriter</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056477"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056475"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056476"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-108"></span><span>    </span><span id="local-6989586621679056469"><span class="annot"><span class="annottext">write :: StateArrow s a w ()
+</span><a href="Control.Arrow.Operations.html#write"><span class="hs-identifier hs-var hs-var hs-var hs-var">write</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a w () -&gt; StateArrow s a w ()
+forall (f :: (* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *) (a :: * -&gt; * -&gt; *) b c.
+ArrowTransformer f a =&gt;
+a b c -&gt; f a b c
+</span><a href="Control.Arrow.Transformer.html#lift"><span class="hs-identifier hs-var">lift</span></a></span><span> </span><span class="annot"><span class="annottext">a w ()
+forall w (a :: * -&gt; * -&gt; *). ArrowWriter w a =&gt; a w ()
+</span><a href="Control.Arrow.Operations.html#write"><span class="hs-identifier hs-var">write</span></a></span><span>
+</span><span id="line-109"></span><span>    </span><span id="local-6989586621679056467"><span class="annot"><span class="annottext">newWriter :: StateArrow s a e b -&gt; StateArrow s a e (b, w)
+</span><a href="Control.Arrow.Operations.html#newWriter"><span class="hs-identifier hs-var hs-var hs-var hs-var">newWriter</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056465"><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056465"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, s) ((b, w), s) -&gt; StateArrow s a e (b, w)
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (e, s) (b, s) -&gt; a (e, s) ((b, s), w)
+forall w (a :: * -&gt; * -&gt; *) e b.
+ArrowWriter w a =&gt;
+a e b -&gt; a e (b, w)
+</span><a href="Control.Arrow.Operations.html#newWriter"><span class="hs-identifier hs-var">newWriter</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056465"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, s) ((b, s), w)
+-&gt; a ((b, s), w) ((b, w), s) -&gt; a (e, s) ((b, w), s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(((b, s), w) -&gt; ((b, w), s)) -&gt; a ((b, s), w) ((b, w), s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((b, s), w) -&gt; ((b, w), s)
+forall a b c. ((a, b), c) -&gt; ((a, c), b)
+</span><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- liftings of standard classes</span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span id="local-6989586621679056463"><span id="local-6989586621679056464"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679056455"><span id="local-6989586621679056457"><span id="local-6989586621679056459"><span class="annot"><span class="hs-identifier hs-type">ArrowChoice</span></span><span> </span><span class="annot"><a href="#local-6989586621679056464"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowChoice</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056463"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056464"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-114"></span><span>    </span><span id="local-6989586621679056453"><span class="annot"><span class="annottext">left :: StateArrow s a b c -&gt; StateArrow s a (Either b d) (Either c d)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">left</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056451"><span class="annot"><span class="annottext">a (b, s) (c, s)
+</span><a href="#local-6989586621679056451"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (Either b d, s) (Either c d, s)
+-&gt; StateArrow s a (Either b d) (Either c d)
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Either b d, s) -&gt; Either (b, s) (d, s))
+-&gt; a (Either b d, s) (Either (b, s) (d, s))
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">(Either b d, s) -&gt; Either (b, s) (d, s)
+forall a a b. (Either a a, b) -&gt; Either (a, b) (a, b)
+</span><a href="#local-6989586621679056450"><span class="hs-identifier hs-var">distr</span></a></span><span> </span><span class="annot"><span class="annottext">a (Either b d, s) (Either (b, s) (d, s))
+-&gt; a (Either (b, s) (d, s)) (Either c d, s)
+-&gt; a (Either b d, s) (Either c d, s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a (b, s) (c, s) -&gt; a (Either (b, s) (d, s)) (Either (c, s) (d, s))
+forall (a :: * -&gt; * -&gt; *) b c d.
+ArrowChoice a =&gt;
+a b c -&gt; a (Either b d) (Either c d)
+</span><span class="hs-identifier hs-var">left</span></span><span> </span><span class="annot"><span class="annottext">a (b, s) (c, s)
+</span><a href="#local-6989586621679056451"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a (Either (b, s) (d, s)) (Either (c, s) (d, s))
+-&gt; a (Either (c, s) (d, s)) (Either c d, s)
+-&gt; a (Either (b, s) (d, s)) (Either c d, s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Either (c, s) (d, s) -&gt; (Either c d, s))
+-&gt; a (Either (c, s) (d, s)) (Either c d, s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">Either (c, s) (d, s) -&gt; (Either c d, s)
+forall a b b. Either (a, b) (b, b) -&gt; (Either a b, b)
+</span><a href="#local-6989586621679056449"><span class="hs-identifier hs-var">undistr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-115"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-116"></span><span>        </span><span id="local-6989586621679056450"><span class="annot"><span class="annottext">distr :: (Either a a, b) -&gt; Either (a, b) (a, b)
+</span><a href="#local-6989586621679056450"><span class="hs-identifier hs-var hs-var">distr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679056448"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056448"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679056447"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056447"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a, b) -&gt; Either (a, b) (a, b)
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056448"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056447"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>        </span><span class="annot"><a href="#local-6989586621679056450"><span class="hs-identifier hs-var">distr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679056446"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056446"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679056445"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056445"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a, b) -&gt; Either (a, b) (a, b)
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056446"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056445"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-118"></span><span>        </span><span id="local-6989586621679056449"><span class="annot"><span class="annottext">undistr :: Either (a, b) (b, b) -&gt; (Either a b, b)
+</span><a href="#local-6989586621679056449"><span class="hs-identifier hs-var hs-var">undistr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679056444"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056444"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679056443"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056443"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Either a b
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056444"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056443"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-119"></span><span>        </span><span class="annot"><a href="#local-6989586621679056449"><span class="hs-identifier hs-var">undistr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679056442"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056442"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679056441"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056441"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; Either a b
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056442"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056441"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span id="local-6989586621679056439"><span id="local-6989586621679056440"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowApply</span></span><span> </span><span class="annot"><a href="#local-6989586621679056440"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowApply</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056439"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056440"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-122"></span><span>    </span><span id="local-6989586621679056435"><span class="annot"><span class="annottext">app :: StateArrow s a (StateArrow s a b c, b) c
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">app</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a ((StateArrow s a b c, b), s) (c, s)
+-&gt; StateArrow s a (StateArrow s a b c, b) c
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((StateArrow s a b c, b), s) -&gt; (a (b, s) (c, s), (b, s)))
+-&gt; a ((StateArrow s a b c, b), s) (a (b, s) (c, s), (b, s))
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056434"><span class="annot"><span class="annottext">a (b, s) (c, s)
+</span><a href="#local-6989586621679056434"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679056433"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056433"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679056432"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679056432"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (b, s) (c, s)
+</span><a href="#local-6989586621679056434"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679056433"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679056432"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a ((StateArrow s a b c, b), s) (a (b, s) (c, s), (b, s))
+-&gt; a (a (b, s) (c, s), (b, s)) (c, s)
+-&gt; a ((StateArrow s a b c, b), s) (c, s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a (a (b, s) (c, s), (b, s)) (c, s)
+forall (a :: * -&gt; * -&gt; *) b c. ArrowApply a =&gt; a (a b c, b) c
+</span><span class="hs-identifier hs-var">app</span></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-123"></span><span>
+</span><span id="line-124"></span><span id="local-6989586621679056430"><span id="local-6989586621679056431"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowLoop</span></span><span> </span><span class="annot"><a href="#local-6989586621679056431"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowLoop</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056430"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056431"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-125"></span><span>    </span><span id="local-6989586621679056426"><span class="annot"><span class="annottext">loop :: StateArrow s a (b, d) (c, d) -&gt; StateArrow s a b c
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">loop</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056425"><span class="annot"><span class="annottext">a ((b, d), s) ((c, d), s)
+</span><a href="#local-6989586621679056425"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-126"></span><span>        </span><span class="annot"><span class="annottext">a (b, s) (c, s) -&gt; StateArrow s a b c
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a ((b, s), d) ((c, s), d) -&gt; a (b, s) (c, s)
+forall (a :: * -&gt; * -&gt; *) b d c.
+ArrowLoop a =&gt;
+a (b, d) (c, d) -&gt; a b c
+</span><span class="hs-identifier hs-var">loop</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((b, s), d) -&gt; ((b, d), s)) -&gt; a ((b, s), d) ((b, d), s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((b, s), d) -&gt; ((b, d), s)
+forall a b c. ((a, b), c) -&gt; ((a, c), b)
+</span><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a ((b, s), d) ((b, d), s)
+-&gt; a ((b, d), s) ((c, s), d) -&gt; a ((b, s), d) ((c, s), d)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a ((b, d), s) ((c, d), s)
+</span><a href="#local-6989586621679056425"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a ((b, d), s) ((c, d), s)
+-&gt; a ((c, d), s) ((c, s), d) -&gt; a ((b, d), s) ((c, s), d)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(((c, d), s) -&gt; ((c, s), d)) -&gt; a ((c, d), s) ((c, s), d)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((c, d), s) -&gt; ((c, s), d)
+forall a b c. ((a, b), c) -&gt; ((a, c), b)
+</span><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span id="local-6989586621679056423"><span id="local-6989586621679056424"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679056424"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ArrowPlus</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056423"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056424"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-129"></span><span>    </span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056419"><span class="annot"><span class="annottext">a (b, s) (c, s)
+</span><a href="#local-6989586621679056419"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679056418"><span class="annot"><span class="annottext">&lt;+&gt; :: StateArrow s a b c -&gt; StateArrow s a b c -&gt; StateArrow s a b c
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;+&gt;</span></span></span><span> </span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056416"><span class="annot"><span class="annottext">a (b, s) (c, s)
+</span><a href="#local-6989586621679056416"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (b, s) (c, s) -&gt; StateArrow s a b c
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (b, s) (c, s)
+</span><a href="#local-6989586621679056419"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a (b, s) (c, s) -&gt; a (b, s) (c, s) -&gt; a (b, s) (c, s)
+forall (a :: * -&gt; * -&gt; *) b c.
+ArrowPlus a =&gt;
+a b c -&gt; a b c -&gt; a b c
+</span><span class="hs-operator hs-var">&lt;+&gt;</span></span><span> </span><span class="annot"><span class="annottext">a (b, s) (c, s)
+</span><a href="#local-6989586621679056416"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- Other instances</span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span id="local-6989586621679056413"><span id="local-6989586621679056414"><span id="local-6989586621679056415"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679056410"><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679056415"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056414"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056415"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056413"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-134"></span><span>    </span><span id="local-6989586621679056408"><span class="annot"><span class="annottext">fmap :: (a -&gt; b) -&gt; StateArrow s a b a -&gt; StateArrow s a b b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621679056407"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679056407"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679056406"><span class="annot"><span class="annottext">StateArrow s a b a
+</span><a href="#local-6989586621679056406"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StateArrow s a b a
+</span><a href="#local-6989586621679056406"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">StateArrow s a b a -&gt; StateArrow s a a b -&gt; StateArrow s a b b
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; StateArrow s a a b
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679056407"><span class="hs-identifier hs-var">f</span></a></span></span></span></span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span id="local-6989586621679056403"><span id="local-6989586621679056404"><span id="local-6989586621679056405"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679056394"><span id="local-6989586621679056396"><span id="local-6989586621679056398"><span class="annot"><span class="hs-identifier hs-type">Arrow</span></span><span> </span><span class="annot"><a href="#local-6989586621679056405"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056404"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056405"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056403"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-137"></span><span>    </span><span id="local-6989586621679056392"><span class="annot"><span class="annottext">pure :: a -&gt; StateArrow s a b a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pure</span></span></span><span> </span><span id="local-6989586621679056391"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056391"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(b -&gt; a) -&gt; StateArrow s a b a
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b -&gt; a
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679056391"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-138"></span><span>    </span><span id="local-6989586621679056389"><span class="annot"><span class="annottext">StateArrow s a b (a -&gt; b)
+</span><a href="#local-6989586621679056389"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679056388"><span class="annot"><span class="annottext">&lt;*&gt; :: StateArrow s a b (a -&gt; b)
+-&gt; StateArrow s a b a -&gt; StateArrow s a b b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;*&gt;</span></span></span><span> </span><span id="local-6989586621679056387"><span class="annot"><span class="annottext">StateArrow s a b a
+</span><a href="#local-6989586621679056387"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StateArrow s a b (a -&gt; b)
+</span><a href="#local-6989586621679056389"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">StateArrow s a b (a -&gt; b)
+-&gt; StateArrow s a b a -&gt; StateArrow s a b (a -&gt; b, a)
+forall (a :: * -&gt; * -&gt; *) b c c'.
+Arrow a =&gt;
+a b c -&gt; a b c' -&gt; a b (c, c')
+</span><span class="hs-operator hs-var">&amp;&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">StateArrow s a b a
+</span><a href="#local-6989586621679056387"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">StateArrow s a b (a -&gt; b, a)
+-&gt; StateArrow s a (a -&gt; b, a) b -&gt; StateArrow s a b b
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">((a -&gt; b, a) -&gt; b) -&gt; StateArrow s a (a -&gt; b, a) b
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((a -&gt; b) -&gt; a -&gt; b) -&gt; (a -&gt; b, a) -&gt; b
+forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
+</span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; a -&gt; b
+forall k (cat :: k -&gt; k -&gt; *) (a :: k). Category cat =&gt; cat a a
+</span><span class="hs-identifier hs-var">id</span></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span id="local-6989586621679056383"><span id="local-6989586621679056384"><span id="local-6989586621679056385"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679056376"><span id="local-6989586621679056378"><span class="annot"><span class="hs-identifier hs-type">ArrowPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679056385"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Alternative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056384"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056385"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056383"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-141"></span><span>    </span><span id="local-6989586621679056374"><span class="annot"><span class="annottext">empty :: StateArrow s a b a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">empty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StateArrow s a b a
+forall (a :: * -&gt; * -&gt; *) b c. ArrowZero a =&gt; a b c
+</span><span class="hs-identifier hs-var">zeroArrow</span></span><span>
+</span><span id="line-142"></span><span>    </span><span id="local-6989586621679056372"><span class="annot"><span class="annottext">StateArrow s a b a
+</span><a href="#local-6989586621679056372"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679056371"><span class="annot"><span class="annottext">&lt;|&gt; :: StateArrow s a b a -&gt; StateArrow s a b a -&gt; StateArrow s a b a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;|&gt;</span></span></span><span> </span><span id="local-6989586621679056369"><span class="annot"><span class="annottext">StateArrow s a b a
+</span><a href="#local-6989586621679056369"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StateArrow s a b a
+</span><a href="#local-6989586621679056372"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">StateArrow s a b a -&gt; StateArrow s a b a -&gt; StateArrow s a b a
+forall (a :: * -&gt; * -&gt; *) b c.
+ArrowPlus a =&gt;
+a b c -&gt; a b c -&gt; a b c
+</span><span class="hs-operator hs-var">&lt;+&gt;</span></span><span> </span><span class="annot"><span class="annottext">StateArrow s a b a
+</span><a href="#local-6989586621679056369"><span class="hs-identifier hs-var">g</span></a></span></span></span></span><span class="hs-cpp">
+
+#if MIN_VERSION_base(4,9,0)
+</span><span id="local-6989586621679056365"><span id="local-6989586621679056366"><span id="local-6989586621679056367"><span id="local-6989586621679056368"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679056360"><span id="local-6989586621679056362"><span class="annot"><span class="hs-identifier hs-type">ArrowPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679056368"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056367"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056368"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056366"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056365"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-146"></span><span>    </span><span id="local-6989586621679056358"><span class="annot"><span class="annottext">&lt;&gt; :: StateArrow s a b c -&gt; StateArrow s a b c -&gt; StateArrow s a b c
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StateArrow s a b c -&gt; StateArrow s a b c -&gt; StateArrow s a b c
+forall (a :: * -&gt; * -&gt; *) b c.
+ArrowPlus a =&gt;
+a b c -&gt; a b c -&gt; a b c
+</span><span class="hs-operator hs-var">(&lt;+&gt;)</span></span></span></span></span></span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-149"></span><span id="local-6989586621679056354"><span id="local-6989586621679056355"><span id="local-6989586621679056356"><span id="local-6989586621679056357"><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679056348"><span id="local-6989586621679056350"><span class="annot"><span class="hs-identifier hs-type">ArrowPlus</span></span><span> </span><span class="annot"><a href="#local-6989586621679056357"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056356"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056357"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056355"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056354"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-150"></span><span>    </span><span id="local-6989586621679056346"><span class="annot"><span class="annottext">mempty :: StateArrow s a b c
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StateArrow s a b c
+forall (a :: * -&gt; * -&gt; *) b c. ArrowZero a =&gt; a b c
+</span><span class="hs-identifier hs-var">zeroArrow</span></span></span></span></span></span><span class="hs-cpp">
+#if !(MIN_VERSION_base(4,11,0))
+</span><span>    </span><span class="hs-identifier">mappend</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-operator">&lt;+&gt;</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-155"></span><span class="hs-comment">-- promotions</span><span>
+</span><span id="line-156"></span><span>
+</span><span id="line-157"></span><span id="local-6989586621679056342"><span id="local-6989586621679056343"><span id="local-6989586621679056344"><span id="local-6989586621679056345"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddReader"><span class="hs-identifier hs-type">ArrowAddReader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056345"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056344"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056343"><span class="hs-identifier hs-type">a'</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-158"></span><span>        </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddReader"><span class="hs-identifier hs-type">ArrowAddReader</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056345"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056342"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056344"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056342"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056343"><span class="hs-identifier hs-type">a'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-159"></span><span>    </span><span id="local-6989586621679056336"><span class="annot"><span class="annottext">liftReader :: StateArrow s a' e b -&gt; StateArrow s a e b
+</span><a href="Control.Arrow.Internals.html#liftReader"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftReader</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056334"><span class="annot"><span class="annottext">a' (e, s) (b, s)
+</span><a href="#local-6989586621679056334"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s) -&gt; StateArrow s a e b
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a' (e, s) (b, s) -&gt; a (e, s) (b, s)
+forall r (a :: * -&gt; * -&gt; *) (a' :: * -&gt; * -&gt; *) e b.
+ArrowAddReader r a a' =&gt;
+a' e b -&gt; a e b
+</span><a href="Control.Arrow.Internals.html#liftReader"><span class="hs-identifier hs-var">liftReader</span></a></span><span> </span><span class="annot"><span class="annottext">a' (e, s) (b, s)
+</span><a href="#local-6989586621679056334"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-160"></span><span>    </span><span id="local-6989586621679056333"><span class="annot"><span class="annottext">elimReader :: StateArrow s a e b -&gt; StateArrow s a' (e, r) b
+</span><a href="Control.Arrow.Internals.html#elimReader"><span class="hs-identifier hs-var hs-var hs-var hs-var">elimReader</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056331"><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056331"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a' ((e, r), s) (b, s) -&gt; StateArrow s a' (e, r) b
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((e, r), s) -&gt; ((e, s), r)) -&gt; a' ((e, r), s) ((e, s), r)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((e, r), s) -&gt; ((e, s), r)
+forall a b c. ((a, b), c) -&gt; ((a, c), b)
+</span><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a' ((e, r), s) ((e, s), r)
+-&gt; a' ((e, s), r) (b, s) -&gt; a' ((e, r), s) (b, s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s) -&gt; a' ((e, s), r) (b, s)
+forall r (a :: * -&gt; * -&gt; *) (a' :: * -&gt; * -&gt; *) e b.
+ArrowAddReader r a a' =&gt;
+a e b -&gt; a' (e, r) b
+</span><a href="Control.Arrow.Internals.html#elimReader"><span class="hs-identifier hs-var">elimReader</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056331"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span id="local-6989586621679056327"><span id="local-6989586621679056328"><span id="local-6989586621679056329"><span id="local-6989586621679056330"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddWriter"><span class="hs-identifier hs-type">ArrowAddWriter</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056330"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056329"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056328"><span class="hs-identifier hs-type">a'</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-163"></span><span>        </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddWriter"><span class="hs-identifier hs-type">ArrowAddWriter</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056330"><span class="hs-identifier hs-type">w</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056327"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056329"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056327"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056328"><span class="hs-identifier hs-type">a'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-164"></span><span>    </span><span id="local-6989586621679056321"><span class="annot"><span class="annottext">liftWriter :: StateArrow s a' e b -&gt; StateArrow s a e b
+</span><a href="Control.Arrow.Internals.html#liftWriter"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftWriter</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056319"><span class="annot"><span class="annottext">a' (e, s) (b, s)
+</span><a href="#local-6989586621679056319"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s) -&gt; StateArrow s a e b
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a' (e, s) (b, s) -&gt; a (e, s) (b, s)
+forall w (a :: * -&gt; * -&gt; *) (a' :: * -&gt; * -&gt; *) e b.
+ArrowAddWriter w a a' =&gt;
+a' e b -&gt; a e b
+</span><a href="Control.Arrow.Internals.html#liftWriter"><span class="hs-identifier hs-var">liftWriter</span></a></span><span> </span><span class="annot"><span class="annottext">a' (e, s) (b, s)
+</span><a href="#local-6989586621679056319"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-165"></span><span>    </span><span id="local-6989586621679056318"><span class="annot"><span class="annottext">elimWriter :: StateArrow s a e b -&gt; StateArrow s a' e (b, w)
+</span><a href="Control.Arrow.Internals.html#elimWriter"><span class="hs-identifier hs-var hs-var hs-var hs-var">elimWriter</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056316"><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056316"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a' (e, s) ((b, w), s) -&gt; StateArrow s a' e (b, w)
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (e, s) (b, s) -&gt; a' (e, s) ((b, s), w)
+forall w (a :: * -&gt; * -&gt; *) (a' :: * -&gt; * -&gt; *) e b.
+ArrowAddWriter w a a' =&gt;
+a e b -&gt; a' e (b, w)
+</span><a href="Control.Arrow.Internals.html#elimWriter"><span class="hs-identifier hs-var">elimWriter</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056316"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a' (e, s) ((b, s), w)
+-&gt; a' ((b, s), w) ((b, w), s) -&gt; a' (e, s) ((b, w), s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(((b, s), w) -&gt; ((b, w), s)) -&gt; a' ((b, s), w) ((b, w), s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((b, s), w) -&gt; ((b, w), s)
+forall a b c. ((a, b), c) -&gt; ((a, c), b)
+</span><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-166"></span><span>
+</span><span id="line-167"></span><span id="local-6989586621679056312"><span id="local-6989586621679056313"><span id="local-6989586621679056314"><span id="local-6989586621679056315"><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddError"><span class="hs-identifier hs-type">ArrowAddError</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056315"><span class="hs-identifier hs-type">ex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056314"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056313"><span class="hs-identifier hs-type">a'</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-168"></span><span>        </span><span class="annot"><a href="Control.Arrow.Internals.html#ArrowAddError"><span class="hs-identifier hs-type">ArrowAddError</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056315"><span class="hs-identifier hs-type">ex</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056312"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056314"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056312"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679056313"><span class="hs-identifier hs-type">a'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-169"></span><span>    </span><span id="local-6989586621679056306"><span class="annot"><span class="annottext">liftError :: StateArrow s a' e b -&gt; StateArrow s a e b
+</span><a href="Control.Arrow.Internals.html#liftError"><span class="hs-identifier hs-var hs-var hs-var hs-var">liftError</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056304"><span class="annot"><span class="annottext">a' (e, s) (b, s)
+</span><a href="#local-6989586621679056304"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s) -&gt; StateArrow s a e b
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a' (e, s) (b, s) -&gt; a (e, s) (b, s)
+forall ex (a :: * -&gt; * -&gt; *) (a' :: * -&gt; * -&gt; *) e b.
+ArrowAddError ex a a' =&gt;
+a' e b -&gt; a e b
+</span><a href="Control.Arrow.Internals.html#liftError"><span class="hs-identifier hs-var">liftError</span></a></span><span> </span><span class="annot"><span class="annottext">a' (e, s) (b, s)
+</span><a href="#local-6989586621679056304"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-170"></span><span>    </span><span id="local-6989586621679056303"><span class="annot"><span class="annottext">elimError :: StateArrow s a e b
+-&gt; StateArrow s a' (e, ex) b -&gt; StateArrow s a' e b
+</span><a href="Control.Arrow.Internals.html#elimError"><span class="hs-identifier hs-var hs-var hs-var hs-var">elimError</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056301"><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056301"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-type">StateArrow</span></a></span><span> </span><span id="local-6989586621679056300"><span class="annot"><span class="annottext">a' ((e, ex), s) (b, s)
+</span><a href="#local-6989586621679056300"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-171"></span><span>        </span><span class="annot"><span class="annottext">a' (e, s) (b, s) -&gt; StateArrow s a' e b
+forall s (a :: * -&gt; * -&gt; *) b c.
+a (b, s) (c, s) -&gt; StateArrow s a b c
+</span><a href="Control.Arrow.Transformer.State.html#StateArrow"><span class="hs-identifier hs-var">StateArrow</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a (e, s) (b, s) -&gt; a' ((e, s), ex) (b, s) -&gt; a' (e, s) (b, s)
+forall ex (a :: * -&gt; * -&gt; *) (a' :: * -&gt; * -&gt; *) e b.
+ArrowAddError ex a a' =&gt;
+a e b -&gt; a' (e, ex) b -&gt; a' e b
+</span><a href="Control.Arrow.Internals.html#elimError"><span class="hs-identifier hs-var">elimError</span></a></span><span> </span><span class="annot"><span class="annottext">a (e, s) (b, s)
+</span><a href="#local-6989586621679056301"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(((e, s), ex) -&gt; ((e, ex), s)) -&gt; a' ((e, s), ex) ((e, ex), s)
+forall (a :: * -&gt; * -&gt; *) b c. Arrow a =&gt; (b -&gt; c) -&gt; a b c
+</span><span class="hs-identifier hs-var">arr</span></span><span> </span><span class="annot"><span class="annottext">((e, s), ex) -&gt; ((e, ex), s)
+forall a b c. ((a, b), c) -&gt; ((a, c), b)
+</span><a href="Control.Arrow.Transformer.State.html#swapsnd"><span class="hs-identifier hs-var">swapsnd</span></a></span><span> </span><span class="annot"><span class="annottext">a' ((e, s), ex) ((e, ex), s)
+-&gt; a' ((e, ex), s) (b, s) -&gt; a' ((e, s), ex) (b, s)
+forall k (cat :: k -&gt; k -&gt; *) (a :: k) (b :: k) (c :: k).
+Category cat =&gt;
+cat a b -&gt; cat b c -&gt; cat a c
+</span><span class="hs-operator hs-var">&gt;&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a' ((e, ex), s) (b, s)
+</span><a href="#local-6989586621679056300"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-172"></span></pre></body></html>

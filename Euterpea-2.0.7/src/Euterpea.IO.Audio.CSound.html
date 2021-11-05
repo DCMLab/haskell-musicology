@@ -1,0 +1,391 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-operator">&gt;</span><span> </span><span class="hs-pragma">{-# LANGUAGE Arrows, NoMonomorphismRestriction #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-identifier">This</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">is</span><span> </span><span class="hs-identifier">strictly</span><span> </span><span class="hs-identifier">for</span><span> </span><span class="hs-identifier">backward</span><span> </span><span class="hs-identifier">compatibility</span><span> </span><span class="hs-identifier">with</span><span> </span><span class="hs-identifier">Euterpea</span><span> </span><span class="hs-number">0.1</span><span class="hs-operator">.</span><span class="hs-number">0</span><span class="hs-special">,</span><span>
+</span><span id="line-4"></span><span class="hs-identifier">which</span><span> </span><span class="hs-identifier">used</span><span> </span><span class="hs-identifier">many</span><span> </span><span class="hs-identifier">csound</span><span> </span><span class="hs-identifier">names</span><span> </span><span class="hs-identifier">for</span><span> </span><span class="hs-identifier">the</span><span> </span><span class="hs-identifier">basic</span><span> </span><span class="hs-identifier">signal</span><span> </span><span class="hs-identifier">functions</span><span class="hs-operator">.</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-operator">&gt;</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Euterpea.IO.Audio.CSound</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-7"></span><span class="hs-operator">&gt;</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.BasicSigFuns.html"><span class="hs-identifier">Euterpea.IO.Audio.BasicSigFuns</span></a></span><span>
+</span><span id="line-8"></span><span class="hs-operator">&gt;</span><span> </span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Euterpea.IO.Audio.Basics.html"><span class="hs-identifier">Euterpea.IO.Audio.Basics</span></a></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-operator">&gt;</span><span> </span><span id="gen05"><span class="annot"><span class="annottext">gen05 :: TableSize -&gt; StartPt -&gt; [(StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#gen05"><span class="hs-identifier hs-var hs-var">gen05</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; StartPt -&gt; [(StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableExponN"><span class="hs-identifier hs-var">tableExponN</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-operator">&gt;</span><span> </span><span id="gen05%27"><span class="annot"><span class="annottext">gen05' :: TableSize -&gt; StartPt -&gt; [(StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#gen05%27"><span class="hs-identifier hs-var hs-var">gen05'</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; StartPt -&gt; [(StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableExpon"><span class="hs-identifier hs-var">tableExpon</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-operator">&gt;</span><span> </span><span id="gen07"><span class="annot"><span class="annottext">gen07 :: TableSize -&gt; StartPt -&gt; [(StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#gen07"><span class="hs-identifier hs-var hs-var">gen07</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; StartPt -&gt; [(StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableLinearN"><span class="hs-identifier hs-var">tableLinearN</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-operator">&gt;</span><span> </span><span id="gen07%27"><span class="annot"><span class="annottext">gen07' :: TableSize -&gt; StartPt -&gt; [(StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#gen07%27"><span class="hs-identifier hs-var hs-var">gen07'</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; StartPt -&gt; [(StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableLinear"><span class="hs-identifier hs-var">tableLinear</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-operator">&gt;</span><span> </span><span id="gen09"><span class="annot"><span class="annottext">gen09 :: TableSize -&gt; [(StartPt, StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#gen09"><span class="hs-identifier hs-var hs-var">gen09</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; [(StartPt, StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableSines3N"><span class="hs-identifier hs-var">tableSines3N</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-operator">&gt;</span><span> </span><span id="gen09%27"><span class="annot"><span class="annottext">gen09' :: TableSize -&gt; [(StartPt, StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#gen09%27"><span class="hs-identifier hs-var hs-var">gen09'</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; [(StartPt, StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableSines3"><span class="hs-identifier hs-var">tableSines3</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-operator">&gt;</span><span> </span><span id="gen10"><span class="annot"><span class="annottext">gen10 :: TableSize -&gt; [StartPt] -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#gen10"><span class="hs-identifier hs-var hs-var">gen10</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; [StartPt] -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableSinesN"><span class="hs-identifier hs-var">tableSinesN</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-operator">&gt;</span><span> </span><span id="gen10%27"><span class="annot"><span class="annottext">gen10' :: TableSize -&gt; [StartPt] -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#gen10%27"><span class="hs-identifier hs-var hs-var">gen10'</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; [StartPt] -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableSines"><span class="hs-identifier hs-var">tableSines</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-operator">&gt;</span><span> </span><span id="gen12"><span class="annot"><span class="annottext">gen12 :: TableSize -&gt; StartPt -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#gen12"><span class="hs-identifier hs-var hs-var">gen12</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; StartPt -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableBesselN"><span class="hs-identifier hs-var">tableBesselN</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-operator">&gt;</span><span> </span><span id="gen12%27"><span class="annot"><span class="annottext">gen12' :: TableSize -&gt; StartPt -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#gen12%27"><span class="hs-identifier hs-var hs-var">gen12'</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; StartPt -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableBessel"><span class="hs-identifier hs-var">tableBessel</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-operator">&gt;</span><span> </span><span id="compSine1"><span class="annot"><span class="annottext">compSine1 :: TableSize -&gt; [StartPt] -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#compSine1"><span class="hs-identifier hs-var hs-var">compSine1</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; [StartPt] -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableSinesN"><span class="hs-identifier hs-var">tableSinesN</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-operator">&gt;</span><span> </span><span id="compSine2"><span class="annot"><span class="annottext">compSine2 :: TableSize -&gt; [(StartPt, StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#compSine2"><span class="hs-identifier hs-var hs-var">compSine2</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; [(StartPt, StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableSines3N"><span class="hs-identifier hs-var">tableSines3N</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-operator">&gt;</span><span> </span><span id="exponential1"><span class="annot"><span class="annottext">exponential1 :: TableSize -&gt; StartPt -&gt; [(StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#exponential1"><span class="hs-identifier hs-var hs-var">exponential1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; StartPt -&gt; [(StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableExponN"><span class="hs-identifier hs-var">tableExponN</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-operator">&gt;</span><span> </span><span id="lineSeg1"><span class="annot"><span class="annottext">lineSeg1 :: TableSize -&gt; StartPt -&gt; [(StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.CSound.html#lineSeg1"><span class="hs-identifier hs-var hs-var">lineSeg1</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; StartPt -&gt; [(StartPt, StartPt)] -&gt; Table
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#tableLinearN"><span class="hs-identifier hs-var">tableLinearN</span></a></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-operator">&gt;</span><span> </span><span id="tone"><span class="annot"><span class="annottext">tone :: Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#tone"><span class="hs-identifier hs-var hs-var">tone</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Signal p (StartPt, StartPt) StartPt
+forall p. Clock p =&gt; Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#filterLowPass"><span class="hs-identifier hs-var">filterLowPass</span></a></span><span> </span><span>
+</span><span id="line-27"></span><span class="hs-operator">&gt;</span><span> </span><span class="hs-comment">--             :: forall p . Clock p =&gt; Signal p (Double, Double) Double</span><span>
+</span><span id="line-28"></span><span class="hs-operator">&gt;</span><span> </span><span id="atone"><span class="annot"><span class="annottext">atone :: Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#atone"><span class="hs-identifier hs-var hs-var">atone</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Signal p (StartPt, StartPt) StartPt
+forall p. Clock p =&gt; Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#filterHighPass"><span class="hs-identifier hs-var">filterHighPass</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-operator">&gt;</span><span> </span><span class="hs-comment">--             :: forall p . Clock p =&gt; Signal p (Double, Double) Double</span><span>
+</span><span id="line-30"></span><span class="hs-operator">&gt;</span><span> </span><span id="reson"><span class="annot"><span class="annottext">reson :: TableSize -&gt; Signal p (StartPt, StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#reson"><span class="hs-identifier hs-var hs-var">reson</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; Signal p (StartPt, StartPt, StartPt) StartPt
+forall p.
+Clock p =&gt;
+TableSize -&gt; Signal p (StartPt, StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#filterBandPass"><span class="hs-identifier hs-var">filterBandPass</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-operator">&gt;</span><span> </span><span class="hs-comment">--             :: forall p . Clock p =&gt;</span><span>
+</span><span id="line-32"></span><span class="hs-operator">&gt;</span><span> </span><span class="hs-comment">--                  Int -&gt; Signal p (Double, Double, Double) Double</span><span>
+</span><span id="line-33"></span><span class="hs-operator">&gt;</span><span> </span><span id="areson"><span class="annot"><span class="annottext">areson :: TableSize -&gt; Signal p (StartPt, StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#areson"><span class="hs-identifier hs-var hs-var">areson</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; Signal p (StartPt, StartPt, StartPt) StartPt
+forall p.
+Clock p =&gt;
+TableSize -&gt; Signal p (StartPt, StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#filterBandStop"><span class="hs-identifier hs-var">filterBandStop</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-operator">&gt;</span><span> </span><span class="hs-comment">--             :: forall p . Clock p =&gt;</span><span>
+</span><span id="line-35"></span><span class="hs-operator">&gt;</span><span> </span><span class="hs-comment">--                  Int -&gt; Signal p (Double, Double, Double) Double</span><span>
+</span><span id="line-36"></span><span class="hs-operator">&gt;</span><span> </span><span id="butterlp"><span class="annot"><span class="annottext">butterlp :: Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#butterlp"><span class="hs-identifier hs-var hs-var">butterlp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Signal p (StartPt, StartPt) StartPt
+forall p. Clock p =&gt; Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#filterLowPassBW"><span class="hs-identifier hs-var">filterLowPassBW</span></a></span><span>
+</span><span id="line-37"></span><span class="hs-operator">&gt;</span><span> </span><span id="butterhp"><span class="annot"><span class="annottext">butterhp :: Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#butterhp"><span class="hs-identifier hs-var hs-var">butterhp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Signal p (StartPt, StartPt) StartPt
+forall p. Clock p =&gt; Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#filterHighPassBW"><span class="hs-identifier hs-var">filterHighPassBW</span></a></span><span>
+</span><span id="line-38"></span><span class="hs-operator">&gt;</span><span> </span><span id="butterbp"><span class="annot"><span class="annottext">butterbp :: Signal p (StartPt, StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#butterbp"><span class="hs-identifier hs-var hs-var">butterbp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Signal p (StartPt, StartPt, StartPt) StartPt
+forall p. Clock p =&gt; Signal p (StartPt, StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#filterBandPassBW"><span class="hs-identifier hs-var">filterBandPassBW</span></a></span><span>
+</span><span id="line-39"></span><span class="hs-operator">&gt;</span><span> </span><span id="butterbr"><span class="annot"><span class="annottext">butterbr :: Signal p (StartPt, StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#butterbr"><span class="hs-identifier hs-var hs-var">butterbr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Signal p (StartPt, StartPt, StartPt) StartPt
+forall p. Clock p =&gt; Signal p (StartPt, StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#filterBandStopBW"><span class="hs-identifier hs-var">filterBandStopBW</span></a></span><span>
+</span><span id="line-40"></span><span class="hs-operator">&gt;</span><span> </span><span id="comb"><span class="annot"><span class="annottext">comb :: StartPt -&gt; Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#comb"><span class="hs-identifier hs-var hs-var">comb</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StartPt -&gt; Signal p (StartPt, StartPt) StartPt
+forall p. Clock p =&gt; StartPt -&gt; Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#filterComb"><span class="hs-identifier hs-var">filterComb</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-operator">&gt;</span><span> </span><span id="oscil"><span class="annot"><span class="annottext">oscil :: Table -&gt; StartPt -&gt; ArrowP a p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#oscil"><span class="hs-identifier hs-var hs-var">oscil</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Table -&gt; StartPt -&gt; ArrowP a p StartPt StartPt
+forall p (a :: * -&gt; * -&gt; *).
+(Clock p, ArrowCircuit a) =&gt;
+Table -&gt; StartPt -&gt; ArrowP a p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#osc"><span class="hs-identifier hs-var">osc</span></a></span><span>
+</span><span id="line-43"></span><span class="hs-operator">&gt;</span><span> </span><span id="oscili"><span class="annot"><span class="annottext">oscili :: Table -&gt; StartPt -&gt; ArrowP a p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#oscili"><span class="hs-identifier hs-var hs-var">oscili</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Table -&gt; StartPt -&gt; ArrowP a p StartPt StartPt
+forall p (a :: * -&gt; * -&gt; *).
+(Clock p, ArrowCircuit a) =&gt;
+Table -&gt; StartPt -&gt; ArrowP a p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#oscI"><span class="hs-identifier hs-var">oscI</span></a></span><span>
+</span><span id="line-44"></span><span class="hs-operator">&gt;</span><span> </span><span id="oscils"><span class="annot"><span class="annottext">oscils :: StartPt -&gt; ArrowP a p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#oscils"><span class="hs-identifier hs-var hs-var">oscils</span></a></span></span><span> </span><span id="local-6989586621679097078"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097078"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">proc</span><span> </span><span id="local-6989586621679097077"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097077"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-45"></span><span class="hs-operator">&gt;</span><span>              </span><span id="local-6989586621679097076"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097076"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StartPt -&gt; ArrowP a p () StartPt
+forall p (a :: * -&gt; * -&gt; *).
+(Clock p, ArrowCircuit a) =&gt;
+StartPt -&gt; ArrowP a p () StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#oscFixed"><span class="hs-identifier hs-var">oscFixed</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097078"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span class="hs-operator">&gt;</span><span>              </span><span class="annot"><span class="annottext">ArrowP a p StartPt StartPt
+forall (a :: * -&gt; * -&gt; *) b. Arrow a =&gt; a b b
+</span><a href="Euterpea.IO.Audio.Basics.html#outA"><span class="hs-identifier hs-var">outA</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097076"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097077"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-47"></span><span class="hs-operator">&gt;</span><span> </span><span id="oscil1"><span class="annot"><span class="annottext">oscil1 :: Table -&gt; StartPt -&gt; StartPt -&gt; ArrowP a p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#oscil1"><span class="hs-identifier hs-var hs-var">oscil1</span></a></span></span><span> </span><span id="local-6989586621679097071"><span class="annot"><span class="annottext">Table
+</span><a href="#local-6989586621679097071"><span class="hs-identifier hs-var">tab</span></a></span></span><span> </span><span id="local-6989586621679097070"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097070"><span class="hs-identifier hs-var">del</span></a></span></span><span> </span><span id="local-6989586621679097069"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097069"><span class="hs-identifier hs-var">dur</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><span id="line-48"></span><span class="hs-operator">&gt;</span><span>            </span><span class="hs-keyword">proc</span><span> </span><span id="local-6989586621679097068"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097068"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-49"></span><span class="hs-operator">&gt;</span><span>              </span><span id="local-6989586621679097067"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097067"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Table -&gt; StartPt -&gt; StartPt -&gt; ArrowP a p () StartPt
+forall p (a :: * -&gt; * -&gt; *).
+(Clock p, ArrowChoice a, ArrowCircuit a) =&gt;
+Table -&gt; StartPt -&gt; StartPt -&gt; ArrowP a p () StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#oscDur"><span class="hs-identifier hs-var">oscDur</span></a></span><span>  </span><span class="annot"><span class="annottext">Table
+</span><a href="#local-6989586621679097071"><span class="hs-identifier hs-var">tab</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097070"><span class="hs-identifier hs-var">del</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097069"><span class="hs-identifier hs-var">dur</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span class="hs-operator">&gt;</span><span>              </span><span class="annot"><span class="annottext">ArrowP a p StartPt StartPt
+forall (a :: * -&gt; * -&gt; *) b. Arrow a =&gt; a b b
+</span><a href="Euterpea.IO.Audio.Basics.html#outA"><span class="hs-identifier hs-var">outA</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097067"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097068"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-51"></span><span class="hs-operator">&gt;</span><span> </span><span id="oscil1i"><span class="annot"><span class="annottext">oscil1i :: Table -&gt; StartPt -&gt; StartPt -&gt; ArrowP a p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#oscil1i"><span class="hs-identifier hs-var hs-var">oscil1i</span></a></span></span><span> </span><span id="local-6989586621679097064"><span class="annot"><span class="annottext">Table
+</span><a href="#local-6989586621679097064"><span class="hs-identifier hs-var">tab</span></a></span></span><span> </span><span id="local-6989586621679097063"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097063"><span class="hs-identifier hs-var">del</span></a></span></span><span> </span><span id="local-6989586621679097062"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097062"><span class="hs-identifier hs-var">dur</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-52"></span><span class="hs-operator">&gt;</span><span>            </span><span class="hs-keyword">proc</span><span> </span><span id="local-6989586621679097061"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097061"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-53"></span><span class="hs-operator">&gt;</span><span>              </span><span id="local-6989586621679097060"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097060"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Table -&gt; StartPt -&gt; StartPt -&gt; ArrowP a p () StartPt
+forall p (a :: * -&gt; * -&gt; *).
+(Clock p, ArrowChoice a, ArrowCircuit a) =&gt;
+Table -&gt; StartPt -&gt; StartPt -&gt; ArrowP a p () StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#oscDurI"><span class="hs-identifier hs-var">oscDurI</span></a></span><span> </span><span class="annot"><span class="annottext">Table
+</span><a href="#local-6989586621679097064"><span class="hs-identifier hs-var">tab</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097063"><span class="hs-identifier hs-var">del</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097062"><span class="hs-identifier hs-var">dur</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span class="hs-operator">&gt;</span><span>              </span><span class="annot"><span class="annottext">ArrowP a p StartPt StartPt
+forall (a :: * -&gt; * -&gt; *) b. Arrow a =&gt; a b b
+</span><a href="Euterpea.IO.Audio.Basics.html#outA"><span class="hs-identifier hs-var">outA</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097060"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097061"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-operator">&gt;</span><span> </span><span id="buzz"><span class="annot"><span class="annottext">buzz :: Table -&gt; StartPt -&gt; Signal p (StartPt, TableSize) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#buzz"><span class="hs-identifier hs-var hs-var">buzz</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Table -&gt; StartPt -&gt; Signal p (StartPt, TableSize) StartPt
+forall p.
+Clock p =&gt;
+Table -&gt; StartPt -&gt; Signal p (StartPt, TableSize) StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#oscPartials"><span class="hs-identifier hs-var">oscPartials</span></a></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-operator">&gt;</span><span> </span><span class="hs-comment">-- pluck    = pluck</span><span>
+</span><span id="line-59"></span><span class="hs-operator">&gt;</span><span> </span><span class="hs-comment">-- balance  = balance</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-operator">&gt;</span><span> </span><span id="line"><span class="annot"><span class="annottext">line :: StartPt -&gt; StartPt -&gt; StartPt -&gt; ArrowP SF p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#line"><span class="hs-identifier hs-var hs-var">line</span></a></span></span><span> </span><span id="local-6989586621679097055"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097055"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679097054"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097054"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679097053"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097053"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-62"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">proc</span><span> </span><span id="local-6989586621679097052"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097052"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-63"></span><span class="hs-operator">&gt;</span><span>     </span><span id="local-6989586621679097051"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097051"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt -&gt; Signal p () StartPt
+forall p.
+Clock p =&gt;
+StartPt -&gt; StartPt -&gt; StartPt -&gt; Signal p () StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#envLine"><span class="hs-identifier hs-var">envLine</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097055"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097054"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097053"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span class="hs-operator">&gt;</span><span>     </span><span class="annot"><span class="annottext">ArrowP SF p StartPt StartPt
+forall (a :: * -&gt; * -&gt; *) b. Arrow a =&gt; a b b
+</span><a href="Euterpea.IO.Audio.Basics.html#outA"><span class="hs-identifier hs-var">outA</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097051"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097052"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-operator">&gt;</span><span> </span><span id="expon"><span class="annot"><span class="annottext">expon :: StartPt -&gt; StartPt -&gt; StartPt -&gt; ArrowP SF p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#expon"><span class="hs-identifier hs-var hs-var">expon</span></a></span></span><span> </span><span id="local-6989586621679097048"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097048"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679097047"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097047"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679097046"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097046"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-67"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">proc</span><span> </span><span id="local-6989586621679097045"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097045"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-68"></span><span class="hs-operator">&gt;</span><span>     </span><span id="local-6989586621679097044"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097044"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt -&gt; Signal p () StartPt
+forall p.
+Clock p =&gt;
+StartPt -&gt; StartPt -&gt; StartPt -&gt; Signal p () StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#envExpon"><span class="hs-identifier hs-var">envExpon</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097048"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097047"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097046"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span class="hs-operator">&gt;</span><span>     </span><span class="annot"><span class="annottext">ArrowP SF p StartPt StartPt
+forall (a :: * -&gt; * -&gt; *) b. Arrow a =&gt; a b b
+</span><a href="Euterpea.IO.Audio.Basics.html#outA"><span class="hs-identifier hs-var">outA</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097044"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097045"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-operator">&gt;</span><span> </span><span id="linseg"><span class="annot"><span class="annottext">linseg :: [StartPt] -&gt; [StartPt] -&gt; Signal p () StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#linseg"><span class="hs-identifier hs-var hs-var">linseg</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[StartPt] -&gt; [StartPt] -&gt; Signal p () StartPt
+forall p. Clock p =&gt; [StartPt] -&gt; [StartPt] -&gt; Signal p () StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#envLineSeg"><span class="hs-identifier hs-var">envLineSeg</span></a></span><span>
+</span><span id="line-72"></span><span class="hs-operator">&gt;</span><span> </span><span id="expseg"><span class="annot"><span class="annottext">expseg :: [StartPt] -&gt; [StartPt] -&gt; Signal p () StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#expseg"><span class="hs-identifier hs-var hs-var">expseg</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[StartPt] -&gt; [StartPt] -&gt; Signal p () StartPt
+forall p. Clock p =&gt; [StartPt] -&gt; [StartPt] -&gt; Signal p () StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#envExponSeg"><span class="hs-identifier hs-var">envExponSeg</span></a></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-operator">&gt;</span><span> </span><span id="linen"><span class="annot"><span class="annottext">linen :: StartPt -&gt; StartPt -&gt; StartPt -&gt; ArrowP SF p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#linen"><span class="hs-identifier hs-var hs-var">linen</span></a></span></span><span> </span><span id="local-6989586621679097037"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097037"><span class="hs-identifier hs-var">rise</span></a></span></span><span> </span><span id="local-6989586621679097036"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097036"><span class="hs-identifier hs-var">dur</span></a></span></span><span> </span><span id="local-6989586621679097035"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097035"><span class="hs-identifier hs-var">dec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><span id="line-75"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">proc</span><span> </span><span id="local-6989586621679097034"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097034"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-76"></span><span class="hs-operator">&gt;</span><span>     </span><span id="local-6989586621679097033"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097033"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt -&gt; Signal p () StartPt
+forall p.
+Clock p =&gt;
+StartPt -&gt; StartPt -&gt; StartPt -&gt; Signal p () StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#envASR"><span class="hs-identifier hs-var">envASR</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097037"><span class="hs-identifier hs-var">rise</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097036"><span class="hs-identifier hs-var">dur</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097035"><span class="hs-identifier hs-var">dec</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span class="hs-operator">&gt;</span><span>     </span><span class="annot"><span class="annottext">ArrowP SF p StartPt StartPt
+forall (a :: * -&gt; * -&gt; *) b. Arrow a =&gt; a b b
+</span><a href="Euterpea.IO.Audio.Basics.html#outA"><span class="hs-identifier hs-var">outA</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097033"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097034"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-operator">&gt;</span><span> </span><span id="envlpx"><span class="annot"><span class="annottext">envlpx :: StartPt
+-&gt; StartPt
+-&gt; StartPt
+-&gt; Table
+-&gt; StartPt
+-&gt; StartPt
+-&gt; ArrowP SF p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#envlpx"><span class="hs-identifier hs-var hs-var">envlpx</span></a></span></span><span> </span><span id="local-6989586621679097030"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097030"><span class="hs-identifier hs-var">rise</span></a></span></span><span> </span><span id="local-6989586621679097029"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097029"><span class="hs-identifier hs-var">dur</span></a></span></span><span> </span><span id="local-6989586621679097028"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097028"><span class="hs-identifier hs-var">dec</span></a></span></span><span> </span><span id="local-6989586621679097027"><span class="annot"><span class="annottext">Table
+</span><a href="#local-6989586621679097027"><span class="hs-identifier hs-var">tab</span></a></span></span><span> </span><span id="local-6989586621679097026"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097026"><span class="hs-identifier hs-var">atss</span></a></span></span><span> </span><span id="local-6989586621679097025"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097025"><span class="hs-identifier hs-var">atdec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-80"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">proc</span><span> </span><span id="local-6989586621679097024"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097024"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-81"></span><span class="hs-operator">&gt;</span><span>     </span><span id="local-6989586621679097023"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097023"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StartPt
+-&gt; StartPt
+-&gt; StartPt
+-&gt; Table
+-&gt; StartPt
+-&gt; StartPt
+-&gt; Signal p () StartPt
+forall p.
+Clock p =&gt;
+StartPt
+-&gt; StartPt
+-&gt; StartPt
+-&gt; Table
+-&gt; StartPt
+-&gt; StartPt
+-&gt; Signal p () StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#envCSEnvlpx"><span class="hs-identifier hs-var">envCSEnvlpx</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097030"><span class="hs-identifier hs-var">rise</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097029"><span class="hs-identifier hs-var">dur</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097028"><span class="hs-identifier hs-var">dec</span></a></span><span> </span><span class="annot"><span class="annottext">Table
+</span><a href="#local-6989586621679097027"><span class="hs-identifier hs-var">tab</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097026"><span class="hs-identifier hs-var">atss</span></a></span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097025"><span class="hs-identifier hs-var">atdec</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span class="hs-operator">&gt;</span><span>     </span><span class="annot"><span class="annottext">ArrowP SF p StartPt StartPt
+forall (a :: * -&gt; * -&gt; *) b. Arrow a =&gt; a b b
+</span><a href="Euterpea.IO.Audio.Basics.html#outA"><span class="hs-identifier hs-var">outA</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097023"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097024"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-operator">&gt;</span><span> </span><span id="rand"><span class="annot"><span class="annottext">rand :: TableSize -&gt; ArrowP SF p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#rand"><span class="hs-identifier hs-var hs-var">rand</span></a></span></span><span> </span><span id="local-6989586621679097020"><span class="annot"><span class="annottext">TableSize
+</span><a href="#local-6989586621679097020"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><span id="line-85"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">proc</span><span> </span><span id="local-6989586621679097019"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097019"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-86"></span><span class="hs-operator">&gt;</span><span>     </span><span id="local-6989586621679097018"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097018"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; Signal p () StartPt
+forall p. TableSize -&gt; Signal p () StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#noiseWhite"><span class="hs-identifier hs-var">noiseWhite</span></a></span><span> </span><span class="annot"><span class="annottext">TableSize
+</span><a href="#local-6989586621679097020"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span class="hs-operator">&gt;</span><span>     </span><span class="annot"><span class="annottext">ArrowP SF p StartPt StartPt
+forall (a :: * -&gt; * -&gt; *) b. Arrow a =&gt; a b b
+</span><a href="Euterpea.IO.Audio.Basics.html#outA"><span class="hs-identifier hs-var">outA</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097018"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097019"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="hs-operator">&gt;</span><span> </span><span id="randi"><span class="annot"><span class="annottext">randi :: TableSize -&gt; ArrowP SF p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#randi"><span class="hs-identifier hs-var hs-var">randi</span></a></span></span><span> </span><span id="local-6989586621679097015"><span class="annot"><span class="annottext">TableSize
+</span><a href="#local-6989586621679097015"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><span id="line-90"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">proc</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679097014"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097014"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679097013"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097013"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-91"></span><span class="hs-operator">&gt;</span><span>     </span><span id="local-6989586621679097012"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097012"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; Signal p StartPt StartPt
+forall p. Clock p =&gt; TableSize -&gt; Signal p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#noiseBLI"><span class="hs-identifier hs-var">noiseBLI</span></a></span><span> </span><span class="annot"><span class="annottext">TableSize
+</span><a href="#local-6989586621679097015"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097013"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-92"></span><span class="hs-operator">&gt;</span><span>     </span><span class="annot"><span class="annottext">Signal p StartPt StartPt
+forall (a :: * -&gt; * -&gt; *) b. Arrow a =&gt; a b b
+</span><a href="Euterpea.IO.Audio.Basics.html#outA"><span class="hs-identifier hs-var">outA</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097012"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097014"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span class="hs-operator">&gt;</span><span> </span><span id="randh"><span class="annot"><span class="annottext">randh :: TableSize -&gt; ArrowP SF p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#randh"><span class="hs-identifier hs-var hs-var">randh</span></a></span></span><span> </span><span id="local-6989586621679097009"><span class="annot"><span class="annottext">TableSize
+</span><a href="#local-6989586621679097009"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-95"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">proc</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679097008"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097008"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679097007"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097007"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-96"></span><span class="hs-operator">&gt;</span><span>     </span><span id="local-6989586621679097006"><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097006"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; Signal p StartPt StartPt
+forall p. Clock p =&gt; TableSize -&gt; Signal p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#noiseBLH"><span class="hs-identifier hs-var">noiseBLH</span></a></span><span> </span><span class="annot"><span class="annottext">TableSize
+</span><a href="#local-6989586621679097009"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097007"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-97"></span><span class="hs-operator">&gt;</span><span>     </span><span class="annot"><span class="annottext">Signal p StartPt StartPt
+forall (a :: * -&gt; * -&gt; *) b. Arrow a =&gt; a b b
+</span><a href="Euterpea.IO.Audio.Basics.html#outA"><span class="hs-identifier hs-var">outA</span></a></span><span> </span><span class="hs-glyph">-&lt;</span><span> </span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097006"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">StartPt -&gt; StartPt -&gt; StartPt
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">StartPt
+</span><a href="#local-6989586621679097008"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span class="hs-operator">&gt;</span><span> </span><span id="delay"><span class="annot"><span class="annottext">delay :: StartPt -&gt; Signal p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#delay"><span class="hs-identifier hs-var hs-var">delay</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StartPt -&gt; Signal p StartPt StartPt
+forall p. Clock p =&gt; StartPt -&gt; Signal p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#delayLine"><span class="hs-identifier hs-var">delayLine</span></a></span><span>
+</span><span id="line-100"></span><span class="hs-operator">&gt;</span><span> </span><span id="vdelay"><span class="annot"><span class="annottext">vdelay :: StartPt -&gt; Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#vdelay"><span class="hs-identifier hs-var hs-var">vdelay</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StartPt -&gt; Signal p (StartPt, StartPt) StartPt
+forall p. Clock p =&gt; StartPt -&gt; Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#delayLine1"><span class="hs-identifier hs-var">delayLine1</span></a></span><span>
+</span><span id="line-101"></span><span class="hs-operator">&gt;</span><span> </span><span id="delay1"><span class="annot"><span class="annottext">delay1 :: StartPt -&gt; Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#delay1"><span class="hs-identifier hs-var hs-var">delay1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">StartPt -&gt; Signal p (StartPt, StartPt) StartPt
+forall p. Clock p =&gt; StartPt -&gt; Signal p (StartPt, StartPt) StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#delayLine1"><span class="hs-identifier hs-var">delayLine1</span></a></span><span>
+</span><span id="line-102"></span><span class="hs-operator">&gt;</span><span> </span><span id="delayT"><span class="annot"><span class="annottext">delayT :: TableSize -&gt; Table -&gt; Signal p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.CSound.html#delayT"><span class="hs-identifier hs-var hs-var">delayT</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TableSize -&gt; Table -&gt; Signal p StartPt StartPt
+forall p. Clock p =&gt; TableSize -&gt; Table -&gt; Signal p StartPt StartPt
+</span><a href="Euterpea.IO.Audio.BasicSigFuns.html#delayLineT"><span class="hs-identifier hs-var">delayLineT</span></a></span><span>
+</span><span id="line-103"></span></pre></body></html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-comment">{-|
+Module      : Graphics.Vega.VegaLite.Output
+Copyright   : (c) Douglas Burke, 2018-2019
+License     : BSD3
+
+Maintainer  : dburke.gw@gmail.com
+Stability   : unstable
+Portability : CPP, OverloadedStrings
+
+Write out the VegaLite specification.
+
+-}</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Graphics.Vega.VegaLite.Output</span><span>
+</span><span id="line-18"></span><span>       </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Output.html#toHtml"><span class="hs-identifier">toHtml</span></a></span><span>
+</span><span id="line-19"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Output.html#toHtmlFile"><span class="hs-identifier">toHtmlFile</span></a></span><span>
+</span><span id="line-20"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Output.html#toHtmlWith"><span class="hs-identifier">toHtmlWith</span></a></span><span>
+</span><span id="line-21"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Output.html#toHtmlFileWith"><span class="hs-identifier">toHtmlFileWith</span></a></span><span>
+</span><span id="line-22"></span><span>       </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">A</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Lazy</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TL</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Lazy.IO</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TL</span></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Value</span></span><span class="hs-special">)</span><span class="hs-cpp">
+
+#if !(MIN_VERSION_base(4, 12, 0))
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Monoid</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-operator">&lt;&gt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html"><span class="hs-identifier">Graphics.Vega.VegaLite.Specification</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VegaLite"><span class="hs-identifier">VegaLite</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#fromVL"><span class="hs-identifier">fromVL</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">{-|
+
+Converts VegaLite to html Text. Uses Vega-Embed with the
+default options. See 'toHtmlWith' for more control.
+
+@since 0.2.1.0
+-}</span><span>
+</span><span id="line-44"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Output.html#toHtml"><span class="hs-identifier hs-type">toHtml</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VegaLite"><span class="hs-identifier hs-type">VegaLite</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TL.Text</span></span><span>
+</span><span id="line-45"></span><span id="toHtml"><span class="annot"><span class="annottext">toHtml :: VegaLite -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Output.html#toHtml"><span class="hs-identifier hs-var hs-var">toHtml</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Value -&gt; VegaLite -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Output.html#toHtmlWith"><span class="hs-identifier hs-var">toHtmlWith</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Value
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">{-|
+
+Converts VegaLite to an html file. Uses Vega-Embed with the
+default options. See 'toHtmlFileWith' for more control.
+
+@since 0.2.1.0
+-}</span><span>
+</span><span id="line-54"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Output.html#toHtmlFile"><span class="hs-identifier hs-type">toHtmlFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VegaLite"><span class="hs-identifier hs-type">VegaLite</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span id="toHtmlFile"><span class="annot"><span class="annottext">toHtmlFile :: FilePath -&gt; VegaLite -&gt; IO ()
+</span><a href="Graphics.Vega.VegaLite.Output.html#toHtmlFile"><span class="hs-identifier hs-var hs-var">toHtmlFile</span></a></span></span><span> </span><span id="local-6989586621679111507"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679111507"><span class="hs-identifier hs-var">file</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; Text -&gt; IO ()
+</span><span class="hs-identifier hs-var">TL.writeFile</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679111507"><span class="hs-identifier hs-var">file</span></a></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; IO ()) -&gt; (VegaLite -&gt; Text) -&gt; VegaLite -&gt; IO ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">VegaLite -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Output.html#toHtml"><span class="hs-identifier hs-var">toHtml</span></a></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-comment">{-|
+
+Converts VegaLite to html Text. Uses Vega-Embed and is for when
+some control is needed over the output: 'toHtml' is a simpler
+form which just uses the default Vega-Embed options.
+
+The render you use to view the output file must support Javascript,
+since it is needed to create the visualization from the Vega-Lite
+specification. The Vega and Vega-Lite Javascript versions are pegged
+to 5 and 4, but no limit is applied to the Vega-Embed library.
+
+@since 0.4.0.0
+-}</span><span>
+</span><span id="line-70"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Output.html#toHtmlWith"><span class="hs-identifier hs-type">toHtmlWith</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-71"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Value</span></span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-comment">-- ^ The options to pass to the Vega-Embed @embed@ routine. See</span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-comment">--   &lt;https://github.com/vega/vega-embed#options&gt; for the</span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-comment">--   supported options.</span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VegaLite"><span class="hs-identifier hs-type">VegaLite</span></a></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-comment">-- ^ The Vega-Lite specification to display.</span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TL.Text</span></span><span>
+</span><span id="line-78"></span><span id="toHtmlWith"><span class="annot"><span class="annottext">toHtmlWith :: Maybe Value -&gt; VegaLite -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Output.html#toHtmlWith"><span class="hs-identifier hs-var hs-var">toHtmlWith</span></a></span></span><span> </span><span id="local-6989586621679111504"><span class="annot"><span class="annottext">Maybe Value
+</span><a href="#local-6989586621679111504"><span class="hs-identifier hs-var">mopts</span></a></span></span><span> </span><span id="local-6989586621679111503"><span class="annot"><span class="annottext">VegaLite
+</span><a href="#local-6989586621679111503"><span class="hs-identifier hs-var">vl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679111502"><span class="annot"><span class="annottext">spec :: Text
+</span><a href="#local-6989586621679111502"><span class="hs-identifier hs-var hs-var">spec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Value -&gt; Text
+forall a. ToJSON a =&gt; a -&gt; Text
+</span><span class="hs-identifier hs-var">A.encodeToLazyText</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VegaLite -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Specification.html#fromVL"><span class="hs-identifier hs-var">fromVL</span></a></span><span> </span><span class="annot"><span class="annottext">VegaLite
+</span><a href="#local-6989586621679111503"><span class="hs-identifier hs-var">vl</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>      </span><span id="local-6989586621679111500"><span class="annot"><span class="annottext">opts :: Text
+</span><a href="#local-6989586621679111500"><span class="hs-identifier hs-var hs-var">opts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; (Value -&gt; Text) -&gt; Maybe Value -&gt; Text
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679111498"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679111498"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;,&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; Text
+forall a. ToJSON a =&gt; a -&gt; Text
+</span><span class="hs-identifier hs-var">A.encodeToLazyText</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679111498"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe Value
+</span><a href="#local-6989586621679111504"><span class="hs-identifier hs-var">mopts</span></a></span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">[Text] -&gt; Text
+</span><span class="hs-identifier hs-var">TL.unlines</span></span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;&lt;!DOCTYPE html&gt;&quot;</span></span><span>
+</span><span id="line-84"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;&lt;html&gt;&quot;</span></span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;&lt;head&gt;&quot;</span></span><span>
+</span><span id="line-86"></span><span>      </span><span class="hs-comment">-- versions are fixed at vega 5, vega-lite 4</span><span>
+</span><span id="line-87"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;  &lt;script src=\&quot;https://cdn.jsdelivr.net/npm/vega@5\&quot;&gt;&lt;/script&gt;&quot;</span></span><span>
+</span><span id="line-88"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;  &lt;script src=\&quot;https://cdn.jsdelivr.net/npm/vega-lite@4\&quot;&gt;&lt;/script&gt;&quot;</span></span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;  &lt;script src=\&quot;https://cdn.jsdelivr.net/npm/vega-embed\&quot;&gt;&lt;/script&gt;&quot;</span></span><span>
+</span><span id="line-90"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;&lt;/head&gt;&quot;</span></span><span>
+</span><span id="line-91"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;&lt;body&gt;&quot;</span></span><span>
+</span><span id="line-92"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;&lt;div id=\&quot;vis\&quot;&gt;&lt;/div&gt;&quot;</span></span><span>
+</span><span id="line-93"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;&lt;script type=\&quot;text/javascript\&quot;&gt;&quot;</span></span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;  var spec = &quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679111502"><span class="hs-identifier hs-var">spec</span></a></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;;&quot;</span></span><span>
+</span><span id="line-95"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;  vegaEmbed(\'#vis\', spec&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679111500"><span class="hs-identifier hs-var">opts</span></a></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;).then(function(result) {&quot;</span></span><span>
+</span><span id="line-96"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;  // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view&quot;</span></span><span>
+</span><span id="line-97"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;  }).catch(console.error);&quot;</span></span><span>
+</span><span id="line-98"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;&lt;/script&gt;&quot;</span></span><span>
+</span><span id="line-99"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;&lt;/body&gt;&quot;</span></span><span>
+</span><span id="line-100"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;&lt;/html&gt;&quot;</span></span><span>
+</span><span id="line-101"></span><span>    </span><span class="hs-special">]</span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span class="hs-comment">{-|
+
+Converts VegaLite to an html file. Uses Vega-Embed and is for when
+some control is needed over the output: 'toHtmlFile' is a simpler
+form which just uses the default Vega-Embed options.
+
+@since 0.4.0.0
+-}</span><span>
+</span><span id="line-111"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Output.html#toHtmlFileWith"><span class="hs-identifier hs-type">toHtmlFileWith</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-112"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Value</span></span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-comment">-- ^ The options to pass to the Vega-Embed @embed@ routine. See</span><span>
+</span><span id="line-114"></span><span>  </span><span class="hs-comment">--   &lt;https://github.com/vega/vega-embed#options&gt; for the</span><span>
+</span><span id="line-115"></span><span>  </span><span class="hs-comment">--   supported options.</span><span>
+</span><span id="line-116"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-117"></span><span>  </span><span class="hs-comment">-- ^ The output file name (it will be over-written if it already exists).</span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VegaLite"><span class="hs-identifier hs-type">VegaLite</span></a></span><span>
+</span><span id="line-119"></span><span>  </span><span class="hs-comment">-- ^ The Vega-Lite specification to display.</span><span>
+</span><span id="line-120"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span id="toHtmlFileWith"><span class="annot"><span class="annottext">toHtmlFileWith :: Maybe Value -&gt; FilePath -&gt; VegaLite -&gt; IO ()
+</span><a href="Graphics.Vega.VegaLite.Output.html#toHtmlFileWith"><span class="hs-identifier hs-var hs-var">toHtmlFileWith</span></a></span></span><span> </span><span id="local-6989586621679111496"><span class="annot"><span class="annottext">Maybe Value
+</span><a href="#local-6989586621679111496"><span class="hs-identifier hs-var">mopts</span></a></span></span><span> </span><span id="local-6989586621679111495"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679111495"><span class="hs-identifier hs-var">file</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; Text -&gt; IO ()
+</span><span class="hs-identifier hs-var">TL.writeFile</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679111495"><span class="hs-identifier hs-var">file</span></a></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; IO ()) -&gt; (VegaLite -&gt; Text) -&gt; VegaLite -&gt; IO ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Maybe Value -&gt; VegaLite -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Output.html#toHtmlWith"><span class="hs-identifier hs-var">toHtmlWith</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe Value
+</span><a href="#local-6989586621679111496"><span class="hs-identifier hs-var">mopts</span></a></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span></pre></body></html>

@@ -1,0 +1,772 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE FlexibleInstances          #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE BangPatterns               #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE MagicHash                  #-}</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Html.Convert</span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Html.Convert.html#Converted"><span class="hs-identifier">Converted</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier">Convert</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Html.Type.Internal.html"><span class="hs-identifier">Html.Type.Internal</span></a></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.String</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Char</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ord</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Double.Conversion.ByteString</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.Natural</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Exts</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeLits</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.CString</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">unpackCString#</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">unpackCStringUtf8#</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">unpackFoldrCString#</span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Semigroup</span></span><span>                   </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">S</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span>                      </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">M</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Builder</span></span><span>          </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">B</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Builder.Prim</span></span><span>     </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">BP</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Builder.Internal</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">U</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span>                        </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Encoding</span></span><span>               </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Lazy</span></span><span>                   </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TL</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text.Lazy.Encoding</span></span><span>          </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">TL</span></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">newtype</span><span> </span><span id="Converted"><span class="annot"><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Converted"><span class="annot"><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span></span><span> </span><span class="hs-special">{</span><span id="unConv"><span class="annot"><span class="annottext">Converted -&gt; Builder
+</span><a href="Html.Convert.html#unConv"><span class="hs-identifier hs-var hs-var">unConv</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">B.Builder</span></span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679051583"><span id="local-6989586621679051585"><span id="local-6989586621679051587"><span class="annot"><span class="annottext">Semigroup Converted
+Converted
+Semigroup Converted
+-&gt; Converted
+-&gt; (Converted -&gt; Converted -&gt; Converted)
+-&gt; ([Converted] -&gt; Converted)
+-&gt; Monoid Converted
+[Converted] -&gt; Converted
+Converted -&gt; Converted -&gt; Converted
+forall a.
+Semigroup a -&gt; a -&gt; (a -&gt; a -&gt; a) -&gt; ([a] -&gt; a) -&gt; Monoid a
+mconcat :: [Converted] -&gt; Converted
+$cmconcat :: [Converted] -&gt; Converted
+mappend :: Converted -&gt; Converted -&gt; Converted
+$cmappend :: Converted -&gt; Converted -&gt; Converted
+mempty :: Converted
+$cmempty :: Converted
+$cp1Monoid :: Semigroup Converted
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">M.Monoid</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679051576"><span id="local-6989586621679051578"><span id="local-6989586621679051580"><span class="annot"><span class="annottext">b -&gt; Converted -&gt; Converted
+NonEmpty Converted -&gt; Converted
+Converted -&gt; Converted -&gt; Converted
+(Converted -&gt; Converted -&gt; Converted)
+-&gt; (NonEmpty Converted -&gt; Converted)
+-&gt; (forall b. Integral b =&gt; b -&gt; Converted -&gt; Converted)
+-&gt; Semigroup Converted
+forall b. Integral b =&gt; b -&gt; Converted -&gt; Converted
+forall a.
+(a -&gt; a -&gt; a)
+-&gt; (NonEmpty a -&gt; a)
+-&gt; (forall b. Integral b =&gt; b -&gt; a -&gt; a)
+-&gt; Semigroup a
+stimes :: b -&gt; Converted -&gt; Converted
+$cstimes :: forall b. Integral b =&gt; b -&gt; Converted -&gt; Converted
+sconcat :: NonEmpty Converted -&gt; Converted
+$csconcat :: NonEmpty Converted -&gt; Converted
+&lt;&gt; :: Converted -&gt; Converted -&gt; Converted
+$c&lt;&gt; :: Converted -&gt; Converted -&gt; Converted
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">S.Semigroup</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsString</span></span><span> </span><span class="annot"><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-type">Converted</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679051572"><span class="annot"><span class="annottext">fromString :: String -&gt; Converted
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromString</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Converted
+forall a. Convert a =&gt; a -&gt; Converted
+</span><a href="Html.Convert.html#convert"><span class="hs-identifier hs-var">convert</span></a></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">{-| Convert a type efficienctly to a renderable representation.  Add
+  instances if you want use custom types in your document.
+
+@
+{\-\# LANGUAGE OverloadedStrings \#-\}
+{\-\# LANGUAGE RecordWildCards   \#-\}
+
+module Main where
+
+import Html
+
+import Data.Text (Text)
+import Data.Monoid
+
+data Person
+  = Person
+  { name :: Text
+  , age :: Int
+  , vegetarian :: Bool
+  }
+
+-- | This is already very efficient.
+-- Wrap the Strings in Raw if you don't want to escape them.
+instance Convert Person where
+  convert (Person{..})
+    =  convert name
+    &lt;&gt; &quot; is &quot;
+    &lt;&gt; convert age
+    &lt;&gt; &quot; years old and likes &quot;
+    &lt;&gt; if vegetarian then &quot;oranges.&quot; else &quot;meat.&quot;
+
+john :: Person
+john = Person {name = \&quot;John\&quot;, age = 52, vegetarian = True}
+
+main :: IO ()
+main = print (div_ john)
+@
+-}</span><span>
+</span><span id="line-75"></span><span class="hs-keyword">class</span><span> </span><span id="Convert"><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-var">Convert</span></a></span></span><span> </span><span id="local-6989586621679051640"><span class="annot"><a href="#local-6989586621679051640"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-76"></span><span>  </span><span id="convert"><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-identifier hs-type">convert</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679051640"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-type">Converted</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span id="local-6989586621679051570"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownSymbol</span></span><span> </span><span class="annot"><a href="#local-6989586621679051570"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Proxy</span></span><span> </span><span class="annot"><a href="#local-6989586621679051570"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051567"><span class="annot"><span class="annottext">convert :: Proxy a -&gt; Converted
+</span><a href="#local-6989586621679051567"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted)
+-&gt; (Proxy a -&gt; Builder) -&gt; Proxy a -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Builder
+</span><span class="hs-identifier hs-var">U.byteStringCopy</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Builder)
+-&gt; (Proxy a -&gt; ByteString) -&gt; Proxy a -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ByteString
+forall a. IsString a =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">fromString</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; ByteString)
+-&gt; (Proxy a -&gt; String) -&gt; Proxy a -&gt; ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Proxy a -&gt; String
+forall (n :: Symbol) (proxy :: Symbol -&gt; *).
+KnownSymbol n =&gt;
+proxy n -&gt; String
+</span><span class="hs-identifier hs-var">symbolVal</span></span></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>              </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051562"><span class="annot"><span class="annottext">convert :: () -&gt; Converted
+</span><a href="#local-6989586621679051562"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Converted -&gt; () -&gt; Converted
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Converted
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-81"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#Raw"><span class="hs-identifier hs-type">Raw</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span class="hs-special">)</span><span>      </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051559"><span class="annot"><span class="annottext">convert :: Raw Char -&gt; Converted
+</span><a href="#local-6989586621679051559"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted)
+-&gt; (Raw Char -&gt; Builder) -&gt; Raw Char -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Builder
+</span><span class="hs-identifier hs-var">B.charUtf8</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Builder) -&gt; (Raw Char -&gt; Char) -&gt; Raw Char -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Raw Char -&gt; Char
+forall a. Raw a -&gt; a
+</span><a href="Html.Type.Internal.html#fromRaw"><span class="hs-identifier hs-var hs-var">fromRaw</span></a></span><span>
+</span><span id="line-82"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#Raw"><span class="hs-identifier hs-type">Raw</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">)</span><span>    </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051555"><span class="annot"><span class="annottext">convert :: Raw String -&gt; Converted
+</span><a href="#local-6989586621679051555"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Converted
+</span><a href="Html.Convert.html#stringConvRaw"><span class="hs-identifier hs-var">stringConvRaw</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Converted)
+-&gt; (Raw String -&gt; String) -&gt; Raw String -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Raw String -&gt; String
+forall a. Raw a -&gt; a
+</span><a href="Html.Type.Internal.html#fromRaw"><span class="hs-identifier hs-var hs-var">fromRaw</span></a></span><span>
+</span><span id="line-83"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#Raw"><span class="hs-identifier hs-type">Raw</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span class="hs-special">)</span><span>    </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051552"><span class="annot"><span class="annottext">convert :: Raw Text -&gt; Converted
+</span><a href="#local-6989586621679051552"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted)
+-&gt; (Raw Text -&gt; Builder) -&gt; Raw Text -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Builder
+</span><span class="hs-identifier hs-var">T.encodeUtf8Builder</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Builder) -&gt; (Raw Text -&gt; Text) -&gt; Raw Text -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Raw Text -&gt; Text
+forall a. Raw a -&gt; a
+</span><a href="Html.Type.Internal.html#fromRaw"><span class="hs-identifier hs-var hs-var">fromRaw</span></a></span><span>
+</span><span id="line-84"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#Raw"><span class="hs-identifier hs-type">Raw</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">TL.Text</span></span><span class="hs-special">)</span><span>   </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051549"><span class="annot"><span class="annottext">convert :: Raw Text -&gt; Converted
+</span><a href="#local-6989586621679051549"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted)
+-&gt; (Raw Text -&gt; Builder) -&gt; Raw Text -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Builder
+</span><span class="hs-identifier hs-var">TL.encodeUtf8Builder</span></span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Builder) -&gt; (Raw Text -&gt; Text) -&gt; Raw Text -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Raw Text -&gt; Text
+forall a. Raw a -&gt; a
+</span><a href="Html.Type.Internal.html#fromRaw"><span class="hs-identifier hs-var hs-var">fromRaw</span></a></span><span>
+</span><span id="line-85"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Html.Type.Internal.html#Raw"><span class="hs-identifier hs-type">Raw</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">B.Builder</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051546"><span class="annot"><span class="annottext">convert :: Raw Builder -&gt; Converted
+</span><a href="#local-6989586621679051546"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted)
+-&gt; (Raw Builder -&gt; Builder) -&gt; Raw Builder -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Raw Builder -&gt; Builder
+forall a. Raw a -&gt; a
+</span><a href="Html.Type.Internal.html#fromRaw"><span class="hs-identifier hs-var hs-var">fromRaw</span></a></span><span>
+</span><span id="line-86"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span>            </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051544"><span class="annot"><span class="annottext">convert :: Char -&gt; Converted
+</span><a href="#local-6989586621679051544"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted) -&gt; (Char -&gt; Builder) -&gt; Char -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">BoundedPrim Char -&gt; Char -&gt; Builder
+forall a. BoundedPrim a -&gt; a -&gt; Builder
+</span><span class="hs-identifier hs-var">BP.primBounded</span></span><span> </span><span class="annot"><span class="annottext">BoundedPrim Char
+</span><a href="Html.Convert.html#escapeUtf8"><span class="hs-identifier hs-var">escapeUtf8</span></a></span><span>
+</span><span id="line-87"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>          </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051540"><span class="annot"><span class="annottext">convert :: String -&gt; Converted
+</span><a href="#local-6989586621679051540"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Converted
+</span><a href="Html.Convert.html#stringConv"><span class="hs-identifier hs-var">stringConv</span></a></span><span>
+</span><span id="line-88"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>          </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051537"><span class="annot"><span class="annottext">convert :: Text -&gt; Converted
+</span><a href="#local-6989586621679051537"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted) -&gt; (Text -&gt; Builder) -&gt; Text -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">BoundedPrim Word8 -&gt; Text -&gt; Builder
+</span><span class="hs-identifier hs-var">T.encodeUtf8BuilderEscaped</span></span><span> </span><span class="annot"><span class="annottext">BoundedPrim Word8
+</span><a href="Html.Convert.html#escape"><span class="hs-identifier hs-var">escape</span></a></span><span>
+</span><span id="line-89"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">TL.Text</span></span><span>         </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051533"><span class="annot"><span class="annottext">convert :: Text -&gt; Converted
+</span><a href="#local-6989586621679051533"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted) -&gt; (Text -&gt; Builder) -&gt; Text -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">BoundedPrim Word8 -&gt; Text -&gt; Builder
+</span><span class="hs-identifier hs-var">TL.encodeUtf8BuilderEscaped</span></span><span> </span><span class="annot"><span class="annottext">BoundedPrim Word8
+</span><a href="Html.Convert.html#escape"><span class="hs-identifier hs-var">escape</span></a></span><span>
+</span><span id="line-90"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>             </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051530"><span class="annot"><span class="annottext">convert :: Int -&gt; Converted
+</span><a href="#local-6989586621679051530"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted) -&gt; (Int -&gt; Builder) -&gt; Int -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Builder
+</span><span class="hs-identifier hs-var">B.intDec</span></span><span>
+</span><span id="line-91"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>         </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051527"><span class="annot"><span class="annottext">convert :: Integer -&gt; Converted
+</span><a href="#local-6989586621679051527"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted)
+-&gt; (Integer -&gt; Builder) -&gt; Integer -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Builder
+</span><span class="hs-identifier hs-var">B.integerDec</span></span><span>
+</span><span id="line-92"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span><span>         </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051524"><span class="annot"><span class="annottext">convert :: Natural -&gt; Converted
+</span><a href="#local-6989586621679051524"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted)
+-&gt; (Natural -&gt; Builder) -&gt; Natural -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Builder
+</span><span class="hs-identifier hs-var">B.integerDec</span></span><span> </span><span class="annot"><span class="annottext">(Integer -&gt; Builder) -&gt; (Natural -&gt; Integer) -&gt; Natural -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Natural -&gt; Integer
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span>
+</span><span id="line-93"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Float</span></span><span>           </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051522"><span class="annot"><span class="annottext">convert :: Float -&gt; Converted
+</span><a href="#local-6989586621679051522"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted) -&gt; (Float -&gt; Builder) -&gt; Float -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Builder
+</span><span class="hs-identifier hs-var">U.byteStringCopy</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Builder)
+-&gt; (Float -&gt; ByteString) -&gt; Float -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; ByteString
+</span><span class="hs-identifier hs-var">toShortest</span></span><span> </span><span class="annot"><span class="annottext">(Double -&gt; ByteString) -&gt; (Float -&gt; Double) -&gt; Float -&gt; ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Float -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span>
+</span><span id="line-94"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>          </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051519"><span class="annot"><span class="annottext">convert :: Double -&gt; Converted
+</span><a href="#local-6989586621679051519"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted)
+-&gt; (Double -&gt; Builder) -&gt; Double -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Builder
+</span><span class="hs-identifier hs-var">U.byteStringCopy</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; Builder)
+-&gt; (Double -&gt; ByteString) -&gt; Double -&gt; Builder
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; ByteString
+</span><span class="hs-identifier hs-var">toShortest</span></span><span>
+</span><span id="line-95"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Html.Convert.html#Convert"><span class="hs-identifier hs-type">Convert</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word</span></span><span>            </span><span class="hs-keyword">where</span><span> </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-special">;</span><span> </span><span id="local-6989586621679051517"><span class="annot"><span class="annottext">convert :: Word -&gt; Converted
+</span><a href="#local-6989586621679051517"><span class="hs-identifier hs-var hs-var hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted) -&gt; (Word -&gt; Builder) -&gt; Word -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Word -&gt; Builder
+</span><span class="hs-identifier hs-var">B.wordDec</span></span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Html.Convert.html#builderCString%23"><span class="hs-pragma hs-type">builderCString#</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-98"></span><span class="annot"><a href="Html.Convert.html#builderCString%23"><span class="hs-identifier hs-type">builderCString#</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BP.BoundedPrim</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word8</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Addr#</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-type">Converted</span></a></span><span>
+</span><span id="line-99"></span><span id="builderCString%23"><span class="annot"><span class="annottext">builderCString# :: BoundedPrim Word8 -&gt; Addr# -&gt; Converted
+</span><a href="Html.Convert.html#builderCString%23"><span class="hs-identifier hs-var hs-var">builderCString#</span></a></span></span><span> </span><span id="local-6989586621679051514"><span class="annot"><span class="annottext">BoundedPrim Word8
+</span><a href="#local-6989586621679051514"><span class="hs-identifier hs-var">bp</span></a></span></span><span> </span><span id="local-6989586621679051513"><span class="annot"><span class="annottext">Addr#
+</span><a href="#local-6989586621679051513"><span class="hs-identifier hs-var">addr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted) -&gt; Builder -&gt; Converted
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">BoundedPrim Word8 -&gt; (Int -&gt; Maybe (Word8, Int)) -&gt; Int -&gt; Builder
+forall b a. BoundedPrim b -&gt; (a -&gt; Maybe (b, a)) -&gt; a -&gt; Builder
+</span><span class="hs-identifier hs-var">BP.primUnfoldrBounded</span></span><span> </span><span class="annot"><span class="annottext">BoundedPrim Word8
+</span><a href="#local-6989586621679051514"><span class="hs-identifier hs-var">bp</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Maybe (Word8, Int)
+forall a. Num a =&gt; Int -&gt; Maybe (a, Int)
+</span><a href="#local-6989586621679051511"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-100"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-101"></span><span>    </span><span id="local-6989586621679051511"><span class="annot"><span class="annottext">go :: Int -&gt; Maybe (a, Int)
+</span><a href="#local-6989586621679051511"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-glyph">!</span><span id="local-6989586621679051510"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679051510"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679051509"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a, Int) -&gt; Maybe (a, Int)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; a
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679051509"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679051510"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (a, Int)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-103"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-104"></span><span>        </span><span class="hs-glyph">!</span><span id="local-6989586621679051509"><span class="annot"><span class="annottext">b :: Int
+</span><a href="#local-6989586621679051509"><span class="hs-identifier hs-var hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int# -&gt; Int
+</span><span class="hs-identifier hs-var">I#</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char# -&gt; Int#
+</span><span class="hs-identifier hs-var">ord#</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Char#
+</span><a href="#local-6989586621679051506"><span class="hs-identifier hs-var">at#</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679051510"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-105"></span><span>    </span><span id="local-6989586621679051506"><span class="annot"><span class="annottext">at# :: Int -&gt; Char#
+</span><a href="#local-6989586621679051506"><span class="hs-identifier hs-var hs-var">at#</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">I#</span></span><span> </span><span id="local-6989586621679051505"><span class="annot"><span class="annottext">Int#
+</span><a href="#local-6989586621679051505"><span class="hs-identifier hs-var">i#</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Addr# -&gt; Int# -&gt; Char#
+</span><span class="hs-identifier hs-var">indexCharOffAddr#</span></span><span> </span><span class="annot"><span class="annottext">Addr#
+</span><a href="#local-6989586621679051513"><span class="hs-identifier hs-var">addr</span></a></span><span> </span><span class="annot"><span class="annottext">Int#
+</span><a href="#local-6989586621679051505"><span class="hs-identifier hs-var">i#</span></a></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">[</span><span class="hs-pragma">0</span><span class="hs-pragma">]</span><span> </span><span class="annot"><a href="Html.Convert.html#stringConv"><span class="hs-pragma hs-type">stringConv</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-108"></span><span class="annot"><a href="Html.Convert.html#stringConv"><span class="hs-identifier hs-type">stringConv</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-type">Converted</span></a></span><span>
+</span><span id="line-109"></span><span id="stringConv"><span class="annot"><span class="annottext">stringConv :: String -&gt; Converted
+</span><a href="Html.Convert.html#stringConv"><span class="hs-identifier hs-var hs-var">stringConv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted)
+-&gt; (String -&gt; Builder) -&gt; String -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">BoundedPrim Char -&gt; String -&gt; Builder
+forall a. BoundedPrim a -&gt; [a] -&gt; Builder
+</span><span class="hs-identifier hs-var">BP.primMapListBounded</span></span><span> </span><span class="annot"><span class="annottext">BoundedPrim Char
+</span><a href="Html.Convert.html#escapeUtf8"><span class="hs-identifier hs-var">escapeUtf8</span></a></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">[</span><span class="hs-pragma">0</span><span class="hs-pragma">]</span><span> </span><span class="annot"><a href="Html.Convert.html#stringConvRaw"><span class="hs-pragma hs-type">stringConvRaw</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-112"></span><span class="annot"><a href="Html.Convert.html#stringConvRaw"><span class="hs-identifier hs-type">stringConvRaw</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-type">Converted</span></a></span><span>
+</span><span id="line-113"></span><span id="stringConvRaw"><span class="annot"><span class="annottext">stringConvRaw :: String -&gt; Converted
+</span><a href="Html.Convert.html#stringConvRaw"><span class="hs-identifier hs-var hs-var">stringConvRaw</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Builder -&gt; Converted
+</span><a href="Html.Convert.html#Converted"><span class="hs-identifier hs-var">Converted</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder -&gt; Converted)
+-&gt; (String -&gt; Builder) -&gt; String -&gt; Converted
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Builder
+</span><span class="hs-identifier hs-var">B.stringUtf8</span></span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span class="annot"><a href="Html.Convert.html#escapeUtf8"><span class="hs-identifier hs-type">escapeUtf8</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BP.BoundedPrim</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span>
+</span><span id="line-116"></span><span id="escapeUtf8"><span class="annot"><span class="annottext">escapeUtf8 :: BoundedPrim Char
+</span><a href="Html.Convert.html#escapeUtf8"><span class="hs-identifier hs-var hs-var">escapeUtf8</span></a></span></span><span>
+</span><span id="line-117"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool)
+-&gt; BoundedPrim Char -&gt; BoundedPrim Char -&gt; BoundedPrim Char
+forall a.
+(a -&gt; Bool) -&gt; BoundedPrim a -&gt; BoundedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.condB</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span>  </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&gt;'</span></span><span> </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BoundedPrim Char
+</span><span class="hs-identifier hs-var">BP.charUtf8</span></span><span>
+</span><span id="line-118"></span><span>  </span><span class="annot"><span class="annottext">(BoundedPrim Char -&gt; BoundedPrim Char)
+-&gt; (BoundedPrim Char -&gt; BoundedPrim Char)
+-&gt; BoundedPrim Char
+-&gt; BoundedPrim Char
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool)
+-&gt; BoundedPrim Char -&gt; BoundedPrim Char -&gt; BoundedPrim Char
+forall a.
+(a -&gt; Bool) -&gt; BoundedPrim a -&gt; BoundedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.condB</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&lt;'</span></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Char, (Char, (Char, Char))) -&gt; BoundedPrim Char
+forall a. (Char, (Char, (Char, Char))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051499"><span class="hs-identifier hs-var">fixed4</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&amp;'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'l'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'t'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">';'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-119"></span><span>  </span><span class="annot"><span class="annottext">(BoundedPrim Char -&gt; BoundedPrim Char)
+-&gt; (BoundedPrim Char -&gt; BoundedPrim Char)
+-&gt; BoundedPrim Char
+-&gt; BoundedPrim Char
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool)
+-&gt; BoundedPrim Char -&gt; BoundedPrim Char -&gt; BoundedPrim Char
+forall a.
+(a -&gt; Bool) -&gt; BoundedPrim a -&gt; BoundedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.condB</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&gt;'</span></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Char, (Char, (Char, Char))) -&gt; BoundedPrim Char
+forall a. (Char, (Char, (Char, Char))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051499"><span class="hs-identifier hs-var">fixed4</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&amp;'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'g'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'t'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">';'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>  </span><span class="annot"><span class="annottext">(BoundedPrim Char -&gt; BoundedPrim Char)
+-&gt; (BoundedPrim Char -&gt; BoundedPrim Char)
+-&gt; BoundedPrim Char
+-&gt; BoundedPrim Char
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool)
+-&gt; BoundedPrim Char -&gt; BoundedPrim Char -&gt; BoundedPrim Char
+forall a.
+(a -&gt; Bool) -&gt; BoundedPrim a -&gt; BoundedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.condB</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&amp;'</span></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Char, (Char, (Char, (Char, Char)))) -&gt; BoundedPrim Char
+forall a. (Char, (Char, (Char, (Char, Char)))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051498"><span class="hs-identifier hs-var">fixed5</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&amp;'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'a'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'m'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'p'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">';'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>  </span><span class="annot"><span class="annottext">(BoundedPrim Char -&gt; BoundedPrim Char)
+-&gt; (BoundedPrim Char -&gt; BoundedPrim Char)
+-&gt; BoundedPrim Char
+-&gt; BoundedPrim Char
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool)
+-&gt; BoundedPrim Char -&gt; BoundedPrim Char -&gt; BoundedPrim Char
+forall a.
+(a -&gt; Bool) -&gt; BoundedPrim a -&gt; BoundedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.condB</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&quot;'</span></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Char, (Char, (Char, (Char, Char)))) -&gt; BoundedPrim Char
+forall a. (Char, (Char, (Char, (Char, Char)))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051498"><span class="hs-identifier hs-var">fixed5</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&amp;'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'#'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'3'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'4'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">';'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>  </span><span class="annot"><span class="annottext">(BoundedPrim Char -&gt; BoundedPrim Char)
+-&gt; (BoundedPrim Char -&gt; BoundedPrim Char)
+-&gt; BoundedPrim Char
+-&gt; BoundedPrim Char
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool)
+-&gt; BoundedPrim Char -&gt; BoundedPrim Char -&gt; BoundedPrim Char
+forall a.
+(a -&gt; Bool) -&gt; BoundedPrim a -&gt; BoundedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.condB</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'\''</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Char, (Char, (Char, (Char, Char)))) -&gt; BoundedPrim Char
+forall a. (Char, (Char, (Char, (Char, Char)))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051498"><span class="hs-identifier hs-var">fixed5</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&amp;'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'#'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'3'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'9'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">';'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-123"></span><span>  </span><span class="annot"><span class="annottext">(BoundedPrim Char -&gt; BoundedPrim Char)
+-&gt; BoundedPrim Char -&gt; BoundedPrim Char
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char -&gt; BoundedPrim Char
+forall a. FixedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.liftFixedToBounded</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+</span><span class="hs-identifier hs-var">BP.char7</span></span><span>
+</span><span id="line-124"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-125"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="#local-6989586621679051499"><span class="hs-pragma hs-type">fixed4</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-126"></span><span>    </span><span id="local-6989586621679051499"><span class="annot"><span class="annottext">fixed4 :: (Char, (Char, (Char, Char))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051499"><span class="hs-identifier hs-var hs-var">fixed4</span></a></span></span><span> </span><span id="local-6989586621679051495"><span class="annot"><span class="annottext">(Char, (Char, (Char, Char)))
+</span><a href="#local-6989586621679051495"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FixedPrim a -&gt; BoundedPrim a
+forall a. FixedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.liftFixedToBounded</span></span><span> </span><span class="annot"><span class="annottext">(FixedPrim a -&gt; BoundedPrim a) -&gt; FixedPrim a -&gt; BoundedPrim a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Char, (Char, (Char, Char))) -&gt; a -&gt; (Char, (Char, (Char, Char)))
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">(Char, (Char, (Char, Char)))
+</span><a href="#local-6989586621679051495"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; (Char, (Char, (Char, Char))))
+-&gt; FixedPrim (Char, (Char, (Char, Char))) -&gt; FixedPrim a
+forall (f :: * -&gt; *) b a. Contravariant f =&gt; (b -&gt; a) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">BP.&gt;$&lt;</span></span><span>
+</span><span id="line-127"></span><span>      </span><span class="annot"><span class="annottext">FixedPrim Char
+</span><span class="hs-identifier hs-var">BP.char7</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+-&gt; FixedPrim (Char, (Char, Char))
+-&gt; FixedPrim (Char, (Char, (Char, Char)))
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+</span><span class="hs-identifier hs-var">BP.char7</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+-&gt; FixedPrim (Char, Char) -&gt; FixedPrim (Char, (Char, Char))
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+</span><span class="hs-identifier hs-var">BP.char7</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char -&gt; FixedPrim Char -&gt; FixedPrim (Char, Char)
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+</span><span class="hs-identifier hs-var">BP.char7</span></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="#local-6989586621679051498"><span class="hs-pragma hs-type">fixed5</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-130"></span><span>    </span><span id="local-6989586621679051498"><span class="annot"><span class="annottext">fixed5 :: (Char, (Char, (Char, (Char, Char)))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051498"><span class="hs-identifier hs-var hs-var">fixed5</span></a></span></span><span> </span><span id="local-6989586621679051492"><span class="annot"><span class="annottext">(Char, (Char, (Char, (Char, Char))))
+</span><a href="#local-6989586621679051492"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FixedPrim a -&gt; BoundedPrim a
+forall a. FixedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.liftFixedToBounded</span></span><span> </span><span class="annot"><span class="annottext">(FixedPrim a -&gt; BoundedPrim a) -&gt; FixedPrim a -&gt; BoundedPrim a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Char, (Char, (Char, (Char, Char))))
+-&gt; a -&gt; (Char, (Char, (Char, (Char, Char))))
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">(Char, (Char, (Char, (Char, Char))))
+</span><a href="#local-6989586621679051492"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; (Char, (Char, (Char, (Char, Char)))))
+-&gt; FixedPrim (Char, (Char, (Char, (Char, Char)))) -&gt; FixedPrim a
+forall (f :: * -&gt; *) b a. Contravariant f =&gt; (b -&gt; a) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">BP.&gt;$&lt;</span></span><span>
+</span><span id="line-131"></span><span>      </span><span class="annot"><span class="annottext">FixedPrim Char
+</span><span class="hs-identifier hs-var">BP.char7</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+-&gt; FixedPrim (Char, (Char, (Char, Char)))
+-&gt; FixedPrim (Char, (Char, (Char, (Char, Char))))
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+</span><span class="hs-identifier hs-var">BP.char7</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+-&gt; FixedPrim (Char, (Char, Char))
+-&gt; FixedPrim (Char, (Char, (Char, Char)))
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+</span><span class="hs-identifier hs-var">BP.char7</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+-&gt; FixedPrim (Char, Char) -&gt; FixedPrim (Char, (Char, Char))
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+</span><span class="hs-identifier hs-var">BP.char7</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char -&gt; FixedPrim Char -&gt; FixedPrim (Char, Char)
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Char
+</span><span class="hs-identifier hs-var">BP.char7</span></span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span class="annot"><a href="Html.Convert.html#escape"><span class="hs-identifier hs-type">escape</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BP.BoundedPrim</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word8</span></span><span>
+</span><span id="line-134"></span><span id="escape"><span class="annot"><span class="annottext">escape :: BoundedPrim Word8
+</span><a href="Html.Convert.html#escape"><span class="hs-identifier hs-var hs-var">escape</span></a></span></span><span>
+</span><span id="line-135"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Word8 -&gt; Bool)
+-&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8
+forall a.
+(a -&gt; Bool) -&gt; BoundedPrim a -&gt; BoundedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.condB</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word8 -&gt; Word8 -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span>  </span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&gt;'</span></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FixedPrim Word8 -&gt; BoundedPrim Word8
+forall a. FixedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.liftFixedToBounded</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+</span><span class="hs-identifier hs-var">BP.word8</span></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>  </span><span class="annot"><span class="annottext">(BoundedPrim Word8 -&gt; BoundedPrim Word8)
+-&gt; (BoundedPrim Word8 -&gt; BoundedPrim Word8)
+-&gt; BoundedPrim Word8
+-&gt; BoundedPrim Word8
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Word8 -&gt; Bool)
+-&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8
+forall a.
+(a -&gt; Bool) -&gt; BoundedPrim a -&gt; BoundedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.condB</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word8 -&gt; Word8 -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&lt;'</span></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Word8, (Word8, (Word8, Word8))) -&gt; BoundedPrim Word8
+forall a. (Word8, (Word8, (Word8, Word8))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051489"><span class="hs-identifier hs-var">fixed4</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&amp;'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'l'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'t'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">';'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>  </span><span class="annot"><span class="annottext">(BoundedPrim Word8 -&gt; BoundedPrim Word8)
+-&gt; (BoundedPrim Word8 -&gt; BoundedPrim Word8)
+-&gt; BoundedPrim Word8
+-&gt; BoundedPrim Word8
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Word8 -&gt; Bool)
+-&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8
+forall a.
+(a -&gt; Bool) -&gt; BoundedPrim a -&gt; BoundedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.condB</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word8 -&gt; Word8 -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&gt;'</span></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Word8, (Word8, (Word8, Word8))) -&gt; BoundedPrim Word8
+forall a. (Word8, (Word8, (Word8, Word8))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051489"><span class="hs-identifier hs-var">fixed4</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&amp;'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'g'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'t'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">';'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-138"></span><span>  </span><span class="annot"><span class="annottext">(BoundedPrim Word8 -&gt; BoundedPrim Word8)
+-&gt; (BoundedPrim Word8 -&gt; BoundedPrim Word8)
+-&gt; BoundedPrim Word8
+-&gt; BoundedPrim Word8
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Word8 -&gt; Bool)
+-&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8
+forall a.
+(a -&gt; Bool) -&gt; BoundedPrim a -&gt; BoundedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.condB</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word8 -&gt; Word8 -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&amp;'</span></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Word8, (Word8, (Word8, (Word8, Word8)))) -&gt; BoundedPrim Word8
+forall a.
+(Word8, (Word8, (Word8, (Word8, Word8)))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051488"><span class="hs-identifier hs-var">fixed5</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&amp;'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'a'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'m'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'p'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">';'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>  </span><span class="annot"><span class="annottext">(BoundedPrim Word8 -&gt; BoundedPrim Word8)
+-&gt; (BoundedPrim Word8 -&gt; BoundedPrim Word8)
+-&gt; BoundedPrim Word8
+-&gt; BoundedPrim Word8
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Word8 -&gt; Bool)
+-&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8
+forall a.
+(a -&gt; Bool) -&gt; BoundedPrim a -&gt; BoundedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.condB</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word8 -&gt; Word8 -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&quot;'</span></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Word8, (Word8, (Word8, (Word8, Word8)))) -&gt; BoundedPrim Word8
+forall a.
+(Word8, (Word8, (Word8, (Word8, Word8)))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051488"><span class="hs-identifier hs-var">fixed5</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&amp;'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'#'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'3'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'4'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">';'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>  </span><span class="annot"><span class="annottext">(BoundedPrim Word8 -&gt; BoundedPrim Word8)
+-&gt; (BoundedPrim Word8 -&gt; BoundedPrim Word8)
+-&gt; BoundedPrim Word8
+-&gt; BoundedPrim Word8
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Word8 -&gt; Bool)
+-&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8
+forall a.
+(a -&gt; Bool) -&gt; BoundedPrim a -&gt; BoundedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.condB</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word8 -&gt; Word8 -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'\''</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Word8, (Word8, (Word8, (Word8, Word8)))) -&gt; BoundedPrim Word8
+forall a.
+(Word8, (Word8, (Word8, (Word8, Word8)))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051488"><span class="hs-identifier hs-var">fixed5</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&amp;'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'#'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'3'</span></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'9'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var">c2w</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">';'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-141"></span><span>  </span><span class="annot"><span class="annottext">(BoundedPrim Word8 -&gt; BoundedPrim Word8)
+-&gt; BoundedPrim Word8 -&gt; BoundedPrim Word8
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8 -&gt; BoundedPrim Word8
+forall a. FixedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.liftFixedToBounded</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+</span><span class="hs-identifier hs-var">BP.word8</span></span><span>
+</span><span id="line-142"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-143"></span><span>    </span><span id="local-6989586621679051491"><span class="annot"><span class="annottext">c2w :: Char -&gt; Word8
+</span><a href="#local-6989586621679051491"><span class="hs-identifier hs-var hs-var">c2w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Word8
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Word8) -&gt; (Char -&gt; Int) -&gt; Char -&gt; Word8
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Int
+</span><span class="hs-identifier hs-var">ord</span></span><span>
+</span><span id="line-144"></span><span>
+</span><span id="line-145"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="#local-6989586621679051489"><span class="hs-pragma hs-type">fixed4</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-146"></span><span>    </span><span id="local-6989586621679051489"><span class="annot"><span class="annottext">fixed4 :: (Word8, (Word8, (Word8, Word8))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051489"><span class="hs-identifier hs-var hs-var">fixed4</span></a></span></span><span> </span><span id="local-6989586621679051487"><span class="annot"><span class="annottext">(Word8, (Word8, (Word8, Word8)))
+</span><a href="#local-6989586621679051487"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FixedPrim a -&gt; BoundedPrim a
+forall a. FixedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.liftFixedToBounded</span></span><span> </span><span class="annot"><span class="annottext">(FixedPrim a -&gt; BoundedPrim a) -&gt; FixedPrim a -&gt; BoundedPrim a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Word8, (Word8, (Word8, Word8)))
+-&gt; a -&gt; (Word8, (Word8, (Word8, Word8)))
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">(Word8, (Word8, (Word8, Word8)))
+</span><a href="#local-6989586621679051487"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; (Word8, (Word8, (Word8, Word8))))
+-&gt; FixedPrim (Word8, (Word8, (Word8, Word8))) -&gt; FixedPrim a
+forall (f :: * -&gt; *) b a. Contravariant f =&gt; (b -&gt; a) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">BP.&gt;$&lt;</span></span><span>
+</span><span id="line-147"></span><span>      </span><span class="annot"><span class="annottext">FixedPrim Word8
+</span><span class="hs-identifier hs-var">BP.word8</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+-&gt; FixedPrim (Word8, (Word8, Word8))
+-&gt; FixedPrim (Word8, (Word8, (Word8, Word8)))
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+</span><span class="hs-identifier hs-var">BP.word8</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+-&gt; FixedPrim (Word8, Word8) -&gt; FixedPrim (Word8, (Word8, Word8))
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+</span><span class="hs-identifier hs-var">BP.word8</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8 -&gt; FixedPrim Word8 -&gt; FixedPrim (Word8, Word8)
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+</span><span class="hs-identifier hs-var">BP.word8</span></span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span>    </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="#local-6989586621679051488"><span class="hs-pragma hs-type">fixed5</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-150"></span><span>    </span><span id="local-6989586621679051488"><span class="annot"><span class="annottext">fixed5 :: (Word8, (Word8, (Word8, (Word8, Word8)))) -&gt; BoundedPrim a
+</span><a href="#local-6989586621679051488"><span class="hs-identifier hs-var hs-var">fixed5</span></a></span></span><span> </span><span id="local-6989586621679051486"><span class="annot"><span class="annottext">(Word8, (Word8, (Word8, (Word8, Word8))))
+</span><a href="#local-6989586621679051486"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FixedPrim a -&gt; BoundedPrim a
+forall a. FixedPrim a -&gt; BoundedPrim a
+</span><span class="hs-identifier hs-var">BP.liftFixedToBounded</span></span><span> </span><span class="annot"><span class="annottext">(FixedPrim a -&gt; BoundedPrim a) -&gt; FixedPrim a -&gt; BoundedPrim a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Word8, (Word8, (Word8, (Word8, Word8))))
+-&gt; a -&gt; (Word8, (Word8, (Word8, (Word8, Word8))))
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">(Word8, (Word8, (Word8, (Word8, Word8))))
+</span><a href="#local-6989586621679051486"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; (Word8, (Word8, (Word8, (Word8, Word8)))))
+-&gt; FixedPrim (Word8, (Word8, (Word8, (Word8, Word8))))
+-&gt; FixedPrim a
+forall (f :: * -&gt; *) b a. Contravariant f =&gt; (b -&gt; a) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">BP.&gt;$&lt;</span></span><span>
+</span><span id="line-151"></span><span>      </span><span class="annot"><span class="annottext">FixedPrim Word8
+</span><span class="hs-identifier hs-var">BP.word8</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+-&gt; FixedPrim (Word8, (Word8, (Word8, Word8)))
+-&gt; FixedPrim (Word8, (Word8, (Word8, (Word8, Word8))))
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+</span><span class="hs-identifier hs-var">BP.word8</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+-&gt; FixedPrim (Word8, (Word8, Word8))
+-&gt; FixedPrim (Word8, (Word8, (Word8, Word8)))
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+</span><span class="hs-identifier hs-var">BP.word8</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+-&gt; FixedPrim (Word8, Word8) -&gt; FixedPrim (Word8, (Word8, Word8))
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+</span><span class="hs-identifier hs-var">BP.word8</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8 -&gt; FixedPrim Word8 -&gt; FixedPrim (Word8, Word8)
+forall (f :: * -&gt; *) a b. Monoidal f =&gt; f a -&gt; f b -&gt; f (a, b)
+</span><span class="hs-operator hs-var">BP.&gt;*&lt;</span></span><span> </span><span class="annot"><span class="annottext">FixedPrim Word8
+</span><span class="hs-identifier hs-var">BP.word8</span></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span class="hs-pragma">{-# RULES</span><span> </span><span class="annot"><span class="hs-pragma">&quot;CONVERTED literal&quot;</span></span><span> </span><span class="hs-pragma">forall</span><span> </span><span id="local-6989586621679051485"><span class="annot"><a href="#local-6989586621679051485"><span class="hs-pragma hs-var">a</span></a></span></span><span class="hs-pragma">.</span><span>
+</span><span id="line-154"></span><span>    </span><span class="annot"><a href="Html.Convert.html#stringConv"><span class="hs-pragma hs-type">stringConv</span></a></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">unpackCString#</span></span><span> </span><span class="annot"><a href="#local-6989586621679051485"><span class="hs-pragma hs-type">a</span></a></span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">=</span><span> </span><span class="annot"><a href="Html.Convert.html#builderCString%23"><span class="hs-pragma hs-type">builderCString#</span></a></span><span> </span><span class="annot"><a href="Html.Convert.html#escape"><span class="hs-pragma hs-type">escape</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679051485"><span class="hs-pragma hs-type">a</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span class="hs-pragma">{-# RULES</span><span> </span><span class="annot"><span class="hs-pragma">&quot;CONVERTED foldr literal&quot;</span></span><span> </span><span class="hs-pragma">forall</span><span> </span><span id="local-6989586621679051484"><span class="annot"><a href="#local-6989586621679051484"><span class="hs-pragma hs-var">a</span></a></span></span><span class="hs-pragma">.</span><span>
+</span><span id="line-157"></span><span>    </span><span class="annot"><a href="Html.Convert.html#stringConv"><span class="hs-pragma hs-type">stringConv</span></a></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">build</span></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">unpackFoldrCString#</span></span><span> </span><span class="annot"><a href="#local-6989586621679051484"><span class="hs-pragma hs-type">a</span></a></span><span class="hs-pragma">)</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">=</span><span> </span><span class="annot"><a href="Html.Convert.html#builderCString%23"><span class="hs-pragma hs-type">builderCString#</span></a></span><span> </span><span class="annot"><a href="Html.Convert.html#escape"><span class="hs-pragma hs-type">escape</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679051484"><span class="hs-pragma hs-type">a</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span class="hs-pragma">{-# RULES</span><span> </span><span class="annot"><span class="hs-pragma">&quot;CONVERTED literal raw&quot;</span></span><span> </span><span class="hs-pragma">forall</span><span> </span><span id="local-6989586621679051483"><span class="annot"><a href="#local-6989586621679051483"><span class="hs-pragma hs-var">a</span></a></span></span><span class="hs-pragma">.</span><span>
+</span><span id="line-160"></span><span>    </span><span class="annot"><a href="Html.Convert.html#stringConvRaw"><span class="hs-pragma hs-type">stringConvRaw</span></a></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">unpackCString#</span></span><span> </span><span class="annot"><a href="#local-6989586621679051483"><span class="hs-pragma hs-type">a</span></a></span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">=</span><span> </span><span class="annot"><a href="Html.Convert.html#builderCString%23"><span class="hs-pragma hs-type">builderCString#</span></a></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">BP.liftFixedToBounded</span></span><span> </span><span class="annot"><span class="hs-pragma hs-type">BP.word8</span></span><span class="hs-pragma">)</span><span> </span><span class="annot"><a href="#local-6989586621679051483"><span class="hs-pragma hs-type">a</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span class="hs-pragma">{-# RULES</span><span> </span><span class="annot"><span class="hs-pragma">&quot;CONVERTED foldr literal raw&quot;</span></span><span> </span><span class="hs-pragma">forall</span><span> </span><span id="local-6989586621679051482"><span class="annot"><a href="#local-6989586621679051482"><span class="hs-pragma hs-var">a</span></a></span></span><span class="hs-pragma">.</span><span>
+</span><span id="line-163"></span><span>    </span><span class="annot"><a href="Html.Convert.html#stringConvRaw"><span class="hs-pragma hs-type">stringConvRaw</span></a></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">build</span></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">unpackFoldrCString#</span></span><span> </span><span class="annot"><a href="#local-6989586621679051482"><span class="hs-pragma hs-type">a</span></a></span><span class="hs-pragma">)</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">=</span><span> </span><span class="annot"><a href="Html.Convert.html#builderCString%23"><span class="hs-pragma hs-type">builderCString#</span></a></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">BP.liftFixedToBounded</span></span><span> </span><span class="annot"><span class="hs-pragma hs-type">BP.word8</span></span><span class="hs-pragma">)</span><span> </span><span class="annot"><a href="#local-6989586621679051482"><span class="hs-pragma hs-type">a</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-164"></span><span>
+</span><span id="line-165"></span><span class="hs-pragma">{-# RULES</span><span> </span><span class="annot"><span class="hs-pragma">&quot;CONVERTED literal utf8&quot;</span></span><span> </span><span class="hs-pragma">forall</span><span> </span><span id="local-6989586621679051481"><span class="annot"><a href="#local-6989586621679051481"><span class="hs-pragma hs-var">a</span></a></span></span><span class="hs-pragma">.</span><span>
+</span><span id="line-166"></span><span>    </span><span class="annot"><a href="Html.Convert.html#stringConv"><span class="hs-pragma hs-type">stringConv</span></a></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">unpackCStringUtf8#</span></span><span> </span><span class="annot"><a href="#local-6989586621679051481"><span class="hs-pragma hs-type">a</span></a></span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">=</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">T.pack</span></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">unpackCStringUtf8#</span></span><span> </span><span class="annot"><a href="#local-6989586621679051481"><span class="hs-pragma hs-type">a</span></a></span><span class="hs-pragma">)</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-167"></span><span>
+</span><span id="line-168"></span><span class="hs-pragma">{-# RULES</span><span> </span><span class="annot"><span class="hs-pragma">&quot;CONVERTED literal utf8 raw&quot;</span></span><span> </span><span class="hs-pragma">forall</span><span> </span><span id="local-6989586621679051479"><span class="annot"><a href="#local-6989586621679051479"><span class="hs-pragma hs-var">a</span></a></span></span><span class="hs-pragma">.</span><span>
+</span><span id="line-169"></span><span>    </span><span class="annot"><a href="Html.Convert.html#stringConvRaw"><span class="hs-pragma hs-type">stringConvRaw</span></a></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">unpackCStringUtf8#</span></span><span> </span><span class="annot"><a href="#local-6989586621679051479"><span class="hs-pragma hs-type">a</span></a></span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">=</span><span> </span><span class="annot"><a href="Html.Convert.html#convert"><span class="hs-pragma hs-type">convert</span></a></span><span> </span><span class="hs-pragma">(</span><span class="annot"><a href="Html.Type.Internal.html#Raw"><span class="hs-pragma hs-type">Raw</span></a></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">T.pack</span></span><span> </span><span class="hs-pragma">(</span><span class="annot"><span class="hs-pragma hs-type">unpackCStringUtf8#</span></span><span> </span><span class="annot"><a href="#local-6989586621679051479"><span class="hs-pragma hs-type">a</span></a></span><span class="hs-pragma">)</span><span class="hs-pragma">)</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-170"></span></pre></body></html>

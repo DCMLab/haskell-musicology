@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LINE 1 &quot;Sound/PortMidi/DeviceInfo.hsc&quot; #-}</span><span>
+</span><span id="line-1"></span><span class="hs-pragma">{-# OPTIONS_HADDOCK hide #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Sound.PortMidi.DeviceInfo</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-4"></span><span>    </span><span class="annot"><a href="Sound.PortMidi.DeviceInfo.html#DeviceInfo"><span class="hs-identifier">DeviceInfo</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Sound.PortMidi.DeviceInfo.html#peekDeviceInfo"><span class="hs-identifier">peekDeviceInfo</span></a></span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C</span></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">data</span><span> </span><span id="DeviceInfo"><span class="annot"><a href="Sound.PortMidi.DeviceInfo.html#DeviceInfo"><span class="hs-identifier hs-var">DeviceInfo</span></a></span></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-glyph">=</span><span>  </span><span id="DeviceInfo"><span class="annot"><a href="Sound.PortMidi.DeviceInfo.html#DeviceInfo"><span class="hs-identifier hs-var">DeviceInfo</span></a></span></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="interface"><span class="annot"><span class="annottext">DeviceInfo -&gt; String
+</span><a href="Sound.PortMidi.DeviceInfo.html#interface"><span class="hs-identifier hs-var hs-var">interface</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="name"><span class="annot"><span class="annottext">DeviceInfo -&gt; String
+</span><a href="Sound.PortMidi.DeviceInfo.html#name"><span class="hs-identifier hs-var hs-var">name</span></a></span></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="input"><span class="annot"><span class="annottext">DeviceInfo -&gt; Bool
+</span><a href="Sound.PortMidi.DeviceInfo.html#input"><span class="hs-identifier hs-var hs-var">input</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="output"><span class="annot"><span class="annottext">DeviceInfo -&gt; Bool
+</span><a href="Sound.PortMidi.DeviceInfo.html#output"><span class="hs-identifier hs-var hs-var">output</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="opened"><span class="annot"><span class="annottext">DeviceInfo -&gt; Bool
+</span><a href="Sound.PortMidi.DeviceInfo.html#opened"><span class="hs-identifier hs-var hs-var">opened</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679032998"><span id="local-6989586621679033000"><span class="annot"><span class="annottext">DeviceInfo -&gt; DeviceInfo -&gt; Bool
+(DeviceInfo -&gt; DeviceInfo -&gt; Bool)
+-&gt; (DeviceInfo -&gt; DeviceInfo -&gt; Bool) -&gt; Eq DeviceInfo
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: DeviceInfo -&gt; DeviceInfo -&gt; Bool
+$c/= :: DeviceInfo -&gt; DeviceInfo -&gt; Bool
+== :: DeviceInfo -&gt; DeviceInfo -&gt; Bool
+$c== :: DeviceInfo -&gt; DeviceInfo -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679032991"><span id="local-6989586621679032993"><span id="local-6989586621679032995"><span class="annot"><span class="annottext">Int -&gt; DeviceInfo -&gt; ShowS
+[DeviceInfo] -&gt; ShowS
+DeviceInfo -&gt; String
+(Int -&gt; DeviceInfo -&gt; ShowS)
+-&gt; (DeviceInfo -&gt; String)
+-&gt; ([DeviceInfo] -&gt; ShowS)
+-&gt; Show DeviceInfo
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [DeviceInfo] -&gt; ShowS
+$cshowList :: [DeviceInfo] -&gt; ShowS
+show :: DeviceInfo -&gt; String
+$cshow :: DeviceInfo -&gt; String
+showsPrec :: Int -&gt; DeviceInfo -&gt; ShowS
+$cshowsPrec :: Int -&gt; DeviceInfo -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span id="local-6989586621679032989"><span class="annot"><a href="Sound.PortMidi.DeviceInfo.html#peekDeviceInfo"><span class="hs-identifier hs-type">peekDeviceInfo</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><a href="#local-6989586621679032989"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="Sound.PortMidi.DeviceInfo.html#DeviceInfo"><span class="hs-identifier hs-type">DeviceInfo</span></a></span></span><span>
+</span><span id="line-23"></span><span id="peekDeviceInfo"><span class="annot"><span class="annottext">peekDeviceInfo :: Ptr a -&gt; IO DeviceInfo
+</span><a href="Sound.PortMidi.DeviceInfo.html#peekDeviceInfo"><span class="hs-identifier hs-var hs-var">peekDeviceInfo</span></a></span></span><span> </span><span id="local-6989586621679032988"><span class="annot"><span class="annottext">Ptr a
+</span><a href="#local-6989586621679032988"><span class="hs-identifier hs-var">ptr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-24"></span><span>  </span><span id="local-6989586621679032987"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679032987"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679032986"><span class="annot"><span class="annottext">Ptr a
+</span><a href="#local-6989586621679032986"><span class="hs-identifier hs-var">hsc_ptr</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr a -&gt; Int -&gt; IO CString
+forall a b. Storable a =&gt; Ptr b -&gt; Int -&gt; IO a
+</span><span class="hs-identifier hs-var">peekByteOff</span></span><span> </span><span class="annot"><span class="annottext">Ptr a
+</span><a href="#local-6989586621679032986"><span class="hs-identifier hs-var">hsc_ptr</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">8</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Ptr a
+</span><a href="#local-6989586621679032988"><span class="hs-identifier hs-var">ptr</span></a></span><span> </span><span class="annot"><span class="annottext">IO CString -&gt; (CString -&gt; IO String) -&gt; IO String
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">CString -&gt; IO String
+</span><span class="hs-identifier hs-var">peekCString</span></span><span>
+</span><span id="line-25"></span><span class="hs-pragma">{-# LINE 25 &quot;Sound/PortMidi/DeviceInfo.hsc&quot; #-}</span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-identifier">u</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-identifier">hsc_ptr</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">peekByteOff</span><span> </span><span class="hs-identifier">hsc_ptr</span><span> </span><span class="hs-number">16</span><span class="hs-special">)</span><span> </span><span class="hs-identifier">ptr</span><span> </span><span class="hs-operator">&gt;&gt;=</span><span> </span><span class="hs-identifier">peekCString</span><span>
+</span><span id="line-26"></span><span class="hs-pragma">{-# LINE 26 &quot;Sound/PortMidi/DeviceInfo.hsc&quot; #-}</span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-identifier">i</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-identifier">hsc_ptr</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">peekByteOff</span><span> </span><span class="hs-identifier">hsc_ptr</span><span> </span><span class="hs-number">24</span><span class="hs-special">)</span><span> </span><span class="hs-identifier">ptr</span><span>
+</span><span id="line-27"></span><span class="hs-pragma">{-# LINE 27 &quot;Sound/PortMidi/DeviceInfo.hsc&quot; #-}</span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-identifier">o</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-identifier">hsc_ptr</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">peekByteOff</span><span> </span><span class="hs-identifier">hsc_ptr</span><span> </span><span class="hs-number">28</span><span class="hs-special">)</span><span> </span><span class="hs-identifier">ptr</span><span>
+</span><span id="line-28"></span><span class="hs-pragma">{-# LINE 28 &quot;Sound/PortMidi/DeviceInfo.hsc&quot; #-}</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-identifier">d</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-identifier">hsc_ptr</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">peekByteOff</span><span> </span><span class="hs-identifier">hsc_ptr</span><span> </span><span class="hs-number">32</span><span class="hs-special">)</span><span> </span><span class="hs-identifier">ptr</span><span>
+</span><span id="line-29"></span><span class="hs-pragma">{-# LINE 29 &quot;Sound/PortMidi/DeviceInfo.hsc&quot; #-}</span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-identifier">return</span><span> </span><span class="hs-operator">$</span><span> </span><span class="hs-identifier">DeviceInfo</span><span> </span><span class="hs-identifier">s</span><span> </span><span class="hs-identifier">u</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">asBool</span><span> </span><span class="hs-identifier">i</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">asBool</span><span> </span><span class="hs-identifier">o</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">asBool</span><span> </span><span class="hs-identifier">d</span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><a href="#local-6989586621679032975"><span class="hs-identifier hs-type">asBool</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int32</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-32"></span><span class="hs-pragma">{-# LINE 32 &quot;Sound/PortMidi/DeviceInfo.hsc&quot; #-}</span><span>
+</span><span id="line-32"></span><span>    </span><span class="hs-identifier">asBool</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-operator">/=</span><span> </span><span class="hs-number">0</span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span></pre></body></html>
