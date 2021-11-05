@@ -42,7 +42,7 @@ jobs:
 
       # Copy docs
       - name: Copy Docs
-      - run: |
+        run: |
           doc_path=`stack path | grep local-doc-root | cut -f2 -d ":"`
           cp -r "doc_path" docs
 
