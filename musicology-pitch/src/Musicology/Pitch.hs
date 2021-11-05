@@ -61,9 +61,9 @@ Output:
 > - p79
 > - p82
 > MIDI classes:
-> - pcic3
-> - pcic7
-> - pcic10
+> - ic3
+> - ic7
+> - ic10
 > spelled:
 > - E5
 > - G5

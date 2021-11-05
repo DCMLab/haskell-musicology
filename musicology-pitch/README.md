@@ -1,5 +1,7 @@
 # musicology-pitch
 
+![docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://dcmlab.github.io/haskell-musicology/musicology-pitch-0.1.0.0/Musicology-Pitch.html)
+
 This package provides useful representations and operations for working with musical pitch.
 Follows the same API and notation formats as the companion libraries:
 - [Pitches.jl](https://github.com/DCMLab/Pitches.jl/) (Julia)
@@ -55,9 +57,9 @@ MIDI:
 - p79
 - p82
 MIDI classes:
-- pcic3
-- pcic7
-- pcic10
+- pc3
+- pc7
+- pc10
 spelled:
 - E5
 - G5

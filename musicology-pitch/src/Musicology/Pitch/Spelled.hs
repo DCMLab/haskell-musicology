@@ -5,14 +5,39 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# OPTIONS_HADDOCK show-extensions #-}
+{-|
+Module: Musicology.Pitch.Spelled
+Description: Spelled pitch and interval types (Western notation).
+Copyright: Christoph Finkensiep, 2021
+License: BSD
+Maintainer: chfin@chfin.de
+Stability: experimental
+
+This module defines pitch and interval types for spelled pitch, i.e. Western notation.
+-}
 module Musicology.Pitch.Spelled
-  ( SInterval(..)
+  ( -- * Interval Types
+    SInterval(..)
   , spelled
   , spelledDiaChrom
   , SIC(..)
   , sic
+  -- * Pitch Types
+  , SPitch
+  , SPC
+  , spelledp
+  , spc
+  -- * Common Accessors
   , Spelled(..)
   , letter
+  -- * Concrete Intervals
+  --
+  -- | Concrete intervals come in two variants,
+  -- one for intervals (e.g. 'fifth') and one for interval classes ('fifth'').
+  -- Imperfect intervals have a 'ImperfectInterval' type
+  -- and must be used with 'major' or 'minor' (e.g. @'minor' 'third'@).
+  -- All (fully applied) intervals can be used with 'aug', 'dim' and 'down'
   , second
   , third
   , fourth
@@ -27,14 +52,14 @@ module Musicology.Pitch.Spelled
   , fifth'
   , sixth'
   , seventh'
-  , SPitch
-  , SPC
-  , spelledp
-  , spc
+  -- * Concrete pitches
+  --
+  -- | Concrete pitches are constructed from an accidental ('flt', 'nat', or 'shp')
+  -- and (for non-class pitches) and octave number.
   , Accidental(..)
   , flt
-  , shp
   , nat
+  , shp
   , c
   , d
   , e

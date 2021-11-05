@@ -5,8 +5,8 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# OPTIONS_HADDOCK show-extensions #-}
 {-|
-Module: Musicology.Pitch
-Description: Representations and operations for musical pitch.
+Module: Musicology.Pitch.Class
+Description: Generic pitch and interval interface.
 Copyright: Christoph Finkensiep, 2021
 License: BSD
 Maintainer: chfin@chfin.de
@@ -38,10 +38,10 @@ module Musicology.Pitch.Class
   -- , ClassyInterval(..)
   , Diatonic(..)
   , Chromatic(..)
-  , ImperfectInterval(..)
   , aug
   , dim
   , down
+  , ImperfectInterval(..)
   , minor
   , major
   -- * Pitches

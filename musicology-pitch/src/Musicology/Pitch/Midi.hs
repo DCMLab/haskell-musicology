@@ -2,10 +2,24 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# OPTIONS_HADDOCK show-extensions #-}
+{-|
+Module: Musicology.Pitch.Midi
+Description: Enharmonic pitch and interval types (MIDI).
+Copyright: Christoph Finkensiep, 2021
+License: BSD
+Maintainer: chfin@chfin.de
+Stability: experimental
+
+This module defines pitch and interval types for enharmonic/chromatic pitch, (as used in MIDI).
+Midi intervals are just 'Int's.
+-}
 module Musicology.Pitch.Midi
-  ( MidiInterval
+  ( -- * Interval types
+    MidiInterval
   , MidiIC(..)
   , mic
+  -- * Pitch types
   , MidiPitch
   , MidiPC
   , midip
@@ -114,7 +128,7 @@ instance ToMidi MidiPitch where
   toMidi (Pitch i) = i
 
 instance Notation MidiPC where
-  showNotation (Pitch i) = "pc" <> showNotation i
+  showNotation (Pitch (MidiIC i)) = "pc" <> showNotation i
   parseNotation = R.string "pc" >> (midipc <$> parseInt)
 
 instance Show MidiPC where
