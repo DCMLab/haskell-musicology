@@ -14,12 +14,25 @@ Stability: experimental
 
 This module defines a generic interface for pitch and interval types.
 
-It provides three basic blocks of functionality
+It provides three basic blocks of functionality:
+
+- a set of type classes for generically [working with intervals](#g:1)
+- a generic type and associated operations for [working with pitches](#g:2)
+- functionality for reading and printing pitches and intervals in a [common notation](#g:3)
 -}
 module Musicology.Pitch.Class
-  ( module Data.VectorSpace
-  , IntervalClass(..)
+  (
+  -- * Intervals
+  --
+  -- | Every interval implements the 'Interval' class.
+  -- Since intervals form vector spaces (or rather [modules]()),
+  -- 'Interval' inherits from 'VectorSpace' and the associated arithmetic operations '^+^', '^-^', '*^', and '^*'.
+  -- Each 'Interval' type is associated with an 'IntervalClass' type that implements octave equivalence.
+  -- In addition, the classes 'Diatonic' and 'Chromatic' provide extra functionality
+  -- for intervals that have diatonic and chromatic interpretations.
+  module Data.VectorSpace
   , Interval(..)
+  , IntervalClass(..)
   , oct
   , unison
   -- , ClassyInterval(..)
@@ -31,6 +44,16 @@ module Musicology.Pitch.Class
   , down
   , minor
   , major
+  -- * Pitches
+  --
+  -- | Pitches are derived from intervals by interpreting an interval relative to a conventional reference point,
+  -- which is specific to the interval type at hand.
+  -- A pitch is represented as a 'Pitch' value, which is a newtype wrapper around an interval type.
+  -- Calculating with pitches and intervals is done with
+  --
+  -- - 'pto', 'pfrom' between pitches,
+  -- - '+^', '^+', '-^' between pitches and intervals (the @^@ is on the interval side)
+  -- - 'pc' for turning a pitch into a pitch class.
   , Pitch(..)
   , toPitch
   , toInterval
@@ -40,12 +63,18 @@ module Musicology.Pitch.Class
   , (^+)
   , (-^)
   , pc
+  -- * Notation
+  --
+  -- | The 'Notation' class implements showing and reading a standard notation
+  -- that is compatible with other implementations of this library (for standard interval and pitch types).
   , Notation(..)
+  -- * Other Functions
   , transpose
   , embedI
   , embedP
   , embed
   , embed'
+  -- * Conversion Classes
   , ToMidi(..)
   , ToFreq(..)
   )
@@ -67,9 +96,6 @@ import           Data.Hashable                  ( Hashable )
 -- Intervals --
 ---------------
 
--- should pitches always be nums?
--- does multiplication always make sense?
--- scalar multiplication? vector space?
 
 class (Interval i, Interval (IOf i), VectorSpace i, ICOf (IOf i) ~ i) => IntervalClass i where
   type IOf i
