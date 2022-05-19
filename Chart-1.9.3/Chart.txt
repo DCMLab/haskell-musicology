@@ -938,9 +938,9 @@ joinPlot :: Plot x y -> Plot x y -> Plot x y
 class ToPlot a
 toPlot :: ToPlot a => a x y -> Plot x y
 mapXY :: PointMapFn x y -> (x, y) -> Point
-plot_render :: forall x_anDP y_anDQ. Lens' (Plot x_anDP y_anDQ) (PointMapFn x_anDP y_anDQ -> BackendProgram ())
-plot_legend :: forall x_anDP y_anDQ. Lens' (Plot x_anDP y_anDQ) [(String, Rect -> BackendProgram ())]
-plot_all_points :: forall x_anDP y_anDQ. Lens' (Plot x_anDP y_anDQ) ([x_anDP], [y_anDQ])
+plot_render :: forall x_anMb y_anMc. Lens' (Plot x_anMb y_anMc) (PointMapFn x_anMb y_anMc -> BackendProgram ())
+plot_legend :: forall x_anMb y_anMc. Lens' (Plot x_anMb y_anMc) [(String, Rect -> BackendProgram ())]
+plot_all_points :: forall x_anMb y_anMc. Lens' (Plot x_anMb y_anMc) ([x_anMb], [y_anMc])
 instance Graphics.Rendering.Chart.Plot.Types.ToPlot Graphics.Rendering.Chart.Plot.Types.Plot
 
 
@@ -954,9 +954,9 @@ PlotPoints :: String -> PointStyle -> [(x, y)] -> PlotPoints x y
 [_plot_points_title] :: PlotPoints x y -> String
 [_plot_points_style] :: PlotPoints x y -> PointStyle
 [_plot_points_values] :: PlotPoints x y -> [(x, y)]
-plot_points_title :: forall x_ao0Q y_ao0R. Lens' (PlotPoints x_ao0Q y_ao0R) String
-plot_points_style :: forall x_ao0Q y_ao0R. Lens' (PlotPoints x_ao0Q y_ao0R) PointStyle
-plot_points_values :: forall x_ao0Q y_ao0R x_ao4K y_ao4L. Lens (PlotPoints x_ao0Q y_ao0R) (PlotPoints x_ao4K y_ao4L) [(x_ao0Q, y_ao0R)] [(x_ao4K, y_ao4L)]
+plot_points_title :: forall x_ao9c y_ao9d. Lens' (PlotPoints x_ao9c y_ao9d) String
+plot_points_style :: forall x_ao9c y_ao9d. Lens' (PlotPoints x_ao9c y_ao9d) PointStyle
+plot_points_values :: forall x_ao9c y_ao9d x_aod6 y_aod7. Lens (PlotPoints x_ao9c y_ao9d) (PlotPoints x_aod6 y_aod7) [(x_ao9c, y_ao9d)] [(x_aod6, y_aod7)]
 instance Graphics.Rendering.Chart.Plot.Types.ToPlot Graphics.Rendering.Chart.Plot.Points.PlotPoints
 instance Data.Default.Class.Default (Graphics.Rendering.Chart.Plot.Points.PlotPoints x y)
 
@@ -984,10 +984,10 @@ hlinePlot :: String -> LineStyle -> b -> Plot a b
 
 -- | Helper function to plot a single vertical line.
 vlinePlot :: String -> LineStyle -> a -> Plot a b
-plot_lines_title :: forall x_aov3 y_aov4. Lens' (PlotLines x_aov3 y_aov4) String
-plot_lines_style :: forall x_aov3 y_aov4. Lens' (PlotLines x_aov3 y_aov4) LineStyle
-plot_lines_values :: forall x_aov3 y_aov4. Lens' (PlotLines x_aov3 y_aov4) [[(x_aov3, y_aov4)]]
-plot_lines_limit_values :: forall x_aov3 y_aov4. Lens' (PlotLines x_aov3 y_aov4) [[(Limit x_aov3, Limit y_aov4)]]
+plot_lines_title :: forall x_aoDp y_aoDq. Lens' (PlotLines x_aoDp y_aoDq) String
+plot_lines_style :: forall x_aoDp y_aoDq. Lens' (PlotLines x_aoDp y_aoDq) LineStyle
+plot_lines_values :: forall x_aoDp y_aoDq. Lens' (PlotLines x_aoDp y_aoDq) [[(x_aoDp, y_aoDq)]]
+plot_lines_limit_values :: forall x_aoDp y_aoDq. Lens' (PlotLines x_aoDp y_aoDq) [[(Limit x_aoDp, Limit y_aoDq)]]
 instance Graphics.Rendering.Chart.Plot.Types.ToPlot Graphics.Rendering.Chart.Plot.Lines.PlotLines
 instance Data.Default.Class.Default (Graphics.Rendering.Chart.Plot.Lines.PlotLines x y)
 
@@ -1001,8 +1001,8 @@ data PlotHidden x y
 PlotHidden :: [x] -> [y] -> PlotHidden x y
 [_plot_hidden_x_values] :: PlotHidden x y -> [x]
 [_plot_hidden_y_values] :: PlotHidden x y -> [y]
-plot_hidden_x_values :: forall x_apov y_apow x_appv. Lens (PlotHidden x_apov y_apow) (PlotHidden x_appv y_apow) [x_apov] [x_appv]
-plot_hidden_y_values :: forall x_apov y_apow y_appw. Lens (PlotHidden x_apov y_apow) (PlotHidden x_apov y_appw) [y_apow] [y_appw]
+plot_hidden_x_values :: forall x_apwR y_apwS x_apxR. Lens (PlotHidden x_apwR y_apwS) (PlotHidden x_apxR y_apwS) [x_apwR] [x_apxR]
+plot_hidden_y_values :: forall x_apwR y_apwS y_apxS. Lens (PlotHidden x_apwR y_apwS) (PlotHidden x_apwR y_apxS) [y_apwS] [y_apxS]
 instance Graphics.Rendering.Chart.Plot.Types.ToPlot Graphics.Rendering.Chart.Plot.Hidden.PlotHidden
 
 
@@ -1017,10 +1017,10 @@ PlotFillBetween :: String -> FillStyle -> Maybe LineStyle -> [(x, (y, y))] -> Pl
 [_plot_fillbetween_style] :: PlotFillBetween x y -> FillStyle
 [_plot_fillbetween_line] :: PlotFillBetween x y -> Maybe LineStyle
 [_plot_fillbetween_values] :: PlotFillBetween x y -> [(x, (y, y))]
-plot_fillbetween_title :: forall x_apAH y_apAI. Lens' (PlotFillBetween x_apAH y_apAI) String
-plot_fillbetween_style :: forall x_apAH y_apAI. Lens' (PlotFillBetween x_apAH y_apAI) FillStyle
-plot_fillbetween_line :: forall x_apAH y_apAI. Lens' (PlotFillBetween x_apAH y_apAI) (Maybe LineStyle)
-plot_fillbetween_values :: forall x_apAH y_apAI x_apFV y_apFW. Lens (PlotFillBetween x_apAH y_apAI) (PlotFillBetween x_apFV y_apFW) [(x_apAH, (y_apAI, y_apAI))] [(x_apFV, (y_apFW, y_apFW))]
+plot_fillbetween_title :: forall x_apJ3 y_apJ4. Lens' (PlotFillBetween x_apJ3 y_apJ4) String
+plot_fillbetween_style :: forall x_apJ3 y_apJ4. Lens' (PlotFillBetween x_apJ3 y_apJ4) FillStyle
+plot_fillbetween_line :: forall x_apJ3 y_apJ4. Lens' (PlotFillBetween x_apJ3 y_apJ4) (Maybe LineStyle)
+plot_fillbetween_values :: forall x_apJ3 y_apJ4 x_apOh y_apOi. Lens (PlotFillBetween x_apJ3 y_apJ4) (PlotFillBetween x_apOh y_apOi) [(x_apJ3, (y_apJ4, y_apJ4))] [(x_apOh, (y_apOi, y_apOi))]
 instance Graphics.Rendering.Chart.Plot.Types.ToPlot Graphics.Rendering.Chart.Plot.FillBetween.PlotFillBetween
 instance Data.Default.Class.Default (Graphics.Rendering.Chart.Plot.FillBetween.PlotFillBetween x y)
 
@@ -1051,11 +1051,11 @@ ErrValue :: x -> x -> x -> ErrValue x
 
 -- | When the error is symmetric, we can simply pass in dx for the error.
 symErrPoint :: (Num a, Num b) => a -> b -> a -> b -> ErrPoint a b
-plot_errbars_title :: forall x_aqsr y_aqss. Lens' (PlotErrBars x_aqsr y_aqss) String
-plot_errbars_line_style :: forall x_aqsr y_aqss. Lens' (PlotErrBars x_aqsr y_aqss) LineStyle
-plot_errbars_tick_length :: forall x_aqsr y_aqss. Lens' (PlotErrBars x_aqsr y_aqss) Double
-plot_errbars_overhang :: forall x_aqsr y_aqss. Lens' (PlotErrBars x_aqsr y_aqss) Double
-plot_errbars_values :: forall x_aqsr y_aqss x_aqG5 y_aqG6. Lens (PlotErrBars x_aqsr y_aqss) (PlotErrBars x_aqG5 y_aqG6) [ErrPoint x_aqsr y_aqss] [ErrPoint x_aqG5 y_aqG6]
+plot_errbars_title :: forall x_aqAN y_aqAO. Lens' (PlotErrBars x_aqAN y_aqAO) String
+plot_errbars_line_style :: forall x_aqAN y_aqAO. Lens' (PlotErrBars x_aqAN y_aqAO) LineStyle
+plot_errbars_tick_length :: forall x_aqAN y_aqAO. Lens' (PlotErrBars x_aqAN y_aqAO) Double
+plot_errbars_overhang :: forall x_aqAN y_aqAO. Lens' (PlotErrBars x_aqAN y_aqAO) Double
+plot_errbars_values :: forall x_aqAN y_aqAO x_aqOr y_aqOs. Lens (PlotErrBars x_aqAN y_aqAO) (PlotErrBars x_aqOr y_aqOs) [ErrPoint x_aqAN y_aqAO] [ErrPoint x_aqOr y_aqOs]
 instance GHC.Show.Show x => GHC.Show.Show (Graphics.Rendering.Chart.Plot.ErrBars.ErrValue x)
 instance (GHC.Show.Show x, GHC.Show.Show y) => GHC.Show.Show (Graphics.Rendering.Chart.Plot.ErrBars.ErrPoint x y)
 instance Graphics.Rendering.Chart.Plot.Types.ToPlot Graphics.Rendering.Chart.Plot.ErrBars.PlotErrBars
@@ -1094,15 +1094,15 @@ Candle :: x -> y -> y -> y -> y -> y -> Candle x y
 [candle_mid] :: Candle x y -> y
 [candle_close] :: Candle x y -> y
 [candle_high] :: Candle x y -> y
-plot_candle_title :: forall x_aswl y_aswm. Lens' (PlotCandle x_aswl y_aswm) String
-plot_candle_line_style :: forall x_aswl y_aswm. Lens' (PlotCandle x_aswl y_aswm) LineStyle
-plot_candle_tick_length :: forall x_aswl y_aswm. Lens' (PlotCandle x_aswl y_aswm) Double
-plot_candle_width :: forall x_aswl y_aswm. Lens' (PlotCandle x_aswl y_aswm) Double
-plot_candle_centre :: forall x_aswl y_aswm. Lens' (PlotCandle x_aswl y_aswm) Double
-plot_candle_fill :: forall x_aswl y_aswm. Lens' (PlotCandle x_aswl y_aswm) Bool
-plot_candle_rise_fill_style :: forall x_aswl y_aswm. Lens' (PlotCandle x_aswl y_aswm) FillStyle
-plot_candle_fall_fill_style :: forall x_aswl y_aswm. Lens' (PlotCandle x_aswl y_aswm) FillStyle
-plot_candle_values :: forall x_aswl y_aswm x_asJV y_asJW. Lens (PlotCandle x_aswl y_aswm) (PlotCandle x_asJV y_asJW) [Candle x_aswl y_aswm] [Candle x_asJV y_asJW]
+plot_candle_title :: forall x_asEH y_asEI. Lens' (PlotCandle x_asEH y_asEI) String
+plot_candle_line_style :: forall x_asEH y_asEI. Lens' (PlotCandle x_asEH y_asEI) LineStyle
+plot_candle_tick_length :: forall x_asEH y_asEI. Lens' (PlotCandle x_asEH y_asEI) Double
+plot_candle_width :: forall x_asEH y_asEI. Lens' (PlotCandle x_asEH y_asEI) Double
+plot_candle_centre :: forall x_asEH y_asEI. Lens' (PlotCandle x_asEH y_asEI) Double
+plot_candle_fill :: forall x_asEH y_asEI. Lens' (PlotCandle x_asEH y_asEI) Bool
+plot_candle_rise_fill_style :: forall x_asEH y_asEI. Lens' (PlotCandle x_asEH y_asEI) FillStyle
+plot_candle_fall_fill_style :: forall x_asEH y_asEI. Lens' (PlotCandle x_asEH y_asEI) FillStyle
+plot_candle_values :: forall x_asEH y_asEI x_asSh y_asSi. Lens (PlotCandle x_asEH y_asEI) (PlotCandle x_asSh y_asSi) [Candle x_asEH y_asEI] [Candle x_asSh y_asSi]
 instance (GHC.Show.Show x, GHC.Show.Show y) => GHC.Show.Show (Graphics.Rendering.Chart.Plot.Candle.Candle x y)
 instance Graphics.Rendering.Chart.Plot.Types.ToPlot Graphics.Rendering.Chart.Plot.Candle.PlotCandle
 instance Data.Default.Class.Default (Graphics.Rendering.Chart.Plot.Candle.PlotCandle x y)
@@ -1317,12 +1317,12 @@ PlotAnnotation :: HTextAnchor -> VTextAnchor -> Double -> FontStyle -> Rectangle
 --   height of the background area
 [_plot_annotation_background] :: PlotAnnotation x y -> Rectangle
 [_plot_annotation_values] :: PlotAnnotation x y -> [(x, y, String)]
-plot_annotation_hanchor :: forall x_ayfm y_ayfn. Lens' (PlotAnnotation x_ayfm y_ayfn) HTextAnchor
-plot_annotation_vanchor :: forall x_ayfm y_ayfn. Lens' (PlotAnnotation x_ayfm y_ayfn) VTextAnchor
-plot_annotation_angle :: forall x_ayfm y_ayfn. Lens' (PlotAnnotation x_ayfm y_ayfn) Double
-plot_annotation_style :: forall x_ayfm y_ayfn. Lens' (PlotAnnotation x_ayfm y_ayfn) FontStyle
-plot_annotation_background :: forall x_ayfm y_ayfn. Lens' (PlotAnnotation x_ayfm y_ayfn) Rectangle
-plot_annotation_values :: forall x_ayfm y_ayfn x_ayuQ y_ayuR. Lens (PlotAnnotation x_ayfm y_ayfn) (PlotAnnotation x_ayuQ y_ayuR) [(x_ayfm, y_ayfn, String)] [(x_ayuQ, y_ayuR, String)]
+plot_annotation_hanchor :: forall x_aynM y_aynN. Lens' (PlotAnnotation x_aynM y_aynN) HTextAnchor
+plot_annotation_vanchor :: forall x_aynM y_aynN. Lens' (PlotAnnotation x_aynM y_aynN) VTextAnchor
+plot_annotation_angle :: forall x_aynM y_aynN. Lens' (PlotAnnotation x_aynM y_aynN) Double
+plot_annotation_style :: forall x_aynM y_aynN. Lens' (PlotAnnotation x_aynM y_aynN) FontStyle
+plot_annotation_background :: forall x_aynM y_aynN. Lens' (PlotAnnotation x_aynM y_aynN) Rectangle
+plot_annotation_values :: forall x_aynM y_aynN x_ayDg y_ayDh. Lens (PlotAnnotation x_aynM y_aynN) (PlotAnnotation x_ayDg y_ayDh) [(x_aynM, y_aynN, String)] [(x_ayDg, y_ayDh, String)]
 instance Graphics.Rendering.Chart.Plot.Types.ToPlot Graphics.Rendering.Chart.Plot.Annotation.PlotAnnotation
 instance Data.Default.Class.Default (Graphics.Rendering.Chart.Plot.Annotation.PlotAnnotation x y)
 
@@ -1622,12 +1622,12 @@ axisLabelsOverride :: [(x, String)] -> AxisData x -> AxisData x
 axis_show_line :: Lens' AxisVisibility Bool
 axis_show_ticks :: Lens' AxisVisibility Bool
 axis_show_labels :: Lens' AxisVisibility Bool
-axis_visibility :: forall x_aHyN. Lens' (AxisData x_aHyN) AxisVisibility
-axis_viewport :: forall x_aHyN. Lens' (AxisData x_aHyN) (Range -> x_aHyN -> Double)
-axis_tropweiv :: forall x_aHyN. Lens' (AxisData x_aHyN) (Range -> Double -> x_aHyN)
-axis_ticks :: forall x_aHyN. Lens' (AxisData x_aHyN) [(x_aHyN, Double)]
-axis_labels :: forall x_aHyN. Lens' (AxisData x_aHyN) [[(x_aHyN, String)]]
-axis_grid :: forall x_aHyN. Lens' (AxisData x_aHyN) [x_aHyN]
+axis_visibility :: forall x_aHHb. Lens' (AxisData x_aHHb) AxisVisibility
+axis_viewport :: forall x_aHHb. Lens' (AxisData x_aHHb) (Range -> x_aHHb -> Double)
+axis_tropweiv :: forall x_aHHb. Lens' (AxisData x_aHHb) (Range -> Double -> x_aHHb)
+axis_ticks :: forall x_aHHb. Lens' (AxisData x_aHHb) [(x_aHHb, Double)]
+axis_labels :: forall x_aHHb. Lens' (AxisData x_aHHb) [[(x_aHHb, String)]]
+axis_grid :: forall x_aHHb. Lens' (AxisData x_aHHb) [x_aHHb]
 axis_line_style :: Lens' AxisStyle LineStyle
 axis_label_style :: Lens' AxisStyle FontStyle
 axis_grid_style :: Lens' AxisStyle LineStyle
@@ -1811,10 +1811,10 @@ autoScaledLogAxis :: RealFloat a => LogAxisParams a -> AxisFn a
 --   evenly spaced values from the set {1*X, 2*X, 2.5*X, 5*X} (where X is
 --   some power of ten) that evenly cover the input points.
 autoSteps :: Int -> [Double] -> [Double]
-la_labelf :: forall a_aSxn a_aU9s. Lens (LinearAxisParams a_aSxn) (LinearAxisParams a_aU9s) ([a_aSxn] -> [String]) ([a_aU9s] -> [String])
-la_nLabels :: forall a_aSxn. Lens' (LinearAxisParams a_aSxn) Int
-la_nTicks :: forall a_aSxn. Lens' (LinearAxisParams a_aSxn) Int
-loga_labelf :: forall a_aSxm a_aUbh. Iso (LogAxisParams a_aSxm) (LogAxisParams a_aUbh) ([a_aSxm] -> [String]) ([a_aUbh] -> [String])
+la_labelf :: forall a_aSFF a_aUhK. Lens (LinearAxisParams a_aSFF) (LinearAxisParams a_aUhK) ([a_aSFF] -> [String]) ([a_aUhK] -> [String])
+la_nLabels :: forall a_aSFF. Lens' (LinearAxisParams a_aSFF) Int
+la_nTicks :: forall a_aSFF. Lens' (LinearAxisParams a_aSFF) Int
+loga_labelf :: forall a_aSFE a_aUjz. Iso (LogAxisParams a_aSFE) (LogAxisParams a_aUjz) ([a_aSFE] -> [String]) ([a_aUjz] -> [String])
 instance GHC.Float.RealFloat Graphics.Rendering.Chart.Axis.Floating.Percent
 instance GHC.Float.Floating Graphics.Rendering.Chart.Axis.Floating.Percent
 instance GHC.Real.RealFrac Graphics.Rendering.Chart.Axis.Floating.Percent
@@ -1880,12 +1880,12 @@ VectorStyle :: LineStyle -> PointStyle -> VectorStyle
 [_vector_line_style] :: VectorStyle -> LineStyle
 [_vector_head_style] :: VectorStyle -> PointStyle
 plotVectorField :: (PlotValue x, PlotValue y) => PlotVectors x y -> Plot x y
-plot_vectors_mapf :: forall x_a10uk y_a10ul. Lens' (PlotVectors x_a10uk y_a10ul) ((x_a10uk, y_a10ul) -> (x_a10uk, y_a10ul))
-plot_vectors_grid :: forall x_a10uk y_a10ul. Lens' (PlotVectors x_a10uk y_a10ul) [(x_a10uk, y_a10ul)]
-plot_vectors_title :: forall x_a10uk y_a10ul. Lens' (PlotVectors x_a10uk y_a10ul) String
-plot_vectors_style :: forall x_a10uk y_a10ul. Lens' (PlotVectors x_a10uk y_a10ul) VectorStyle
-plot_vectors_scale :: forall x_a10uk y_a10ul. Lens' (PlotVectors x_a10uk y_a10ul) Double
-plot_vectors_values :: forall x_a10uk y_a10ul. Lens' (PlotVectors x_a10uk y_a10ul) [((x_a10uk, y_a10ul), (x_a10uk, y_a10ul))]
+plot_vectors_mapf :: forall x_a10CC y_a10CD. Lens' (PlotVectors x_a10CC y_a10CD) ((x_a10CC, y_a10CD) -> (x_a10CC, y_a10CD))
+plot_vectors_grid :: forall x_a10CC y_a10CD. Lens' (PlotVectors x_a10CC y_a10CD) [(x_a10CC, y_a10CD)]
+plot_vectors_title :: forall x_a10CC y_a10CD. Lens' (PlotVectors x_a10CC y_a10CD) String
+plot_vectors_style :: forall x_a10CC y_a10CD. Lens' (PlotVectors x_a10CC y_a10CD) VectorStyle
+plot_vectors_scale :: forall x_a10CC y_a10CD. Lens' (PlotVectors x_a10CC y_a10CD) Double
+plot_vectors_values :: forall x_a10CC y_a10CD. Lens' (PlotVectors x_a10CC y_a10CD) [((x_a10CC, y_a10CD), (x_a10CC, y_a10CD))]
 vector_line_style :: Lens' VectorStyle LineStyle
 vector_head_style :: Lens' VectorStyle PointStyle
 instance Data.Default.Class.Default Graphics.Rendering.Chart.Plot.Vectors.VectorStyle
@@ -1958,14 +1958,14 @@ class PlotValue a => BarsPlotValue a
 barsReference :: BarsPlotValue a => a
 barsAdd :: BarsPlotValue a => a -> a -> a
 plotBars :: BarsPlotValue y => PlotBars x y -> Plot x y
-plot_bars_style :: forall x_a12vK y_a12vL. Lens' (PlotBars x_a12vK y_a12vL) PlotBarsStyle
-plot_bars_item_styles :: forall x_a12vK y_a12vL. Lens' (PlotBars x_a12vK y_a12vL) [(FillStyle, Maybe LineStyle)]
-plot_bars_titles :: forall x_a12vK y_a12vL. Lens' (PlotBars x_a12vK y_a12vL) [String]
-plot_bars_spacing :: forall x_a12vK y_a12vL. Lens' (PlotBars x_a12vK y_a12vL) PlotBarsSpacing
-plot_bars_alignment :: forall x_a12vK y_a12vL. Lens' (PlotBars x_a12vK y_a12vL) PlotBarsAlignment
-plot_bars_reference :: forall x_a12vK y_a12vL. Lens' (PlotBars x_a12vK y_a12vL) y_a12vL
-plot_bars_singleton_width :: forall x_a12vK y_a12vL. Lens' (PlotBars x_a12vK y_a12vL) Double
-plot_bars_values :: forall x_a12vK y_a12vL x_a12NX. Lens (PlotBars x_a12vK y_a12vL) (PlotBars x_a12NX y_a12vL) [(x_a12vK, [y_a12vL])] [(x_a12NX, [y_a12vL])]
+plot_bars_style :: forall x_a12E2 y_a12E3. Lens' (PlotBars x_a12E2 y_a12E3) PlotBarsStyle
+plot_bars_item_styles :: forall x_a12E2 y_a12E3. Lens' (PlotBars x_a12E2 y_a12E3) [(FillStyle, Maybe LineStyle)]
+plot_bars_titles :: forall x_a12E2 y_a12E3. Lens' (PlotBars x_a12E2 y_a12E3) [String]
+plot_bars_spacing :: forall x_a12E2 y_a12E3. Lens' (PlotBars x_a12E2 y_a12E3) PlotBarsSpacing
+plot_bars_alignment :: forall x_a12E2 y_a12E3. Lens' (PlotBars x_a12E2 y_a12E3) PlotBarsAlignment
+plot_bars_reference :: forall x_a12E2 y_a12E3. Lens' (PlotBars x_a12E2 y_a12E3) y_a12E3
+plot_bars_singleton_width :: forall x_a12E2 y_a12E3. Lens' (PlotBars x_a12E2 y_a12E3) Double
+plot_bars_values :: forall x_a12E2 y_a12E3 x_a12Wf. Lens (PlotBars x_a12E2 y_a12E3) (PlotBars x_a12Wf y_a12E3) [(x_a12E2, [y_a12E3])] [(x_a12Wf, [y_a12E3])]
 instance GHC.Show.Show Graphics.Rendering.Chart.Plot.Bars.PlotBarsStyle
 instance GHC.Show.Show Graphics.Rendering.Chart.Plot.Bars.PlotBarsSpacing
 instance GHC.Show.Show Graphics.Rendering.Chart.Plot.Bars.PlotBarsAlignment
@@ -1992,13 +1992,13 @@ AreaSpots :: String -> Double -> AlphaColour Double -> Colour Double -> Double -
 -- | the largest size of spot
 [_area_spots_max_radius] :: AreaSpots z x y -> Double
 [_area_spots_values] :: AreaSpots z x y -> [(x, y, z)]
-area_spots_title :: forall z_a159x x_a159y y_a159z. Lens' (AreaSpots z_a159x x_a159y y_a159z) String
-area_spots_linethick :: forall z_a159x x_a159y y_a159z. Lens' (AreaSpots z_a159x x_a159y y_a159z) Double
-area_spots_linecolour :: forall z_a159x x_a159y y_a159z. Lens' (AreaSpots z_a159x x_a159y y_a159z) (AlphaColour Double)
-area_spots_fillcolour :: forall z_a159x x_a159y y_a159z. Lens' (AreaSpots z_a159x x_a159y y_a159z) (Colour Double)
-area_spots_opacity :: forall z_a159x x_a159y y_a159z. Lens' (AreaSpots z_a159x x_a159y y_a159z) Double
-area_spots_max_radius :: forall z_a159x x_a159y y_a159z. Lens' (AreaSpots z_a159x x_a159y y_a159z) Double
-area_spots_values :: forall z_a159x x_a159y y_a159z z_a15wf x_a15wg y_a15wh. Lens (AreaSpots z_a159x x_a159y y_a159z) (AreaSpots z_a15wf x_a15wg y_a15wh) [(x_a159y, y_a159z, z_a159x)] [(x_a15wg, y_a15wh, z_a15wf)]
+area_spots_title :: forall z_a15hP x_a15hQ y_a15hR. Lens' (AreaSpots z_a15hP x_a15hQ y_a15hR) String
+area_spots_linethick :: forall z_a15hP x_a15hQ y_a15hR. Lens' (AreaSpots z_a15hP x_a15hQ y_a15hR) Double
+area_spots_linecolour :: forall z_a15hP x_a15hQ y_a15hR. Lens' (AreaSpots z_a15hP x_a15hQ y_a15hR) (AlphaColour Double)
+area_spots_fillcolour :: forall z_a15hP x_a15hQ y_a15hR. Lens' (AreaSpots z_a15hP x_a15hQ y_a15hR) (Colour Double)
+area_spots_opacity :: forall z_a15hP x_a15hQ y_a15hR. Lens' (AreaSpots z_a15hP x_a15hQ y_a15hR) Double
+area_spots_max_radius :: forall z_a15hP x_a15hQ y_a15hR. Lens' (AreaSpots z_a15hP x_a15hQ y_a15hR) Double
+area_spots_values :: forall z_a15hP x_a15hQ y_a15hR z_a15Ex x_a15Ey y_a15Ez. Lens (AreaSpots z_a15hP x_a15hQ y_a15hR) (AreaSpots z_a15Ex x_a15Ey y_a15Ez) [(x_a15hQ, y_a15hR, z_a15hP)] [(x_a15Ey, y_a15Ez, z_a15Ex)]
 
 -- | A collection of unconnected spots, with x,y position, an independent z
 --   value to be represented by the area of the spot, and in addition, a
@@ -2014,12 +2014,12 @@ AreaSpots4D :: String -> Double -> [Colour Double] -> Double -> Double -> [(x, y
 -- | the largest size of spot
 [_area_spots_4d_max_radius] :: AreaSpots4D z t x y -> Double
 [_area_spots_4d_values] :: AreaSpots4D z t x y -> [(x, y, z, t)]
-area_spots_4d_title :: forall z_a159t t_a159u x_a159v y_a159w. Lens' (AreaSpots4D z_a159t t_a159u x_a159v y_a159w) String
-area_spots_4d_linethick :: forall z_a159t t_a159u x_a159v y_a159w. Lens' (AreaSpots4D z_a159t t_a159u x_a159v y_a159w) Double
-area_spots_4d_palette :: forall z_a159t t_a159u x_a159v y_a159w. Lens' (AreaSpots4D z_a159t t_a159u x_a159v y_a159w) [Colour Double]
-area_spots_4d_opacity :: forall z_a159t t_a159u x_a159v y_a159w. Lens' (AreaSpots4D z_a159t t_a159u x_a159v y_a159w) Double
-area_spots_4d_max_radius :: forall z_a159t t_a159u x_a159v y_a159w. Lens' (AreaSpots4D z_a159t t_a159u x_a159v y_a159w) Double
-area_spots_4d_values :: forall z_a159t t_a159u x_a159v y_a159w z_a15BR t_a15BS x_a15BT y_a15BU. Lens (AreaSpots4D z_a159t t_a159u x_a159v y_a159w) (AreaSpots4D z_a15BR t_a15BS x_a15BT y_a15BU) [(x_a159v, y_a159w, z_a159t, t_a159u)] [(x_a15BT, y_a15BU, z_a15BR, t_a15BS)]
+area_spots_4d_title :: forall z_a15hL t_a15hM x_a15hN y_a15hO. Lens' (AreaSpots4D z_a15hL t_a15hM x_a15hN y_a15hO) String
+area_spots_4d_linethick :: forall z_a15hL t_a15hM x_a15hN y_a15hO. Lens' (AreaSpots4D z_a15hL t_a15hM x_a15hN y_a15hO) Double
+area_spots_4d_palette :: forall z_a15hL t_a15hM x_a15hN y_a15hO. Lens' (AreaSpots4D z_a15hL t_a15hM x_a15hN y_a15hO) [Colour Double]
+area_spots_4d_opacity :: forall z_a15hL t_a15hM x_a15hN y_a15hO. Lens' (AreaSpots4D z_a15hL t_a15hM x_a15hN y_a15hO) Double
+area_spots_4d_max_radius :: forall z_a15hL t_a15hM x_a15hN y_a15hO. Lens' (AreaSpots4D z_a15hL t_a15hM x_a15hN y_a15hO) Double
+area_spots_4d_values :: forall z_a15hL t_a15hM x_a15hN y_a15hO z_a15K9 t_a15Ka x_a15Kb y_a15Kc. Lens (AreaSpots4D z_a15hL t_a15hM x_a15hN y_a15hO) (AreaSpots4D z_a15K9 t_a15Ka x_a15Kb y_a15Kc) [(x_a15hN, y_a15hO, z_a15hL, t_a15hM)] [(x_a15Kb, y_a15Kc, z_a15K9, t_a15Ka)]
 instance Data.Default.Class.Default (Graphics.Rendering.Chart.Plot.AreaSpots.AreaSpots4D z t x y)
 instance (Graphics.Rendering.Chart.Axis.Types.PlotValue z, Graphics.Rendering.Chart.Axis.Types.PlotValue t, GHC.Show.Show t) => Graphics.Rendering.Chart.Plot.Types.ToPlot (Graphics.Rendering.Chart.Plot.AreaSpots.AreaSpots4D z t)
 instance Data.Default.Class.Default (Graphics.Rendering.Chart.Plot.AreaSpots.AreaSpots z x y)
@@ -2116,15 +2116,15 @@ defaultFloatPlotHist :: PlotHist x Double
 -- | <tt>defaultPlotHist</tt> but normalized such that the integral of the
 --   histogram is one.
 defaultNormedPlotHist :: PlotHist x Double
-plot_hist_title :: forall x_a18NX y_a18NY. Lens' (PlotHist x_a18NX y_a18NY) String
-plot_hist_bins :: forall x_a18NX y_a18NY. Lens' (PlotHist x_a18NX y_a18NY) Int
-plot_hist_values :: forall x_a18NX y_a18NY. Lens' (PlotHist x_a18NX y_a18NY) [x_a18NX]
-plot_hist_no_zeros :: forall x_a18NX y_a18NY. Lens' (PlotHist x_a18NX y_a18NY) Bool
-plot_hist_range :: forall x_a18NX y_a18NY. Lens' (PlotHist x_a18NX y_a18NY) (Maybe (x_a18NX, x_a18NX))
-plot_hist_drop_lines :: forall x_a18NX y_a18NY. Lens' (PlotHist x_a18NX y_a18NY) Bool
-plot_hist_line_style :: forall x_a18NX y_a18NY. Lens' (PlotHist x_a18NX y_a18NY) LineStyle
-plot_hist_fill_style :: forall x_a18NX y_a18NY. Lens' (PlotHist x_a18NX y_a18NY) FillStyle
-plot_hist_norm_func :: forall x_a18NX y_a18NY y_a192f. Lens (PlotHist x_a18NX y_a18NY) (PlotHist x_a18NX y_a192f) (Double -> Int -> y_a18NY) (Double -> Int -> y_a192f)
+plot_hist_title :: forall x_a18Wi y_a18Wj. Lens' (PlotHist x_a18Wi y_a18Wj) String
+plot_hist_bins :: forall x_a18Wi y_a18Wj. Lens' (PlotHist x_a18Wi y_a18Wj) Int
+plot_hist_values :: forall x_a18Wi y_a18Wj. Lens' (PlotHist x_a18Wi y_a18Wj) [x_a18Wi]
+plot_hist_no_zeros :: forall x_a18Wi y_a18Wj. Lens' (PlotHist x_a18Wi y_a18Wj) Bool
+plot_hist_range :: forall x_a18Wi y_a18Wj. Lens' (PlotHist x_a18Wi y_a18Wj) (Maybe (x_a18Wi, x_a18Wi))
+plot_hist_drop_lines :: forall x_a18Wi y_a18Wj. Lens' (PlotHist x_a18Wi y_a18Wj) Bool
+plot_hist_line_style :: forall x_a18Wi y_a18Wj. Lens' (PlotHist x_a18Wi y_a18Wj) LineStyle
+plot_hist_fill_style :: forall x_a18Wi y_a18Wj. Lens' (PlotHist x_a18Wi y_a18Wj) FillStyle
+plot_hist_norm_func :: forall x_a18Wi y_a18Wj y_a19aA. Lens (PlotHist x_a18Wi y_a18Wj) (PlotHist x_a18Wi y_a19aA) (Double -> Int -> y_a18Wj) (Double -> Int -> y_a19aA)
 instance Data.Default.Class.Default (Graphics.Rendering.Chart.Plot.Histogram.PlotHist x GHC.Types.Int)
 
 
@@ -2361,26 +2361,26 @@ layoutLRToGrid :: forall x yl yr. (Ord x, Ord yl, Ord yr) => LayoutLR x yl yr ->
 --   once on the bottom chart. See <a>StackedLayouts</a> for further
 --   information.
 renderStackedLayouts :: forall x. Ord x => StackedLayouts x -> Renderable ()
-laxis_title_style :: forall x_a1aV1. Lens' (LayoutAxis x_a1aV1) FontStyle
-laxis_title :: forall x_a1aV1. Lens' (LayoutAxis x_a1aV1) String
-laxis_style :: forall x_a1aV1. Lens' (LayoutAxis x_a1aV1) AxisStyle
-laxis_generate :: forall x_a1aV1. Lens' (LayoutAxis x_a1aV1) (AxisFn x_a1aV1)
-laxis_override :: forall x_a1aV1. Lens' (LayoutAxis x_a1aV1) (AxisData x_a1aV1 -> AxisData x_a1aV1)
-laxis_reverse :: forall x_a1aV1. Lens' (LayoutAxis x_a1aV1) Bool
-layout_background :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) FillStyle
-layout_plot_background :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) (Maybe FillStyle)
-layout_title :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) String
-layout_title_style :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) FontStyle
-layout_x_axis :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) (LayoutAxis x_a1aUW)
-layout_top_axis_visibility :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) AxisVisibility
-layout_bottom_axis_visibility :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) AxisVisibility
-layout_y_axis :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) (LayoutAxis y_a1aUX)
-layout_left_axis_visibility :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) AxisVisibility
-layout_right_axis_visibility :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) AxisVisibility
-layout_margin :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) Double
-layout_plots :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) [Plot x_a1aUW y_a1aUX]
-layout_legend :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) (Maybe LegendStyle)
-layout_grid_last :: forall x_a1aUW y_a1aUX. Lens' (Layout x_a1aUW y_a1aUX) Bool
+laxis_title_style :: forall x_a1b3m. Lens' (LayoutAxis x_a1b3m) FontStyle
+laxis_title :: forall x_a1b3m. Lens' (LayoutAxis x_a1b3m) String
+laxis_style :: forall x_a1b3m. Lens' (LayoutAxis x_a1b3m) AxisStyle
+laxis_generate :: forall x_a1b3m. Lens' (LayoutAxis x_a1b3m) (AxisFn x_a1b3m)
+laxis_override :: forall x_a1b3m. Lens' (LayoutAxis x_a1b3m) (AxisData x_a1b3m -> AxisData x_a1b3m)
+laxis_reverse :: forall x_a1b3m. Lens' (LayoutAxis x_a1b3m) Bool
+layout_background :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) FillStyle
+layout_plot_background :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) (Maybe FillStyle)
+layout_title :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) String
+layout_title_style :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) FontStyle
+layout_x_axis :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) (LayoutAxis x_a1b3h)
+layout_top_axis_visibility :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) AxisVisibility
+layout_bottom_axis_visibility :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) AxisVisibility
+layout_y_axis :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) (LayoutAxis y_a1b3i)
+layout_left_axis_visibility :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) AxisVisibility
+layout_right_axis_visibility :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) AxisVisibility
+layout_margin :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) Double
+layout_plots :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) [Plot x_a1b3h y_a1b3i]
+layout_legend :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) (Maybe LegendStyle)
+layout_grid_last :: forall x_a1b3h y_a1b3i. Lens' (Layout x_a1b3h y_a1b3i) Bool
 
 -- | Setter to update all axis styles on a <a>Layout</a>
 layout_axes_styles :: Setter' (Layout x y) AxisStyle
@@ -2394,21 +2394,21 @@ layout_all_font_styles :: Setter' (Layout x y) FontStyle
 -- | Setter to update the foreground color of core chart elements on a
 --   <a>Layout</a>
 layout_foreground :: Setter' (Layout x y) (AlphaColour Double)
-layoutlr_background :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) FillStyle
-layoutlr_plot_background :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) (Maybe FillStyle)
-layoutlr_title :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) String
-layoutlr_title_style :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) FontStyle
-layoutlr_x_axis :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) (LayoutAxis x_a1aUT)
-layoutlr_top_axis_visibility :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) AxisVisibility
-layoutlr_bottom_axis_visibility :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) AxisVisibility
-layoutlr_left_axis :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) (LayoutAxis y1_a1aUU)
-layoutlr_right_axis :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) (LayoutAxis y2_a1aUV)
-layoutlr_left_axis_visibility :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) AxisVisibility
-layoutlr_right_axis_visibility :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) AxisVisibility
-layoutlr_plots :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) [Either (Plot x_a1aUT y1_a1aUU) (Plot x_a1aUT y2_a1aUV)]
-layoutlr_legend :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) (Maybe LegendStyle)
-layoutlr_margin :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) Double
-layoutlr_grid_last :: forall x_a1aUT y1_a1aUU y2_a1aUV. Lens' (LayoutLR x_a1aUT y1_a1aUU y2_a1aUV) Bool
+layoutlr_background :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) FillStyle
+layoutlr_plot_background :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) (Maybe FillStyle)
+layoutlr_title :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) String
+layoutlr_title_style :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) FontStyle
+layoutlr_x_axis :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) (LayoutAxis x_a1b3e)
+layoutlr_top_axis_visibility :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) AxisVisibility
+layoutlr_bottom_axis_visibility :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) AxisVisibility
+layoutlr_left_axis :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) (LayoutAxis y1_a1b3f)
+layoutlr_right_axis :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) (LayoutAxis y2_a1b3g)
+layoutlr_left_axis_visibility :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) AxisVisibility
+layoutlr_right_axis_visibility :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) AxisVisibility
+layoutlr_plots :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) [Either (Plot x_a1b3e y1_a1b3f) (Plot x_a1b3e y2_a1b3g)]
+layoutlr_legend :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) (Maybe LegendStyle)
+layoutlr_margin :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) Double
+layoutlr_grid_last :: forall x_a1b3e y1_a1b3f y2_a1b3g. Lens' (LayoutLR x_a1b3e y1_a1b3f y2_a1b3g) Bool
 
 -- | Setter to update all axis styles on a <a>LayoutLR</a>
 layoutlr_axes_styles :: Setter' (LayoutLR x y1 y2) AxisStyle
@@ -2422,8 +2422,8 @@ layoutlr_all_font_styles :: Setter' (LayoutLR x y1 y2) FontStyle
 -- | Setter to update the foreground color of core chart elements on a
 --   <a>LayoutLR</a>
 layoutlr_foreground :: Setter' (LayoutLR x y1 y2) (AlphaColour Double)
-slayouts_layouts :: forall x_a1aUO x_a1cwu. Lens (StackedLayouts x_a1aUO) (StackedLayouts x_a1cwu) [StackedLayout x_a1aUO] [StackedLayout x_a1cwu]
-slayouts_compress_legend :: forall x_a1aUO. Lens' (StackedLayouts x_a1aUO) Bool
+slayouts_layouts :: forall x_a1b39 x_a1cEP. Lens (StackedLayouts x_a1b39) (StackedLayouts x_a1cEP) [StackedLayout x_a1b39] [StackedLayout x_a1cEP]
+slayouts_compress_legend :: forall x_a1b39. Lens' (StackedLayouts x_a1b39) Bool
 instance (GHC.Show.Show x, GHC.Show.Show y1, GHC.Show.Show y2) => GHC.Show.Show (Graphics.Rendering.Chart.Layout.LayoutPick x y1 y2)
 instance Data.Default.Class.Default (Graphics.Rendering.Chart.Layout.StackedLayouts x)
 instance GHC.Classes.Ord x => Graphics.Rendering.Chart.Renderable.ToRenderable (Graphics.Rendering.Chart.Layout.StackedLayouts x)

@@ -1,0 +1,753 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE GADTs #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE Rank2Types #-}</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  Data.Machine.Tee</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) 2012 Edward Kmett, R&#250;nar Bjarnason, Paul Chiusano</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  BSD-style (see the file LICENSE)</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Maintainer  :  Edward Kmett &lt;ekmett@gmail.com&gt;</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Stability   :  provisional</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Portability :  Rank-2 Types, GADTs</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">----------------------------------------------------------------------------</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Machine.Tee</span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Tees</span></span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><a href="Data.Machine.Tee.html#Tee"><span class="hs-identifier">Tee</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#TeeT"><span class="hs-identifier">TeeT</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#T"><span class="hs-identifier">T</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier">tee</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#teeT"><span class="hs-identifier">teeT</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#addL"><span class="hs-identifier">addL</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#addR"><span class="hs-identifier">addR</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#capL"><span class="hs-identifier">capL</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#capR"><span class="hs-identifier">capR</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#capT"><span class="hs-identifier">capT</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#zipWithT"><span class="hs-identifier">zipWithT</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#zipWith"><span class="hs-identifier">zipWith</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#zipping"><span class="hs-identifier">zipping</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Machine.Is.html"><span class="hs-identifier">Data.Machine.Is</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Machine.Plan.html"><span class="hs-identifier">Data.Machine.Plan</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Machine.Process.html"><span class="hs-identifier">Data.Machine.Process</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Machine.Type.html"><span class="hs-identifier">Data.Machine.Type</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Machine.Source.html"><span class="hs-identifier">Data.Machine.Source</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(.)</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">id</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">zipWith</span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.Machine</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- Tees</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- | The input descriptor for a 'Tee' or 'TeeT'</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">data</span><span> </span><span id="T"><span class="annot"><a href="Data.Machine.Tee.html#T"><span class="hs-identifier hs-var">T</span></a></span></span><span> </span><span id="local-6989586621679090267"><span class="annot"><a href="#local-6989586621679090267"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679090266"><span class="annot"><a href="#local-6989586621679090266"><span class="hs-identifier hs-type">b</span></a></span></span><span> </span><span id="local-6989586621679090265"><span class="annot"><a href="#local-6989586621679090265"><span class="hs-identifier hs-type">c</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-42"></span><span>  </span><span id="local-6989586621679090376"><span id="local-6989586621679090377"><span id="L"><span class="annot"><a href="Data.Machine.Tee.html#L"><span class="hs-identifier hs-var">L</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090377"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090376"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090377"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-43"></span><span>  </span><span id="local-6989586621679090372"><span id="local-6989586621679090373"><span id="R"><span class="annot"><a href="Data.Machine.Tee.html#R"><span class="hs-identifier hs-var">R</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090373"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090372"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090372"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- | A 'Machine' that can read from two input stream in a deterministic manner.</span><span>
+</span><span id="line-46"></span><span class="hs-keyword">type</span><span> </span><span id="Tee"><span class="annot"><a href="Data.Machine.Tee.html#Tee"><span class="hs-identifier hs-var">Tee</span></a></span></span><span> </span><span id="local-6989586621679090262"><span class="annot"><a href="#local-6989586621679090262"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679090261"><span class="annot"><a href="#local-6989586621679090261"><span class="hs-identifier hs-type">b</span></a></span></span><span> </span><span id="local-6989586621679090260"><span class="annot"><a href="#local-6989586621679090260"><span class="hs-identifier hs-type">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#Machine"><span class="hs-identifier hs-type">Machine</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Tee.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090262"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090261"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679090260"><span class="hs-identifier hs-type">c</span></a></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- | A 'Machine' that can read from two input stream in a deterministic manner with monadic side-effects.</span><span>
+</span><span id="line-49"></span><span class="hs-keyword">type</span><span> </span><span id="TeeT"><span class="annot"><a href="Data.Machine.Tee.html#TeeT"><span class="hs-identifier hs-var">TeeT</span></a></span></span><span> </span><span id="local-6989586621679090259"><span class="annot"><a href="#local-6989586621679090259"><span class="hs-identifier hs-type">m</span></a></span></span><span> </span><span id="local-6989586621679090258"><span class="annot"><a href="#local-6989586621679090258"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679090257"><span class="annot"><a href="#local-6989586621679090257"><span class="hs-identifier hs-type">b</span></a></span></span><span> </span><span id="local-6989586621679090256"><span class="annot"><a href="#local-6989586621679090256"><span class="hs-identifier hs-type">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-type">MachineT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090259"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Tee.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090258"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090257"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679090256"><span class="hs-identifier hs-type">c</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- | Compose a pair of pipes onto the front of a Tee.</span><span>
+</span><span id="line-52"></span><span class="hs-comment">--</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- Examples:</span><span>
+</span><span id="line-54"></span><span class="hs-comment">--</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.Machine.Source</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- &gt;&gt;&gt; run $ tee (source [1..]) (source ['a'..'c']) zipping</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- [(1,'a'),(2,'b'),(3,'c')]</span><span>
+</span><span id="line-58"></span><span class="hs-comment">--</span><span>
+</span><span id="line-59"></span><span id="local-6989586621679090388"><span id="local-6989586621679090389"><span id="local-6989586621679090390"><span id="local-6989586621679090391"><span id="local-6989586621679090392"><span id="local-6989586621679090393"><span class="annot"><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-type">tee</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679090393"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090393"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090392"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090391"><span class="hs-identifier hs-type">a'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090393"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090390"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090389"><span class="hs-identifier hs-type">b'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#TeeT"><span class="hs-identifier hs-type">TeeT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090393"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090391"><span class="hs-identifier hs-type">a'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090389"><span class="hs-identifier hs-type">b'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090388"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#TeeT"><span class="hs-identifier hs-type">TeeT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090393"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090392"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090390"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090388"><span class="hs-identifier hs-type">c</span></a></span></span></span></span></span></span></span><span>
+</span><span id="line-60"></span><span id="tee"><span class="annot"><span class="annottext">tee :: ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var hs-var">tee</span></a></span></span><span> </span><span id="local-6989586621679090255"><span class="annot"><span class="annottext">ProcessT m a a'
+</span><a href="#local-6989586621679090255"><span class="hs-identifier hs-var">ma</span></a></span></span><span> </span><span id="local-6989586621679090254"><span class="annot"><span class="annottext">ProcessT m b b'
+</span><a href="#local-6989586621679090254"><span class="hs-identifier hs-var">mb</span></a></span></span><span> </span><span id="local-6989586621679090253"><span class="annot"><span class="annottext">TeeT m a' b' c
+</span><a href="#local-6989586621679090253"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (Step (T a b) c (TeeT m a b c)) -&gt; TeeT m a b c
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+m (Step k o (MachineT m k o)) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-var">MachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(m (Step (T a b) c (TeeT m a b c)) -&gt; TeeT m a b c)
+-&gt; m (Step (T a b) c (TeeT m a b c)) -&gt; TeeT m a b c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TeeT m a' b' c -&gt; m (Step (T a' b') c (TeeT m a' b' c))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">TeeT m a' b' c
+</span><a href="#local-6989586621679090253"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">m (Step (T a' b') c (TeeT m a' b' c))
+-&gt; (Step (T a' b') c (TeeT m a' b' c)
+    -&gt; m (Step (T a b) c (TeeT m a b c)))
+-&gt; m (Step (T a b) c (TeeT m a b c))
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679090250"><span class="annot"><span class="annottext">Step (T a' b') c (TeeT m a' b' c)
+</span><a href="#local-6989586621679090250"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Step (T a' b') c (TeeT m a' b' c)
+</span><a href="#local-6989586621679090250"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-61"></span><span>  </span><span class="annot"><span class="annottext">Step (T a' b') c (TeeT m a' b' c)
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c) -&gt; m (Step (T a b) c (TeeT m a b c))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c)
+forall (k :: * -&gt; *) o r. Step k o r
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span class="annot"><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-type">Yield</span></a></span><span> </span><span id="local-6989586621679090247"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679090247"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span id="local-6989586621679090246"><span class="annot"><span class="annottext">TeeT m a' b' c
+</span><a href="#local-6989586621679090246"><span class="hs-identifier hs-var">k</span></a></span></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c) -&gt; m (Step (T a b) c (TeeT m a b c))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step (T a b) c (TeeT m a b c)
+ -&gt; m (Step (T a b) c (TeeT m a b c)))
+-&gt; Step (T a b) c (TeeT m a b c)
+-&gt; m (Step (T a b) c (TeeT m a b c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">c -&gt; TeeT m a b c -&gt; Step (T a b) c (TeeT m a b c)
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679090247"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">(TeeT m a b c -&gt; Step (T a b) c (TeeT m a b c))
+-&gt; TeeT m a b c -&gt; Step (T a b) c (TeeT m a b c)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall (m :: * -&gt; *) a a' b b' c.
+Monad m =&gt;
+ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var">tee</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+</span><a href="#local-6989586621679090255"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m b b'
+</span><a href="#local-6989586621679090254"><span class="hs-identifier hs-var">mb</span></a></span><span> </span><span class="annot"><span class="annottext">TeeT m a' b' c
+</span><a href="#local-6989586621679090246"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span class="annot"><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span id="local-6989586621679090244"><span class="annot"><span class="annottext">t -&gt; TeeT m a' b' c
+</span><a href="#local-6989586621679090244"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="annot"><span class="annottext">T a' b' t
+</span><a href="Data.Machine.Tee.html#L"><span class="hs-identifier hs-var">L</span></a></span><span> </span><span id="local-6989586621679090243"><span class="annot"><span class="annottext">TeeT m a' b' c
+</span><a href="#local-6989586621679090243"><span class="hs-identifier hs-var">ff</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ProcessT m a a' -&gt; m (Step (Is a) a' (ProcessT m a a'))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+</span><a href="#local-6989586621679090255"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">m (Step (Is a) a' (ProcessT m a a'))
+-&gt; (Step (Is a) a' (ProcessT m a a')
+    -&gt; m (Step (T a b) c (TeeT m a b c)))
+-&gt; m (Step (T a b) c (TeeT m a b c))
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679090242"><span class="annot"><span class="annottext">Step (Is a) a' (ProcessT m a a')
+</span><a href="#local-6989586621679090242"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Step (Is a) a' (ProcessT m a a')
+</span><a href="#local-6989586621679090242"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-64"></span><span>    </span><span class="annot"><span class="annottext">Step (Is a) a' (ProcessT m a a')
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c)))
+-&gt; TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall (m :: * -&gt; *) a a' b b' c.
+Monad m =&gt;
+ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var">tee</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+forall (k :: * -&gt; *) b. Machine k b
+</span><a href="Data.Machine.Type.html#stopped"><span class="hs-identifier hs-var">stopped</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m b b'
+</span><a href="#local-6989586621679090254"><span class="hs-identifier hs-var">mb</span></a></span><span> </span><span class="annot"><span class="annottext">TeeT m a' b' c
+</span><a href="#local-6989586621679090243"><span class="hs-identifier hs-var">ff</span></a></span><span>
+</span><span id="line-65"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-type">Yield</span></a></span><span> </span><span id="local-6989586621679090240"><span class="annot"><span class="annottext">a'
+</span><a href="#local-6989586621679090240"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679090239"><span class="annot"><span class="annottext">ProcessT m a a'
+</span><a href="#local-6989586621679090239"><span class="hs-identifier hs-var">k</span></a></span></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c)))
+-&gt; TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall (m :: * -&gt; *) a a' b b' c.
+Monad m =&gt;
+ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var">tee</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+</span><a href="#local-6989586621679090239"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m b b'
+</span><a href="#local-6989586621679090254"><span class="hs-identifier hs-var">mb</span></a></span><span> </span><span class="annot"><span class="annottext">(TeeT m a' b' c -&gt; TeeT m a b c) -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">t -&gt; TeeT m a' b' c
+</span><a href="#local-6989586621679090244"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a'
+t
+</span><a href="#local-6989586621679090240"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-66"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span id="local-6989586621679090238"><span class="annot"><span class="annottext">t -&gt; ProcessT m a a'
+</span><a href="#local-6989586621679090238"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="annot"><span class="annottext">Is a t
+</span><a href="Data.Machine.Is.html#Refl"><span class="hs-identifier hs-var">Refl</span></a></span><span> </span><span id="local-6989586621679090236"><span class="annot"><span class="annottext">ProcessT m a a'
+</span><a href="#local-6989586621679090236"><span class="hs-identifier hs-var">fg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-67"></span><span>      </span><span class="annot"><span class="annottext">Step (T t b) c (TeeT m a b c) -&gt; m (Step (T t b) c (TeeT m a b c))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step (T t b) c (TeeT m a b c)
+ -&gt; m (Step (T t b) c (TeeT m a b c)))
+-&gt; Step (T t b) c (TeeT m a b c)
+-&gt; m (Step (T t b) c (TeeT m a b c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(t -&gt; TeeT m a b c)
+-&gt; T t b t -&gt; TeeT m a b c -&gt; Step (T t b) c (TeeT m a b c)
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679090235"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679090235"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall (m :: * -&gt; *) a a' b b' c.
+Monad m =&gt;
+ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var">tee</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t -&gt; ProcessT m a a'
+</span><a href="#local-6989586621679090238"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679090235"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ProcessT m b b'
+</span><a href="#local-6989586621679090254"><span class="hs-identifier hs-var">mb</span></a></span><span> </span><span class="annot"><span class="annottext">(TeeT m a' b' c -&gt; TeeT m a b c) -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Step (T a' b') c (TeeT m a' b' c) -&gt; TeeT m a' b' c
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="annot"><span class="annottext">Step (T a' b') c (TeeT m a' b' c)
+</span><a href="#local-6989586621679090250"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">T t b t
+forall a b. T a b a
+</span><a href="Data.Machine.Tee.html#L"><span class="hs-identifier hs-var">L</span></a></span><span> </span><span class="annot"><span class="annottext">(TeeT m a b c -&gt; Step (T t b) c (TeeT m a b c))
+-&gt; TeeT m a b c -&gt; Step (T t b) c (TeeT m a b c)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall (m :: * -&gt; *) a a' b b' c.
+Monad m =&gt;
+ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var">tee</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+</span><a href="#local-6989586621679090236"><span class="hs-identifier hs-var">fg</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m b b'
+</span><a href="#local-6989586621679090254"><span class="hs-identifier hs-var">mb</span></a></span><span> </span><span class="annot"><span class="annottext">(TeeT m a' b' c -&gt; TeeT m a b c) -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Step (T a' b') c (TeeT m a' b' c) -&gt; TeeT m a' b' c
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="annot"><span class="annottext">Step (T a' b') c (TeeT m a' b' c)
+</span><a href="#local-6989586621679090250"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-68"></span><span>  </span><span class="annot"><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span id="local-6989586621679090233"><span class="annot"><span class="annottext">t -&gt; TeeT m a' b' c
+</span><a href="#local-6989586621679090233"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="annot"><span class="annottext">T a' b' t
+</span><a href="Data.Machine.Tee.html#R"><span class="hs-identifier hs-var">R</span></a></span><span> </span><span id="local-6989586621679090232"><span class="annot"><span class="annottext">TeeT m a' b' c
+</span><a href="#local-6989586621679090232"><span class="hs-identifier hs-var">ff</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ProcessT m b b' -&gt; m (Step (Is b) b' (ProcessT m b b'))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m b b'
+</span><a href="#local-6989586621679090254"><span class="hs-identifier hs-var">mb</span></a></span><span> </span><span class="annot"><span class="annottext">m (Step (Is b) b' (ProcessT m b b'))
+-&gt; (Step (Is b) b' (ProcessT m b b')
+    -&gt; m (Step (T a b) c (TeeT m a b c)))
+-&gt; m (Step (T a b) c (TeeT m a b c))
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679090231"><span class="annot"><span class="annottext">Step (Is b) b' (ProcessT m b b')
+</span><a href="#local-6989586621679090231"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Step (Is b) b' (ProcessT m b b')
+</span><a href="#local-6989586621679090231"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><span class="annottext">Step (Is b) b' (ProcessT m b b')
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c)))
+-&gt; TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall (m :: * -&gt; *) a a' b b' c.
+Monad m =&gt;
+ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var">tee</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+</span><a href="#local-6989586621679090255"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m b b'
+forall (k :: * -&gt; *) b. Machine k b
+</span><a href="Data.Machine.Type.html#stopped"><span class="hs-identifier hs-var">stopped</span></a></span><span> </span><span class="annot"><span class="annottext">TeeT m a' b' c
+</span><a href="#local-6989586621679090232"><span class="hs-identifier hs-var">ff</span></a></span><span>
+</span><span id="line-70"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-type">Yield</span></a></span><span> </span><span id="local-6989586621679090230"><span class="annot"><span class="annottext">b'
+</span><a href="#local-6989586621679090230"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679090229"><span class="annot"><span class="annottext">ProcessT m b b'
+</span><a href="#local-6989586621679090229"><span class="hs-identifier hs-var">k</span></a></span></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c)))
+-&gt; TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall (m :: * -&gt; *) a a' b b' c.
+Monad m =&gt;
+ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var">tee</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+</span><a href="#local-6989586621679090255"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m b b'
+</span><a href="#local-6989586621679090229"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">(TeeT m a' b' c -&gt; TeeT m a b c) -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">t -&gt; TeeT m a' b' c
+</span><a href="#local-6989586621679090233"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">b'
+t
+</span><a href="#local-6989586621679090230"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-71"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span id="local-6989586621679090228"><span class="annot"><span class="annottext">t -&gt; ProcessT m b b'
+</span><a href="#local-6989586621679090228"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="annot"><span class="annottext">Is b t
+</span><a href="Data.Machine.Is.html#Refl"><span class="hs-identifier hs-var">Refl</span></a></span><span> </span><span id="local-6989586621679090227"><span class="annot"><span class="annottext">ProcessT m b b'
+</span><a href="#local-6989586621679090227"><span class="hs-identifier hs-var">fg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-72"></span><span>      </span><span class="annot"><span class="annottext">Step (T a t) c (TeeT m a b c) -&gt; m (Step (T a t) c (TeeT m a b c))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step (T a t) c (TeeT m a b c)
+ -&gt; m (Step (T a t) c (TeeT m a b c)))
+-&gt; Step (T a t) c (TeeT m a b c)
+-&gt; m (Step (T a t) c (TeeT m a b c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(t -&gt; TeeT m a b c)
+-&gt; T a t t -&gt; TeeT m a b c -&gt; Step (T a t) c (TeeT m a b c)
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679090226"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679090226"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall (m :: * -&gt; *) a a' b b' c.
+Monad m =&gt;
+ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var">tee</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+</span><a href="#local-6989586621679090255"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t -&gt; ProcessT m b b'
+</span><a href="#local-6989586621679090228"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679090226"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(TeeT m a' b' c -&gt; TeeT m a b c) -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Step (T a' b') c (TeeT m a' b' c) -&gt; TeeT m a' b' c
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="annot"><span class="annottext">Step (T a' b') c (TeeT m a' b' c)
+</span><a href="#local-6989586621679090250"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">T a t t
+forall a b. T a b b
+</span><a href="Data.Machine.Tee.html#R"><span class="hs-identifier hs-var">R</span></a></span><span> </span><span class="annot"><span class="annottext">(TeeT m a b c -&gt; Step (T a t) c (TeeT m a b c))
+-&gt; TeeT m a b c -&gt; Step (T a t) c (TeeT m a b c)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall (m :: * -&gt; *) a a' b b' c.
+Monad m =&gt;
+ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var">tee</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a'
+</span><a href="#local-6989586621679090255"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m b b'
+</span><a href="#local-6989586621679090227"><span class="hs-identifier hs-var">fg</span></a></span><span> </span><span class="annot"><span class="annottext">(TeeT m a' b' c -&gt; TeeT m a b c) -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Step (T a' b') c (TeeT m a' b' c) -&gt; TeeT m a' b' c
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="annot"><span class="annottext">Step (T a' b') c (TeeT m a' b' c)
+</span><a href="#local-6989586621679090250"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- | `teeT mt ma mb` Use a `Tee` to interleave or combine the outputs of `ma`</span><span>
+</span><span id="line-75"></span><span class="hs-comment">--   and `mb`.</span><span>
+</span><span id="line-76"></span><span class="hs-comment">--</span><span>
+</span><span id="line-77"></span><span class="hs-comment">--   The resulting machine will draw from a single source.</span><span>
+</span><span id="line-78"></span><span class="hs-comment">--</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- Examples:</span><span>
+</span><span id="line-80"></span><span class="hs-comment">--</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- &gt;&gt;&gt; import Data.Machine.Source</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- &gt;&gt;&gt; run $ teeT zipping echo echo &lt;~ source [1..5]</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- [(1,2),(3,4)]</span><span>
+</span><span id="line-84"></span><span class="hs-comment">--</span><span>
+</span><span id="line-85"></span><span id="local-6989586621679090362"><span id="local-6989586621679090363"><span id="local-6989586621679090364"><span id="local-6989586621679090365"><span id="local-6989586621679090366"><span class="annot"><a href="Data.Machine.Tee.html#teeT"><span class="hs-identifier hs-type">teeT</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679090366"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#TeeT"><span class="hs-identifier hs-type">TeeT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090366"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090365"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090364"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090363"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-type">MachineT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090366"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090362"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090365"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-type">MachineT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090366"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090362"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090364"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-type">MachineT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090366"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090362"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090363"><span class="hs-identifier hs-type">c</span></a></span></span></span></span></span></span><span>
+</span><span id="line-86"></span><span id="teeT"><span class="annot"><span class="annottext">teeT :: TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+</span><a href="Data.Machine.Tee.html#teeT"><span class="hs-identifier hs-var hs-var">teeT</span></a></span></span><span> </span><span id="local-6989586621679090225"><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090225"><span class="hs-identifier hs-var">mt</span></a></span></span><span> </span><span id="local-6989586621679090224"><span class="annot"><span class="annottext">MachineT m k a
+</span><a href="#local-6989586621679090224"><span class="hs-identifier hs-var">ma</span></a></span></span><span> </span><span id="local-6989586621679090223"><span class="annot"><span class="annottext">MachineT m k b
+</span><a href="#local-6989586621679090223"><span class="hs-identifier hs-var">mb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (Step k c (MachineT m k c)) -&gt; MachineT m k c
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+m (Step k o (MachineT m k o)) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-var">MachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(m (Step k c (MachineT m k c)) -&gt; MachineT m k c)
+-&gt; m (Step k c (MachineT m k c)) -&gt; MachineT m k c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; m (Step (T a b) c (TeeT m a b c))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090225"><span class="hs-identifier hs-var">mt</span></a></span><span> </span><span class="annot"><span class="annottext">m (Step (T a b) c (TeeT m a b c))
+-&gt; (Step (T a b) c (TeeT m a b c) -&gt; m (Step k c (MachineT m k c)))
+-&gt; m (Step k c (MachineT m k c))
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679090222"><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c)
+</span><a href="#local-6989586621679090222"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c)
+</span><a href="#local-6989586621679090222"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-87"></span><span>  </span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c)
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step k c (MachineT m k c) -&gt; m (Step k c (MachineT m k c))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Step k c (MachineT m k c)
+forall (k :: * -&gt; *) o r. Step k o r
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span>
+</span><span id="line-88"></span><span>  </span><span class="annot"><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-type">Yield</span></a></span><span> </span><span id="local-6989586621679090221"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679090221"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span id="local-6989586621679090220"><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090220"><span class="hs-identifier hs-var">k</span></a></span></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step k c (MachineT m k c) -&gt; m (Step k c (MachineT m k c))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step k c (MachineT m k c) -&gt; m (Step k c (MachineT m k c)))
+-&gt; Step k c (MachineT m k c) -&gt; m (Step k c (MachineT m k c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">c -&gt; MachineT m k c -&gt; Step k c (MachineT m k c)
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679090221"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT m k c -&gt; Step k c (MachineT m k c))
+-&gt; MachineT m k c -&gt; Step k c (MachineT m k c)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+forall (m :: * -&gt; *) a b c (k :: * -&gt; *).
+Monad m =&gt;
+TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+</span><a href="Data.Machine.Tee.html#teeT"><span class="hs-identifier hs-var">teeT</span></a></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090220"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT m k a
+</span><a href="#local-6989586621679090224"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT m k b
+</span><a href="#local-6989586621679090223"><span class="hs-identifier hs-var">mb</span></a></span><span>
+</span><span id="line-89"></span><span>  </span><span class="annot"><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span id="local-6989586621679090219"><span class="annot"><span class="annottext">t -&gt; TeeT m a b c
+</span><a href="#local-6989586621679090219"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="annot"><span class="annottext">T a b t
+</span><a href="Data.Machine.Tee.html#L"><span class="hs-identifier hs-var">L</span></a></span><span> </span><span id="local-6989586621679090218"><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090218"><span class="hs-identifier hs-var">ff</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MachineT m k a -&gt; m (Step k a (MachineT m k a))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT m k a
+</span><a href="#local-6989586621679090224"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">m (Step k a (MachineT m k a))
+-&gt; (Step k a (MachineT m k a) -&gt; m (Step k c (MachineT m k c)))
+-&gt; m (Step k c (MachineT m k c))
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679090217"><span class="annot"><span class="annottext">Step k a (MachineT m k a)
+</span><a href="#local-6989586621679090217"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Step k a (MachineT m k a)
+</span><a href="#local-6989586621679090217"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-90"></span><span>    </span><span class="annot"><span class="annottext">Step k a (MachineT m k a)
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MachineT m k c -&gt; m (Step k c (MachineT m k c))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT m k c -&gt; m (Step k c (MachineT m k c)))
+-&gt; MachineT m k c -&gt; m (Step k c (MachineT m k c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+forall (m :: * -&gt; *) a b c (k :: * -&gt; *).
+Monad m =&gt;
+TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+</span><a href="Data.Machine.Tee.html#teeT"><span class="hs-identifier hs-var">teeT</span></a></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090218"><span class="hs-identifier hs-var">ff</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT m k a
+forall (k :: * -&gt; *) b. Machine k b
+</span><a href="Data.Machine.Type.html#stopped"><span class="hs-identifier hs-var">stopped</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT m k b
+</span><a href="#local-6989586621679090223"><span class="hs-identifier hs-var">mb</span></a></span><span>
+</span><span id="line-91"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-type">Yield</span></a></span><span> </span><span id="local-6989586621679090216"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679090216"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679090215"><span class="annot"><span class="annottext">MachineT m k a
+</span><a href="#local-6989586621679090215"><span class="hs-identifier hs-var">k</span></a></span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MachineT m k c -&gt; m (Step k c (MachineT m k c))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT m k c -&gt; m (Step k c (MachineT m k c)))
+-&gt; MachineT m k c -&gt; m (Step k c (MachineT m k c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+forall (m :: * -&gt; *) a b c (k :: * -&gt; *).
+Monad m =&gt;
+TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+</span><a href="Data.Machine.Tee.html#teeT"><span class="hs-identifier hs-var">teeT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t -&gt; TeeT m a b c
+</span><a href="#local-6989586621679090219"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+t
+</span><a href="#local-6989586621679090216"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">MachineT m k a
+</span><a href="#local-6989586621679090215"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT m k b
+</span><a href="#local-6989586621679090223"><span class="hs-identifier hs-var">mb</span></a></span><span>
+</span><span id="line-92"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span id="local-6989586621679090214"><span class="annot"><span class="annottext">t -&gt; MachineT m k a
+</span><a href="#local-6989586621679090214"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679090213"><span class="annot"><span class="annottext">k t
+</span><a href="#local-6989586621679090213"><span class="hs-identifier hs-var">rq</span></a></span></span><span> </span><span id="local-6989586621679090212"><span class="annot"><span class="annottext">MachineT m k a
+</span><a href="#local-6989586621679090212"><span class="hs-identifier hs-var">fg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-93"></span><span>      </span><span class="annot"><span class="annottext">Step k c (MachineT m k c) -&gt; m (Step k c (MachineT m k c))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step k c (MachineT m k c) -&gt; m (Step k c (MachineT m k c)))
+-&gt; Step k c (MachineT m k c) -&gt; m (Step k c (MachineT m k c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(t -&gt; MachineT m k c)
+-&gt; k t -&gt; MachineT m k c -&gt; Step k c (MachineT m k c)
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679090211"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679090211"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+forall (m :: * -&gt; *) a b c (k :: * -&gt; *).
+Monad m =&gt;
+TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+</span><a href="Data.Machine.Tee.html#teeT"><span class="hs-identifier hs-var">teeT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c) -&gt; TeeT m a b c
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c)
+</span><a href="#local-6989586621679090222"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t -&gt; MachineT m k a
+</span><a href="#local-6989586621679090214"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679090211"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">MachineT m k b
+</span><a href="#local-6989586621679090223"><span class="hs-identifier hs-var">mb</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">k t
+</span><a href="#local-6989586621679090213"><span class="hs-identifier hs-var">rq</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT m k c -&gt; Step k c (MachineT m k c))
+-&gt; MachineT m k c -&gt; Step k c (MachineT m k c)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+forall (m :: * -&gt; *) a b c (k :: * -&gt; *).
+Monad m =&gt;
+TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+</span><a href="Data.Machine.Tee.html#teeT"><span class="hs-identifier hs-var">teeT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c) -&gt; TeeT m a b c
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c)
+</span><a href="#local-6989586621679090222"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">MachineT m k a
+</span><a href="#local-6989586621679090212"><span class="hs-identifier hs-var">fg</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT m k b
+</span><a href="#local-6989586621679090223"><span class="hs-identifier hs-var">mb</span></a></span><span>
+</span><span id="line-94"></span><span>  </span><span class="annot"><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span id="local-6989586621679090210"><span class="annot"><span class="annottext">t -&gt; TeeT m a b c
+</span><a href="#local-6989586621679090210"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="annot"><span class="annottext">T a b t
+</span><a href="Data.Machine.Tee.html#R"><span class="hs-identifier hs-var">R</span></a></span><span> </span><span id="local-6989586621679090209"><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090209"><span class="hs-identifier hs-var">ff</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MachineT m k b -&gt; m (Step k b (MachineT m k b))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT m k b
+</span><a href="#local-6989586621679090223"><span class="hs-identifier hs-var">mb</span></a></span><span> </span><span class="annot"><span class="annottext">m (Step k b (MachineT m k b))
+-&gt; (Step k b (MachineT m k b) -&gt; m (Step k c (MachineT m k c)))
+-&gt; m (Step k c (MachineT m k c))
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679090208"><span class="annot"><span class="annottext">Step k b (MachineT m k b)
+</span><a href="#local-6989586621679090208"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Step k b (MachineT m k b)
+</span><a href="#local-6989586621679090208"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-95"></span><span>    </span><span class="annot"><span class="annottext">Step k b (MachineT m k b)
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MachineT m k c -&gt; m (Step k c (MachineT m k c))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT m k c -&gt; m (Step k c (MachineT m k c)))
+-&gt; MachineT m k c -&gt; m (Step k c (MachineT m k c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+forall (m :: * -&gt; *) a b c (k :: * -&gt; *).
+Monad m =&gt;
+TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+</span><a href="Data.Machine.Tee.html#teeT"><span class="hs-identifier hs-var">teeT</span></a></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090209"><span class="hs-identifier hs-var">ff</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT m k a
+</span><a href="#local-6989586621679090224"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT m k b
+forall (k :: * -&gt; *) b. Machine k b
+</span><a href="Data.Machine.Type.html#stopped"><span class="hs-identifier hs-var">stopped</span></a></span><span>
+</span><span id="line-96"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-type">Yield</span></a></span><span> </span><span id="local-6989586621679090207"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679090207"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679090206"><span class="annot"><span class="annottext">MachineT m k b
+</span><a href="#local-6989586621679090206"><span class="hs-identifier hs-var">k</span></a></span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MachineT m k c -&gt; m (Step k c (MachineT m k c))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT m k c -&gt; m (Step k c (MachineT m k c)))
+-&gt; MachineT m k c -&gt; m (Step k c (MachineT m k c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+forall (m :: * -&gt; *) a b c (k :: * -&gt; *).
+Monad m =&gt;
+TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+</span><a href="Data.Machine.Tee.html#teeT"><span class="hs-identifier hs-var">teeT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t -&gt; TeeT m a b c
+</span><a href="#local-6989586621679090210"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">b
+t
+</span><a href="#local-6989586621679090207"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">MachineT m k a
+</span><a href="#local-6989586621679090224"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT m k b
+</span><a href="#local-6989586621679090206"><span class="hs-identifier hs-var">k</span></a></span><span>
+</span><span id="line-97"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span id="local-6989586621679090205"><span class="annot"><span class="annottext">t -&gt; MachineT m k b
+</span><a href="#local-6989586621679090205"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679090204"><span class="annot"><span class="annottext">k t
+</span><a href="#local-6989586621679090204"><span class="hs-identifier hs-var">rq</span></a></span></span><span> </span><span id="local-6989586621679090203"><span class="annot"><span class="annottext">MachineT m k b
+</span><a href="#local-6989586621679090203"><span class="hs-identifier hs-var">fg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-98"></span><span>      </span><span class="annot"><span class="annottext">Step k c (MachineT m k c) -&gt; m (Step k c (MachineT m k c))
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step k c (MachineT m k c) -&gt; m (Step k c (MachineT m k c)))
+-&gt; Step k c (MachineT m k c) -&gt; m (Step k c (MachineT m k c))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(t -&gt; MachineT m k c)
+-&gt; k t -&gt; MachineT m k c -&gt; Step k c (MachineT m k c)
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679090202"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679090202"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+forall (m :: * -&gt; *) a b c (k :: * -&gt; *).
+Monad m =&gt;
+TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+</span><a href="Data.Machine.Tee.html#teeT"><span class="hs-identifier hs-var">teeT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c) -&gt; TeeT m a b c
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c)
+</span><a href="#local-6989586621679090222"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">MachineT m k a
+</span><a href="#local-6989586621679090224"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t -&gt; MachineT m k b
+</span><a href="#local-6989586621679090205"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679090202"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">k t
+</span><a href="#local-6989586621679090204"><span class="hs-identifier hs-var">rq</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT m k c -&gt; Step k c (MachineT m k c))
+-&gt; MachineT m k c -&gt; Step k c (MachineT m k c)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+forall (m :: * -&gt; *) a b c (k :: * -&gt; *).
+Monad m =&gt;
+TeeT m a b c -&gt; MachineT m k a -&gt; MachineT m k b -&gt; MachineT m k c
+</span><a href="Data.Machine.Tee.html#teeT"><span class="hs-identifier hs-var">teeT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c) -&gt; TeeT m a b c
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+Step k o (MachineT m k o) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#encased"><span class="hs-identifier hs-var">encased</span></a></span><span> </span><span class="annot"><span class="annottext">Step (T a b) c (TeeT m a b c)
+</span><a href="#local-6989586621679090222"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">MachineT m k a
+</span><a href="#local-6989586621679090224"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT m k b
+</span><a href="#local-6989586621679090203"><span class="hs-identifier hs-var">fg</span></a></span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- | Precompose a pipe onto the left input of a tee.</span><span>
+</span><span id="line-101"></span><span id="local-6989586621679090329"><span id="local-6989586621679090330"><span id="local-6989586621679090331"><span id="local-6989586621679090332"><span id="local-6989586621679090333"><span class="annot"><a href="Data.Machine.Tee.html#addL"><span class="hs-identifier hs-type">addL</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679090333"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090333"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090332"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090331"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#TeeT"><span class="hs-identifier hs-type">TeeT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090333"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090331"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090330"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090329"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#TeeT"><span class="hs-identifier hs-type">TeeT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090333"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090332"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090330"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090329"><span class="hs-identifier hs-type">d</span></a></span></span></span></span></span></span><span>
+</span><span id="line-102"></span><span id="addL"><span class="annot"><span class="annottext">addL :: ProcessT m a b -&gt; TeeT m b c d -&gt; TeeT m a c d
+</span><a href="Data.Machine.Tee.html#addL"><span class="hs-identifier hs-var hs-var">addL</span></a></span></span><span> </span><span id="local-6989586621679090201"><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679090201"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ProcessT m a b -&gt; ProcessT m c c -&gt; TeeT m b c d -&gt; TeeT m a c d
+forall (m :: * -&gt; *) a a' b b' c.
+Monad m =&gt;
+ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var">tee</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b
+</span><a href="#local-6989586621679090201"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m c c
+forall a. Process a a
+</span><a href="Data.Machine.Process.html#echo"><span class="hs-identifier hs-var">echo</span></a></span><span>
+</span><span id="line-103"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#addL"><span class="hs-pragma hs-type">addL</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span class="hs-comment">-- | Precompose a pipe onto the right input of a tee.</span><span>
+</span><span id="line-106"></span><span id="local-6989586621679090320"><span id="local-6989586621679090321"><span id="local-6989586621679090322"><span id="local-6989586621679090323"><span id="local-6989586621679090324"><span class="annot"><a href="Data.Machine.Tee.html#addR"><span class="hs-identifier hs-type">addR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679090324"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090324"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090323"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090322"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#TeeT"><span class="hs-identifier hs-type">TeeT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090324"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090321"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090322"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090320"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#TeeT"><span class="hs-identifier hs-type">TeeT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090324"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090321"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090323"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090320"><span class="hs-identifier hs-type">d</span></a></span></span></span></span></span></span><span>
+</span><span id="line-107"></span><span id="addR"><span class="annot"><span class="annottext">addR :: ProcessT m b c -&gt; TeeT m a c d -&gt; TeeT m a b d
+</span><a href="Data.Machine.Tee.html#addR"><span class="hs-identifier hs-var hs-var">addR</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ProcessT m a a -&gt; ProcessT m b c -&gt; TeeT m a c d -&gt; TeeT m a b d
+forall (m :: * -&gt; *) a a' b b' c.
+Monad m =&gt;
+ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var">tee</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a a
+forall a. Process a a
+</span><a href="Data.Machine.Process.html#echo"><span class="hs-identifier hs-var">echo</span></a></span><span>
+</span><span id="line-108"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#addR"><span class="hs-pragma hs-type">addR</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- | Tie off one input of a tee by connecting it to a known source.</span><span>
+</span><span id="line-111"></span><span id="local-6989586621679090196"><span id="local-6989586621679090197"><span id="local-6989586621679090198"><span id="local-6989586621679090199"><span class="annot"><a href="Data.Machine.Tee.html#capL"><span class="hs-identifier hs-type">capL</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679090199"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Source.html#SourceT"><span class="hs-identifier hs-type">SourceT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090199"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090198"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#TeeT"><span class="hs-identifier hs-type">TeeT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090199"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090198"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090197"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090196"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090199"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090197"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090196"><span class="hs-identifier hs-type">c</span></a></span></span></span></span></span><span>
+</span><span id="line-112"></span><span id="capL"><span class="annot"><span class="annottext">capL :: SourceT m a -&gt; TeeT m a b c -&gt; ProcessT m b c
+</span><a href="Data.Machine.Tee.html#capL"><span class="hs-identifier hs-var hs-var">capL</span></a></span></span><span> </span><span id="local-6989586621679090195"><span class="annot"><span class="annottext">SourceT m a
+</span><a href="#local-6989586621679090195"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679090194"><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090194"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall a. T b b a -&gt; Is b a)
+-&gt; MachineT m (T b b) c -&gt; ProcessT m b c
+forall (m :: * -&gt; *) (k :: * -&gt; *) (k' :: * -&gt; *) o.
+Monad m =&gt;
+(forall a. k a -&gt; k' a) -&gt; MachineT m k o -&gt; MachineT m k' o
+</span><a href="Data.Machine.Type.html#fit"><span class="hs-identifier hs-var">fit</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. T b b a -&gt; Is b a
+forall a b. T a a b -&gt; Is a b
+</span><a href="Data.Machine.Tee.html#cappedT"><span class="hs-identifier hs-var">cappedT</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT m (T b b) c -&gt; ProcessT m b c)
+-&gt; MachineT m (T b b) c -&gt; ProcessT m b c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m b a -&gt; TeeT m a b c -&gt; MachineT m (T b b) c
+forall (m :: * -&gt; *) a b c d.
+Monad m =&gt;
+ProcessT m a b -&gt; TeeT m b c d -&gt; TeeT m a c d
+</span><a href="Data.Machine.Tee.html#addL"><span class="hs-identifier hs-var">addL</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m b a
+SourceT m a
+</span><a href="#local-6989586621679090195"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090194"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-113"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#capL"><span class="hs-pragma hs-type">capL</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- | Tie off one input of a tee by connecting it to a known source.</span><span>
+</span><span id="line-116"></span><span id="local-6989586621679090188"><span id="local-6989586621679090189"><span id="local-6989586621679090190"><span id="local-6989586621679090191"><span class="annot"><a href="Data.Machine.Tee.html#capR"><span class="hs-identifier hs-type">capR</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679090191"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Source.html#SourceT"><span class="hs-identifier hs-type">SourceT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090191"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090190"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#TeeT"><span class="hs-identifier hs-type">TeeT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090191"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090189"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090190"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090188"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#ProcessT"><span class="hs-identifier hs-type">ProcessT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090191"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090189"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090188"><span class="hs-identifier hs-type">c</span></a></span></span></span></span></span><span>
+</span><span id="line-117"></span><span id="capR"><span class="annot"><span class="annottext">capR :: SourceT m b -&gt; TeeT m a b c -&gt; ProcessT m a c
+</span><a href="Data.Machine.Tee.html#capR"><span class="hs-identifier hs-var hs-var">capR</span></a></span></span><span> </span><span id="local-6989586621679090187"><span class="annot"><span class="annottext">SourceT m b
+</span><a href="#local-6989586621679090187"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679090186"><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090186"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall a. T a a a -&gt; Is a a)
+-&gt; MachineT m (T a a) c -&gt; ProcessT m a c
+forall (m :: * -&gt; *) (k :: * -&gt; *) (k' :: * -&gt; *) o.
+Monad m =&gt;
+(forall a. k a -&gt; k' a) -&gt; MachineT m k o -&gt; MachineT m k' o
+</span><a href="Data.Machine.Type.html#fit"><span class="hs-identifier hs-var">fit</span></a></span><span> </span><span class="annot"><span class="annottext">forall a. T a a a -&gt; Is a a
+forall a b. T a a b -&gt; Is a b
+</span><a href="Data.Machine.Tee.html#cappedT"><span class="hs-identifier hs-var">cappedT</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT m (T a a) c -&gt; ProcessT m a c)
+-&gt; MachineT m (T a a) c -&gt; ProcessT m a c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b -&gt; TeeT m a b c -&gt; MachineT m (T a a) c
+forall (m :: * -&gt; *) b c a d.
+Monad m =&gt;
+ProcessT m b c -&gt; TeeT m a c d -&gt; TeeT m a b d
+</span><a href="Data.Machine.Tee.html#addR"><span class="hs-identifier hs-var">addR</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m a b
+SourceT m b
+</span><a href="#local-6989586621679090187"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090186"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-118"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#capR"><span class="hs-pragma hs-type">capR</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- | Tie off both inputs to a tee by connecting them to known sources.</span><span>
+</span><span id="line-121"></span><span class="hs-comment">--   This is recommended over capping each side separately, as it is</span><span>
+</span><span id="line-122"></span><span class="hs-comment">--   far more efficient.</span><span>
+</span><span id="line-123"></span><span id="local-6989586621679090182"><span id="local-6989586621679090183"><span id="local-6989586621679090184"><span id="local-6989586621679090185"><span class="annot"><a href="Data.Machine.Tee.html#capT"><span class="hs-identifier hs-type">capT</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679090185"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Source.html#SourceT"><span class="hs-identifier hs-type">SourceT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090185"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090184"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Source.html#SourceT"><span class="hs-identifier hs-type">SourceT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090185"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090183"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#TeeT"><span class="hs-identifier hs-type">TeeT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090185"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090184"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090183"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090182"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Source.html#SourceT"><span class="hs-identifier hs-type">SourceT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090185"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090182"><span class="hs-identifier hs-type">c</span></a></span></span></span></span></span><span>
+</span><span id="line-124"></span><span id="capT"><span class="annot"><span class="annottext">capT :: SourceT m a -&gt; SourceT m b -&gt; TeeT m a b c -&gt; SourceT m c
+</span><a href="Data.Machine.Tee.html#capT"><span class="hs-identifier hs-var hs-var">capT</span></a></span></span><span> </span><span id="local-6989586621679090181"><span class="annot"><span class="annottext">SourceT m a
+</span><a href="#local-6989586621679090181"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679090180"><span class="annot"><span class="annottext">SourceT m b
+</span><a href="#local-6989586621679090180"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679090179"><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090179"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MachineT m (T Any Any) c -&gt; SourceT m c
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+Monad m =&gt;
+MachineT m k o -&gt; SourceT m o
+</span><a href="Data.Machine.Source.html#plug"><span class="hs-identifier hs-var">plug</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT m (T Any Any) c -&gt; SourceT m c)
+-&gt; MachineT m (T Any Any) c -&gt; SourceT m c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ProcessT m Any a
+-&gt; ProcessT m Any b -&gt; TeeT m a b c -&gt; MachineT m (T Any Any) c
+forall (m :: * -&gt; *) a a' b b' c.
+Monad m =&gt;
+ProcessT m a a'
+-&gt; ProcessT m b b' -&gt; TeeT m a' b' c -&gt; TeeT m a b c
+</span><a href="Data.Machine.Tee.html#tee"><span class="hs-identifier hs-var">tee</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m Any a
+SourceT m a
+</span><a href="#local-6989586621679090181"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">ProcessT m Any b
+SourceT m b
+</span><a href="#local-6989586621679090180"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">TeeT m a b c
+</span><a href="#local-6989586621679090179"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-125"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#capT"><span class="hs-pragma hs-type">capT</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- | Natural transformation used by 'capL' and 'capR'.</span><span>
+</span><span id="line-128"></span><span id="local-6989586621679090334"><span id="local-6989586621679090335"><span class="annot"><a href="Data.Machine.Tee.html#cappedT"><span class="hs-identifier hs-type">cappedT</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090335"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090335"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090334"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Is.html#Is"><span class="hs-identifier hs-type">Is</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090335"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090334"><span class="hs-identifier hs-type">b</span></a></span></span></span><span>
+</span><span id="line-129"></span><span id="cappedT"><span class="annot"><span class="annottext">cappedT :: T a a b -&gt; Is a b
+</span><a href="Data.Machine.Tee.html#cappedT"><span class="hs-identifier hs-var hs-var">cappedT</span></a></span></span><span> </span><span class="annot"><span class="annottext">T a a b
+</span><a href="Data.Machine.Tee.html#R"><span class="hs-identifier hs-var">R</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Is a b
+forall a. Is a a
+</span><a href="Data.Machine.Is.html#Refl"><span class="hs-identifier hs-var">Refl</span></a></span><span>
+</span><span id="line-130"></span><span class="annot"><a href="Data.Machine.Tee.html#cappedT"><span class="hs-identifier hs-var">cappedT</span></a></span><span> </span><span class="annot"><span class="annottext">T a a b
+</span><a href="Data.Machine.Tee.html#L"><span class="hs-identifier hs-var">L</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Is a b
+forall a. Is a a
+</span><a href="Data.Machine.Is.html#Refl"><span class="hs-identifier hs-var">Refl</span></a></span><span>
+</span><span id="line-131"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#cappedT"><span class="hs-pragma hs-type">cappedT</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- | wait for both the left and the right sides of a T and then merge them with f.</span><span>
+</span><span id="line-134"></span><span id="local-6989586621679090174"><span id="local-6989586621679090175"><span id="local-6989586621679090176"><span id="local-6989586621679090177"><span class="annot"><a href="Data.Machine.Tee.html#zipWithT"><span class="hs-identifier hs-type">zipWithT</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679090177"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679090176"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679090175"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Plan.html#PlanT"><span class="hs-identifier hs-type">PlanT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Tee.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090177"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090176"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679090175"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090174"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-135"></span><span id="zipWithT"><span class="annot"><span class="annottext">zipWithT :: (a -&gt; b -&gt; c) -&gt; PlanT (T a b) c m ()
+</span><a href="Data.Machine.Tee.html#zipWithT"><span class="hs-identifier hs-var hs-var">zipWithT</span></a></span></span><span> </span><span id="local-6989586621679090173"><span class="annot"><span class="annottext">a -&gt; b -&gt; c
+</span><a href="#local-6989586621679090173"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="hs-special">{</span><span> </span><span id="local-6989586621679090172"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679090172"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T a b a -&gt; Plan (T a b) c a
+forall (k :: * -&gt; *) i o. k i -&gt; Plan k o i
+</span><a href="Data.Machine.Plan.html#awaits"><span class="hs-identifier hs-var">awaits</span></a></span><span> </span><span class="annot"><span class="annottext">T a b a
+forall a b. T a b a
+</span><a href="Data.Machine.Tee.html#L"><span class="hs-identifier hs-var">L</span></a></span><span class="hs-special">;</span><span> </span><span id="local-6989586621679090170"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679090170"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T a b b -&gt; Plan (T a b) c b
+forall (k :: * -&gt; *) i o. k i -&gt; Plan k o i
+</span><a href="Data.Machine.Plan.html#awaits"><span class="hs-identifier hs-var">awaits</span></a></span><span> </span><span class="annot"><span class="annottext">T a b b
+forall a b. T a b b
+</span><a href="Data.Machine.Tee.html#R"><span class="hs-identifier hs-var">R</span></a></span><span class="hs-special">;</span><span> </span><span class="annot"><span class="annottext">c -&gt; Plan (T a b) c ()
+forall o (k :: * -&gt; *). o -&gt; Plan k o ()
+</span><a href="Data.Machine.Plan.html#yield"><span class="hs-identifier hs-var">yield</span></a></span><span> </span><span class="annot"><span class="annottext">(c -&gt; Plan (T a b) c ()) -&gt; c -&gt; Plan (T a b) c ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; c
+</span><a href="#local-6989586621679090173"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679090172"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679090170"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-136"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#zipWithT"><span class="hs-pragma hs-type">zipWithT</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- | Zip together two inputs, then apply the given function,</span><span>
+</span><span id="line-139"></span><span class="hs-comment">--   halting as soon as either input is exhausted.</span><span>
+</span><span id="line-140"></span><span class="hs-comment">--   This implementation reads from the left, then the right</span><span>
+</span><span id="line-141"></span><span id="local-6989586621679090283"><span id="local-6989586621679090284"><span id="local-6989586621679090285"><span class="annot"><a href="Data.Machine.Tee.html#zipWith"><span class="hs-identifier hs-type">zipWith</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679090285"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679090284"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679090283"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#Tee"><span class="hs-identifier hs-type">Tee</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090285"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090284"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090283"><span class="hs-identifier hs-type">c</span></a></span></span></span></span><span>
+</span><span id="line-142"></span><span id="zipWith"><span class="annot"><span class="annottext">zipWith :: (a -&gt; b -&gt; c) -&gt; Tee a b c
+</span><a href="Data.Machine.Tee.html#zipWith"><span class="hs-identifier hs-var hs-var">zipWith</span></a></span></span><span> </span><span id="local-6989586621679090168"><span class="annot"><span class="annottext">a -&gt; b -&gt; c
+</span><a href="#local-6989586621679090168"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanT (T a b) c m () -&gt; MachineT m (T a b) c
+forall (m :: * -&gt; *) (k :: * -&gt; *) o a.
+Monad m =&gt;
+PlanT k o m a -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#repeatedly"><span class="hs-identifier hs-var">repeatedly</span></a></span><span> </span><span class="annot"><span class="annottext">(PlanT (T a b) c m () -&gt; MachineT m (T a b) c)
+-&gt; PlanT (T a b) c m () -&gt; MachineT m (T a b) c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-143"></span><span>  </span><span id="local-6989586621679090166"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679090166"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T a b a -&gt; Plan (T a b) c a
+forall (k :: * -&gt; *) i o. k i -&gt; Plan k o i
+</span><a href="Data.Machine.Plan.html#awaits"><span class="hs-identifier hs-var">awaits</span></a></span><span> </span><span class="annot"><span class="annottext">T a b a
+forall a b. T a b a
+</span><a href="Data.Machine.Tee.html#L"><span class="hs-identifier hs-var">L</span></a></span><span>
+</span><span id="line-144"></span><span>  </span><span id="local-6989586621679090165"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679090165"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T a b b -&gt; Plan (T a b) c b
+forall (k :: * -&gt; *) i o. k i -&gt; Plan k o i
+</span><a href="Data.Machine.Plan.html#awaits"><span class="hs-identifier hs-var">awaits</span></a></span><span> </span><span class="annot"><span class="annottext">T a b b
+forall a b. T a b b
+</span><a href="Data.Machine.Tee.html#R"><span class="hs-identifier hs-var">R</span></a></span><span>
+</span><span id="line-145"></span><span>  </span><span class="annot"><span class="annottext">c -&gt; Plan (T a b) c ()
+forall o (k :: * -&gt; *). o -&gt; Plan k o ()
+</span><a href="Data.Machine.Plan.html#yield"><span class="hs-identifier hs-var">yield</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b -&gt; c
+</span><a href="#local-6989586621679090168"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679090166"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679090165"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#zipWith"><span class="hs-pragma hs-type">zipWith</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span class="hs-comment">-- | Zip together two inputs, halting as soon as either input is exhausted.</span><span>
+</span><span id="line-149"></span><span id="local-6989586621679090163"><span id="local-6989586621679090164"><span class="annot"><a href="Data.Machine.Tee.html#zipping"><span class="hs-identifier hs-type">zipping</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#Tee"><span class="hs-identifier hs-type">Tee</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090164"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679090163"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679090164"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679090163"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-150"></span><span id="zipping"><span class="annot"><span class="annottext">zipping :: MachineT m (T a b) (a, b)
+</span><a href="Data.Machine.Tee.html#zipping"><span class="hs-identifier hs-var hs-var">zipping</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b -&gt; (a, b)) -&gt; Tee a b (a, b)
+forall a b c. (a -&gt; b -&gt; c) -&gt; Tee a b c
+</span><a href="Data.Machine.Tee.html#zipWith"><span class="hs-identifier hs-var">zipWith</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">,</span><span class="hs-special">)</span><span>
+</span><span id="line-151"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Tee.html#zipping"><span class="hs-pragma hs-type">zipping</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-152"></span></pre></body></html>

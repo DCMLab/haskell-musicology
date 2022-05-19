@@ -12912,11 +12912,11 @@ instance (t GHC.Types.~ Data.IntSet.Internal.IntSet) => Control.Lens.Wrapped.Rew
 instance (t GHC.Types.~ Data.Map.Internal.Map k' a', GHC.Classes.Ord k) => Control.Lens.Wrapped.Rewrapped (Data.Map.Internal.Map k a) t
 instance (t GHC.Types.~ Data.Set.Internal.Set a', GHC.Classes.Ord a) => Control.Lens.Wrapped.Rewrapped (Data.Set.Internal.Set a) t
 instance (t GHC.Types.~ Data.Sequence.Internal.Seq a') => Control.Lens.Wrapped.Rewrapped (Data.Sequence.Internal.Seq a) t
-instance (t GHC.Types.~ Data.Profunctor.Types.Star f' d' c') => Control.Lens.Wrapped.Rewrapped (Data.Profunctor.Types.Star f d c) t
-instance (t GHC.Types.~ Data.Profunctor.Types.Costar f' d' c') => Control.Lens.Wrapped.Rewrapped (Data.Profunctor.Types.Costar f d c) t
-instance (t GHC.Types.~ Data.Profunctor.Types.WrappedArrow p' a' b') => Control.Lens.Wrapped.Rewrapped (Data.Profunctor.Types.WrappedArrow p a b) t
-instance (t GHC.Types.~ Data.Profunctor.Types.Forget r' a' b') => Control.Lens.Wrapped.Rewrapped (Data.Profunctor.Types.Forget r a b) t
-instance (t GHC.Types.~ Data.Profunctor.Cayley.Cayley f' p' a' b') => Control.Lens.Wrapped.Rewrapped (Data.Profunctor.Cayley.Cayley f p a b) t
+instance forall k1 k2 t (f' :: k1 -> *) d' (c' :: k1) (f :: k2 -> *) d (c :: k2). (t GHC.Types.~ Data.Profunctor.Types.Star f' d' c') => Control.Lens.Wrapped.Rewrapped (Data.Profunctor.Types.Star f d c) t
+instance forall k1 k2 t (f' :: k1 -> *) (d' :: k1) c' (f :: k2 -> *) (d :: k2) c. (t GHC.Types.~ Data.Profunctor.Types.Costar f' d' c') => Control.Lens.Wrapped.Rewrapped (Data.Profunctor.Types.Costar f d c) t
+instance forall k2 k3 k4 k5 t (p' :: k2 -> k3 -> *) (a' :: k2) (b' :: k3) (p :: k4 -> k5 -> *) (a :: k4) (b :: k5). (t GHC.Types.~ Data.Profunctor.Types.WrappedArrow p' a' b') => Control.Lens.Wrapped.Rewrapped (Data.Profunctor.Types.WrappedArrow p a b) t
+instance forall k1 k2 t r' a' (b' :: k1) r a (b :: k2). (t GHC.Types.~ Data.Profunctor.Types.Forget r' a' b') => Control.Lens.Wrapped.Rewrapped (Data.Profunctor.Types.Forget r a b) t
+instance forall k4 k5 k6 k7 k8 k9 t (f' :: k4 -> *) (p' :: k5 -> k6 -> k4) (a' :: k5) (b' :: k6) (f :: k7 -> *) (p :: k8 -> k9 -> k7) (a :: k8) (b :: k9). (t GHC.Types.~ Data.Profunctor.Cayley.Cayley f' p' a' b') => Control.Lens.Wrapped.Rewrapped (Data.Profunctor.Cayley.Cayley f p a b) t
 instance (t GHC.Types.~ Data.Vector.Vector a') => Control.Lens.Wrapped.Rewrapped (Data.Vector.Vector a) t
 instance (Data.Primitive.Types.Prim a, t GHC.Types.~ Data.Vector.Primitive.Vector a') => Control.Lens.Wrapped.Rewrapped (Data.Vector.Primitive.Vector a) t
 instance (Data.Vector.Unboxed.Base.Unbox a, t GHC.Types.~ Data.Vector.Unboxed.Base.Vector a') => Control.Lens.Wrapped.Rewrapped (Data.Vector.Unboxed.Base.Vector a) t
@@ -13063,11 +13063,11 @@ instance Control.Lens.Wrapped.Wrapped Data.IntSet.Internal.IntSet
 instance GHC.Classes.Ord k => Control.Lens.Wrapped.Wrapped (Data.Map.Internal.Map k a)
 instance GHC.Classes.Ord a => Control.Lens.Wrapped.Wrapped (Data.Set.Internal.Set a)
 instance Control.Lens.Wrapped.Wrapped (Data.Sequence.Internal.Seq a)
-instance Control.Lens.Wrapped.Wrapped (Data.Profunctor.Types.Star f d c)
-instance Control.Lens.Wrapped.Wrapped (Data.Profunctor.Types.Costar f d c)
-instance Control.Lens.Wrapped.Wrapped (Data.Profunctor.Types.WrappedArrow p a b)
-instance Control.Lens.Wrapped.Wrapped (Data.Profunctor.Types.Forget r a b)
-instance Control.Lens.Wrapped.Wrapped (Data.Profunctor.Cayley.Cayley f p a b)
+instance forall k (f :: k -> *) d (c :: k). Control.Lens.Wrapped.Wrapped (Data.Profunctor.Types.Star f d c)
+instance forall k (f :: k -> *) (d :: k) c. Control.Lens.Wrapped.Wrapped (Data.Profunctor.Types.Costar f d c)
+instance forall k k1 (p :: k -> k1 -> *) (a :: k) (b :: k1). Control.Lens.Wrapped.Wrapped (Data.Profunctor.Types.WrappedArrow p a b)
+instance forall k r a (b :: k). Control.Lens.Wrapped.Wrapped (Data.Profunctor.Types.Forget r a b)
+instance forall k k1 k2 (f :: k -> *) (p :: k1 -> k2 -> k) (a :: k1) (b :: k2). Control.Lens.Wrapped.Wrapped (Data.Profunctor.Cayley.Cayley f p a b)
 instance Control.Lens.Wrapped.Wrapped (Data.Vector.Vector a)
 instance Data.Primitive.Types.Prim a => Control.Lens.Wrapped.Wrapped (Data.Vector.Primitive.Vector a)
 instance Data.Vector.Unboxed.Base.Unbox a => Control.Lens.Wrapped.Wrapped (Data.Vector.Unboxed.Base.Vector a)

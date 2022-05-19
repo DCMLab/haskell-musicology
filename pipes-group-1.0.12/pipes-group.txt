@@ -263,9 +263,10 @@ next :: Monad m => Producer a m r -> m (Either r (a, Producer a m r))
 -- | Produce a value
 --   
 --   <pre>
---   <a>yield</a> :: <a>Monad</a> m =&gt; a -&gt; <a>Pipe</a> x a m ()
+--   <a>yield</a> :: <a>Monad</a> m =&gt; a -&gt; <a>Producer</a> a m ()
+--   <a>yield</a> :: <a>Monad</a> m =&gt; a -&gt; <a>Pipe</a>   x a m ()
 --   </pre>
-yield :: forall (m :: Type -> Type) a. Functor m => a -> Producer' a m ()
+yield :: forall (m :: Type -> Type) a x' x. Functor m => a -> Proxy x' x () a m ()
 
 -- | <a>Producer</a>s can only <a>yield</a>
 type Producer b = Proxy X () () b

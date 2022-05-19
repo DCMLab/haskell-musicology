@@ -23,7 +23,7 @@
 </span><span id="line-23"></span><span class="hs-comment">--   (ie position in a list) rather than a numerical value.</span><span>
 </span><span id="line-24"></span><span class="hs-keyword">newtype</span><span> </span><span id="PlotIndex"><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Indexed.html#PlotIndex"><span class="hs-identifier hs-var">PlotIndex</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PlotIndex"><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Indexed.html#PlotIndex"><span class="hs-identifier hs-var">PlotIndex</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="plotindex_i"><span class="annot"><span class="annottext">PlotIndex -&gt; Int
 </span><a href="Graphics.Rendering.Chart.Axis.Indexed.html#plotindex_i"><span class="hs-identifier hs-var hs-var">plotindex_i</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">}</span><span>
-</span><span id="line-25"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679374874"><span id="local-6989586621679374876"><span class="annot"><span class="annottext">PlotIndex -&gt; PlotIndex -&gt; Bool
+</span><span id="line-25"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679375536"><span id="local-6989586621679375538"><span class="annot"><span class="annottext">PlotIndex -&gt; PlotIndex -&gt; Bool
 (PlotIndex -&gt; PlotIndex -&gt; Bool)
 -&gt; (PlotIndex -&gt; PlotIndex -&gt; Bool) -&gt; Eq PlotIndex
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -31,7 +31,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: PlotIndex -&gt; PlotIndex -&gt; Bool
 == :: PlotIndex -&gt; PlotIndex -&gt; Bool
 $c== :: PlotIndex -&gt; PlotIndex -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679374858"><span id="local-6989586621679374860"><span id="local-6989586621679374862"><span id="local-6989586621679374864"><span id="local-6989586621679374866"><span id="local-6989586621679374868"><span id="local-6989586621679374870"><span class="annot"><span class="annottext">Eq PlotIndex
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679375520"><span id="local-6989586621679375522"><span id="local-6989586621679375524"><span id="local-6989586621679375526"><span id="local-6989586621679375528"><span id="local-6989586621679375530"><span id="local-6989586621679375532"><span class="annot"><span class="annottext">Eq PlotIndex
 Eq PlotIndex
 -&gt; (PlotIndex -&gt; PlotIndex -&gt; Ordering)
 -&gt; (PlotIndex -&gt; PlotIndex -&gt; Bool)
@@ -69,7 +69,7 @@ $c&lt; :: PlotIndex -&gt; PlotIndex -&gt; Bool
 compare :: PlotIndex -&gt; PlotIndex -&gt; Ordering
 $ccompare :: PlotIndex -&gt; PlotIndex -&gt; Ordering
 $cp1Ord :: Eq PlotIndex
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679374841"><span id="local-6989586621679374843"><span id="local-6989586621679374845"><span id="local-6989586621679374847"><span id="local-6989586621679374849"><span id="local-6989586621679374851"><span id="local-6989586621679374853"><span id="local-6989586621679374855"><span class="annot"><span class="annottext">Int -&gt; PlotIndex
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679375503"><span id="local-6989586621679375505"><span id="local-6989586621679375507"><span id="local-6989586621679375509"><span id="local-6989586621679375511"><span id="local-6989586621679375513"><span id="local-6989586621679375515"><span id="local-6989586621679375517"><span class="annot"><span class="annottext">Int -&gt; PlotIndex
 PlotIndex -&gt; Int
 PlotIndex -&gt; [PlotIndex]
 PlotIndex -&gt; PlotIndex
@@ -110,7 +110,7 @@ pred :: PlotIndex -&gt; PlotIndex
 $cpred :: PlotIndex -&gt; PlotIndex
 succ :: PlotIndex -&gt; PlotIndex
 $csucc :: PlotIndex -&gt; PlotIndex
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679374826"><span id="local-6989586621679374828"><span id="local-6989586621679374830"><span id="local-6989586621679374832"><span id="local-6989586621679374834"><span id="local-6989586621679374836"><span id="local-6989586621679374838"><span class="annot"><span class="annottext">Integer -&gt; PlotIndex
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679375488"><span id="local-6989586621679375490"><span id="local-6989586621679375492"><span id="local-6989586621679375494"><span id="local-6989586621679375496"><span id="local-6989586621679375498"><span id="local-6989586621679375500"><span class="annot"><span class="annottext">Integer -&gt; PlotIndex
 PlotIndex -&gt; PlotIndex
 PlotIndex -&gt; PlotIndex -&gt; PlotIndex
 (PlotIndex -&gt; PlotIndex -&gt; PlotIndex)
@@ -144,7 +144,7 @@ $c* :: PlotIndex -&gt; PlotIndex -&gt; PlotIndex
 $c- :: PlotIndex -&gt; PlotIndex -&gt; PlotIndex
 + :: PlotIndex -&gt; PlotIndex -&gt; PlotIndex
 $c+ :: PlotIndex -&gt; PlotIndex -&gt; PlotIndex
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Num</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679374821"><span class="annot"><span class="annottext">Num PlotIndex
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Num</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679375483"><span class="annot"><span class="annottext">Num PlotIndex
 Ord PlotIndex
 Num PlotIndex
 -&gt; Ord PlotIndex -&gt; (PlotIndex -&gt; Rational) -&gt; Real PlotIndex
@@ -154,7 +154,7 @@ toRational :: PlotIndex -&gt; Rational
 $ctoRational :: PlotIndex -&gt; Rational
 $cp2Real :: Ord PlotIndex
 $cp1Real :: Num PlotIndex
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Real</span></span></span><span class="hs-special">,</span><span id="local-6989586621679374804"><span id="local-6989586621679374806"><span id="local-6989586621679374808"><span id="local-6989586621679374810"><span id="local-6989586621679374812"><span id="local-6989586621679374814"><span id="local-6989586621679374816"><span class="annot"><span class="annottext">Enum PlotIndex
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Real</span></span></span><span class="hs-special">,</span><span id="local-6989586621679375466"><span id="local-6989586621679375468"><span id="local-6989586621679375470"><span id="local-6989586621679375472"><span id="local-6989586621679375474"><span id="local-6989586621679375476"><span id="local-6989586621679375478"><span class="annot"><span class="annottext">Enum PlotIndex
 Real PlotIndex
 Real PlotIndex
 -&gt; Enum PlotIndex
@@ -196,7 +196,7 @@ quot :: PlotIndex -&gt; PlotIndex -&gt; PlotIndex
 $cquot :: PlotIndex -&gt; PlotIndex -&gt; PlotIndex
 $cp2Integral :: Enum PlotIndex
 $cp1Integral :: Real PlotIndex
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Integral</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679374797"><span id="local-6989586621679374799"><span id="local-6989586621679374801"><span class="annot"><span class="annottext">Int -&gt; PlotIndex -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Integral</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679375459"><span id="local-6989586621679375461"><span id="local-6989586621679375463"><span class="annot"><span class="annottext">Int -&gt; PlotIndex -&gt; ShowS
 [PlotIndex] -&gt; ShowS
 PlotIndex -&gt; String
 (Int -&gt; PlotIndex -&gt; ShowS)
@@ -214,29 +214,29 @@ $cshowsPrec :: Int -&gt; PlotIndex -&gt; ShowS
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-26"></span><span>
 </span><span id="line-27"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Types.html#PlotValue"><span class="hs-identifier hs-type">PlotValue</span></a></span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Indexed.html#PlotIndex"><span class="hs-identifier hs-type">PlotIndex</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-28"></span><span>    </span><span id="local-6989586621679374790"><span class="annot"><span class="annottext">toValue :: PlotIndex -&gt; Double
-</span><a href="Graphics.Rendering.Chart.Axis.Types.html#toValue"><span class="hs-identifier hs-var hs-var hs-var hs-var">toValue</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Indexed.html#PlotIndex"><span class="hs-identifier hs-type">PlotIndex</span></a></span><span> </span><span id="local-6989586621679374788"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679374788"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Double
+</span><span id="line-28"></span><span>    </span><span id="local-6989586621679375452"><span class="annot"><span class="annottext">toValue :: PlotIndex -&gt; Double
+</span><a href="Graphics.Rendering.Chart.Axis.Types.html#toValue"><span class="hs-identifier hs-var hs-var hs-var hs-var">toValue</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Indexed.html#PlotIndex"><span class="hs-identifier hs-type">PlotIndex</span></a></span><span> </span><span id="local-6989586621679375450"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679375450"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Double
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679374788"><span class="hs-identifier hs-var">i</span></a></span><span>
-</span><span id="line-29"></span><span>    </span><span id="local-6989586621679374787"><span class="annot"><span class="annottext">fromValue :: Double -&gt; PlotIndex
+</span><a href="#local-6989586621679375450"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-29"></span><span>    </span><span id="local-6989586621679375449"><span class="annot"><span class="annottext">fromValue :: Double -&gt; PlotIndex
 </span><a href="Graphics.Rendering.Chart.Axis.Types.html#fromValue"><span class="hs-identifier hs-var hs-var hs-var hs-var">fromValue</span></a></span></span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; PlotIndex
 </span><a href="Graphics.Rendering.Chart.Axis.Indexed.html#PlotIndex"><span class="hs-identifier hs-var">PlotIndex</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; PlotIndex) -&gt; (Double -&gt; Int) -&gt; Double -&gt; PlotIndex
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Int
 forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">round</span></span><span>
-</span><span id="line-30"></span><span>    </span><span id="local-6989586621679374783"><span class="annot"><span class="annottext">autoAxis :: AxisFn PlotIndex
+</span><span id="line-30"></span><span>    </span><span id="local-6989586621679375445"><span class="annot"><span class="annottext">autoAxis :: AxisFn PlotIndex
 </span><a href="Graphics.Rendering.Chart.Axis.Types.html#autoAxis"><span class="hs-identifier hs-var hs-var hs-var hs-var">autoAxis</span></a></span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[String] -&gt; AxisFn PlotIndex
 forall i. Integral i =&gt; [String] -&gt; [i] -&gt; AxisData i
 </span><a href="Graphics.Rendering.Chart.Axis.Indexed.html#autoIndexAxis"><span class="hs-identifier hs-var">autoIndexAxis</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-31"></span><span>
 </span><span id="line-32"></span><span class="hs-comment">-- | Augment a list of values with index numbers for plotting.</span><span>
-</span><span id="line-33"></span><span id="local-6989586621679374781"><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Indexed.html#addIndexes"><span class="hs-identifier hs-type">addIndexes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679374781"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Indexed.html#PlotIndex"><span class="hs-identifier hs-type">PlotIndex</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679374781"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span></span><span>
+</span><span id="line-33"></span><span id="local-6989586621679375443"><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Indexed.html#addIndexes"><span class="hs-identifier hs-type">addIndexes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679375443"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Indexed.html#PlotIndex"><span class="hs-identifier hs-type">PlotIndex</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679375443"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span></span><span>
 </span><span id="line-34"></span><span id="addIndexes"><span class="annot"><span class="annottext">addIndexes :: [a] -&gt; [(PlotIndex, a)]
-</span><a href="Graphics.Rendering.Chart.Axis.Indexed.html#addIndexes"><span class="hs-identifier hs-var hs-var">addIndexes</span></a></span></span><span> </span><span id="local-6989586621679374780"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679374780"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Int, a) -&gt; (PlotIndex, a)) -&gt; [(Int, a)] -&gt; [(PlotIndex, a)]
+</span><a href="Graphics.Rendering.Chart.Axis.Indexed.html#addIndexes"><span class="hs-identifier hs-var hs-var">addIndexes</span></a></span></span><span> </span><span id="local-6989586621679375442"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679375442"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Int, a) -&gt; (PlotIndex, a)) -&gt; [(Int, a)] -&gt; [(PlotIndex, a)]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Int -&gt; PlotIndex) -&gt; (Int, a) -&gt; (PlotIndex, a)
 forall (a :: * -&gt; * -&gt; *) b c d.
@@ -247,15 +247,15 @@ a b c -&gt; a (b, d) (c, d)
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679374780"><span class="hs-keyword hs-var">as</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679375442"><span class="hs-keyword hs-var">as</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-35"></span><span>
 </span><span id="line-36"></span><span class="hs-comment">-- | Create an axis for values indexed by position. The</span><span>
 </span><span id="line-37"></span><span class="hs-comment">--   list of strings are the labels to be used.</span><span>
-</span><span id="line-38"></span><span id="local-6989586621679374907"><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Indexed.html#autoIndexAxis"><span class="hs-identifier hs-type">autoIndexAxis</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679374907"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679374907"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Types.html#AxisData"><span class="hs-identifier hs-type">AxisData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679374907"><span class="hs-identifier hs-type">i</span></a></span></span><span>
+</span><span id="line-38"></span><span id="local-6989586621679375569"><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Indexed.html#autoIndexAxis"><span class="hs-identifier hs-type">autoIndexAxis</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integral</span></span><span> </span><span class="annot"><a href="#local-6989586621679375569"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679375569"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Types.html#AxisData"><span class="hs-identifier hs-type">AxisData</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679375569"><span class="hs-identifier hs-type">i</span></a></span></span><span>
 </span><span id="line-39"></span><span id="autoIndexAxis"><span class="annot"><span class="annottext">autoIndexAxis :: [String] -&gt; [i] -&gt; AxisData i
-</span><a href="Graphics.Rendering.Chart.Axis.Indexed.html#autoIndexAxis"><span class="hs-identifier hs-var hs-var">autoIndexAxis</span></a></span></span><span> </span><span id="local-6989586621679374779"><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679374779"><span class="hs-identifier hs-var">labels</span></a></span></span><span> </span><span id="local-6989586621679374778"><span class="annot"><span class="annottext">[i]
-</span><a href="#local-6989586621679374778"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AxisData :: forall x.
+</span><a href="Graphics.Rendering.Chart.Axis.Indexed.html#autoIndexAxis"><span class="hs-identifier hs-var hs-var">autoIndexAxis</span></a></span></span><span> </span><span id="local-6989586621679375441"><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679375441"><span class="hs-identifier hs-var">labels</span></a></span></span><span> </span><span id="local-6989586621679375440"><span class="annot"><span class="annottext">[i]
+</span><a href="#local-6989586621679375440"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AxisData :: forall x.
 AxisVisibility
 -&gt; (Range -&gt; x -&gt; Double)
 -&gt; (Range -&gt; Double -&gt; x)
@@ -273,63 +273,63 @@ forall a. Default a =&gt; a
 </span><span id="line-41"></span><span>    </span><span class="annot"><span class="annottext">_axis_viewport :: Range -&gt; i -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Axis.Types.html#_axis_viewport"><span class="hs-identifier hs-var">_axis_viewport</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Range -&gt; i -&gt; Double
 forall a. Integral a =&gt; Range -&gt; a -&gt; Double
-</span><a href="#local-6989586621679374772"><span class="hs-identifier hs-var">vport</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621679375434"><span class="hs-identifier hs-var">vport</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-42"></span><span>    </span><span class="annot"><span class="annottext">_axis_tropweiv :: Range -&gt; Double -&gt; i
 </span><a href="Graphics.Rendering.Chart.Axis.Types.html#_axis_tropweiv"><span class="hs-identifier hs-var">_axis_tropweiv</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Range -&gt; Double -&gt; i
-</span><a href="#local-6989586621679374770"><span class="hs-identifier hs-var">invport</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621679375432"><span class="hs-identifier hs-var">invport</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-43"></span><span>    </span><span class="annot"><span class="annottext">_axis_ticks :: [(i, Double)]
 </span><a href="Graphics.Rendering.Chart.Axis.Types.html#_axis_ticks"><span class="hs-identifier hs-var">_axis_ticks</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span>
 </span><span id="line-44"></span><span>    </span><span class="annot"><span class="annottext">_axis_labels :: [[(i, String)]]
 </span><a href="Graphics.Rendering.Chart.Axis.Types.html#_axis_labels"><span class="hs-identifier hs-var">_axis_labels</span></a></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">((i, String) -&gt; Bool) -&gt; [(i, String)] -&gt; [(i, String)]
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
-</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679374767"><span class="annot"><span class="annottext">i
-</span><a href="#local-6989586621679374767"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679375429"><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679375429"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">String
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">i
-</span><a href="#local-6989586621679374767"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">i -&gt; i -&gt; Bool
+</span><a href="#local-6989586621679375429"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">i -&gt; i -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">i
-</span><a href="#local-6989586621679374766"><span class="hs-identifier hs-var">imin</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621679375428"><span class="hs-identifier hs-var">imin</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">i
-</span><a href="#local-6989586621679374767"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">i -&gt; i -&gt; Bool
+</span><a href="#local-6989586621679375429"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">i -&gt; i -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">i
-</span><a href="#local-6989586621679374763"><span class="hs-identifier hs-var">imax</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679375425"><span class="hs-identifier hs-var">imax</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-45"></span><span>                            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[i] -&gt; [String] -&gt; [(i, String)]
 forall a b. [a] -&gt; [b] -&gt; [(a, b)]
 </span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">i
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679374779"><span class="hs-identifier hs-var">labels</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621679375441"><span class="hs-identifier hs-var">labels</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span>
 </span><span id="line-46"></span><span>    </span><span class="annot"><span class="annottext">_axis_grid :: [i]
 </span><a href="Graphics.Rendering.Chart.Axis.Types.html#_axis_grid"><span class="hs-identifier hs-var">_axis_grid</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-47"></span><span>    </span><span class="hs-special">}</span><span>
 </span><span id="line-48"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-49"></span><span>    </span><span id="local-6989586621679374772"><span class="annot"><span class="annottext">vport :: Range -&gt; a -&gt; Double
-</span><a href="#local-6989586621679374772"><span class="hs-identifier hs-var hs-var">vport</span></a></span></span><span> </span><span id="local-6989586621679374761"><span class="annot"><span class="annottext">Range
-</span><a href="#local-6989586621679374761"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679374760"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679374760"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Double) -&gt; Range -&gt; Range -&gt; Double -&gt; Double
+</span><span id="line-49"></span><span>    </span><span id="local-6989586621679375434"><span class="annot"><span class="annottext">vport :: Range -&gt; a -&gt; Double
+</span><a href="#local-6989586621679375434"><span class="hs-identifier hs-var hs-var">vport</span></a></span></span><span> </span><span id="local-6989586621679375423"><span class="annot"><span class="annottext">Range
+</span><a href="#local-6989586621679375423"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679375422"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679375422"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Double) -&gt; Range -&gt; Range -&gt; Double -&gt; Double
 forall a. (a -&gt; Double) -&gt; (a, a) -&gt; Range -&gt; a -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Axis.Types.html#linMap"><span class="hs-identifier hs-var">linMap</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
 forall a. a -&gt; a
 </span><span class="hs-identifier hs-var">id</span></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">i -&gt; Double
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">i
-</span><a href="#local-6989586621679374766"><span class="hs-identifier hs-var">imin</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679375428"><span class="hs-identifier hs-var">imin</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">0.5</span></span><span>
 </span><span id="line-50"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">i -&gt; Double
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">i
-</span><a href="#local-6989586621679374763"><span class="hs-identifier hs-var">imax</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679375425"><span class="hs-identifier hs-var">imax</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">0.5</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Range
-</span><a href="#local-6989586621679374761"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Double
+</span><a href="#local-6989586621679375423"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Double
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679374760"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-51"></span><span>    </span><span id="local-6989586621679374770"><span class="annot"><span class="annottext">invport :: Range -&gt; Double -&gt; i
-</span><a href="#local-6989586621679374770"><span class="hs-identifier hs-var hs-var">invport</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; i) -&gt; (i -&gt; Double) -&gt; (i, i) -&gt; Range -&gt; Double -&gt; i
+</span><a href="#local-6989586621679375422"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621679375432"><span class="annot"><span class="annottext">invport :: Range -&gt; Double -&gt; i
+</span><a href="#local-6989586621679375432"><span class="hs-identifier hs-var hs-var">invport</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; i) -&gt; (i -&gt; Double) -&gt; (i, i) -&gt; Range -&gt; Double -&gt; i
 forall a.
 (Double -&gt; a) -&gt; (a -&gt; Double) -&gt; (a, a) -&gt; Range -&gt; Double -&gt; a
 </span><a href="Graphics.Rendering.Chart.Axis.Types.html#invLinMap"><span class="hs-identifier hs-var">invLinMap</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; i
@@ -337,16 +337,16 @@ forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="annot"><span class="annottext">i -&gt; Double
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">i
-</span><a href="#local-6989586621679374766"><span class="hs-identifier hs-var">imin</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">i
-</span><a href="#local-6989586621679374763"><span class="hs-identifier hs-var">imax</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-52"></span><span>    </span><span id="local-6989586621679374766"><span class="annot"><span class="annottext">imin :: i
-</span><a href="#local-6989586621679374766"><span class="hs-identifier hs-var hs-var">imin</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[i] -&gt; i
+</span><a href="#local-6989586621679375428"><span class="hs-identifier hs-var">imin</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">i
+</span><a href="#local-6989586621679375425"><span class="hs-identifier hs-var">imax</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>    </span><span id="local-6989586621679375428"><span class="annot"><span class="annottext">imin :: i
+</span><a href="#local-6989586621679375428"><span class="hs-identifier hs-var hs-var">imin</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[i] -&gt; i
 forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; a
 </span><span class="hs-identifier hs-var">minimum</span></span><span> </span><span class="annot"><span class="annottext">[i]
-</span><a href="#local-6989586621679374778"><span class="hs-identifier hs-var">vs</span></a></span><span>
-</span><span id="line-53"></span><span>    </span><span id="local-6989586621679374763"><span class="annot"><span class="annottext">imax :: i
-</span><a href="#local-6989586621679374763"><span class="hs-identifier hs-var hs-var">imax</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[i] -&gt; i
+</span><a href="#local-6989586621679375440"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><span id="line-53"></span><span>    </span><span id="local-6989586621679375425"><span class="annot"><span class="annottext">imax :: i
+</span><a href="#local-6989586621679375425"><span class="hs-identifier hs-var hs-var">imax</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[i] -&gt; i
 forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; a
 </span><span class="hs-identifier hs-var">maximum</span></span><span> </span><span class="annot"><span class="annottext">[i]
-</span><a href="#local-6989586621679374778"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><a href="#local-6989586621679375440"><span class="hs-identifier hs-var">vs</span></a></span><span>
 </span><span id="line-54"></span></pre></body></html>

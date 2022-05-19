@@ -18,18 +18,18 @@
 </span><span id="line-24"></span><span>
 </span><span id="line-25"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#makeGMMap"><span class="hs-identifier hs-type">makeGMMap</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Euterpea.Music.html#InstrumentName"><span class="hs-identifier hs-type">InstrumentName</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#UserPatchMap"><span class="hs-identifier hs-type">UserPatchMap</span></a></span><span>
 </span><span id="line-26"></span><span class="hs-operator">&gt;</span><span> </span><span id="makeGMMap"><span class="annot"><span class="annottext">makeGMMap :: [InstrumentName] -&gt; UserPatchMap
-</span><a href="Euterpea.IO.MIDI.ToMidi.html#makeGMMap"><span class="hs-identifier hs-var hs-var">makeGMMap</span></a></span></span><span> </span><span id="local-6989586621679094445"><span class="annot"><span class="annottext">[InstrumentName]
-</span><a href="#local-6989586621679094445"><span class="hs-identifier hs-var">ins</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [InstrumentName] -&gt; UserPatchMap
-</span><a href="#local-6989586621679094444"><span class="hs-identifier hs-var">mkGMMap</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="Euterpea.IO.MIDI.ToMidi.html#makeGMMap"><span class="hs-identifier hs-var hs-var">makeGMMap</span></a></span></span><span> </span><span id="local-6989586621679094409"><span class="annot"><span class="annottext">[InstrumentName]
+</span><a href="#local-6989586621679094409"><span class="hs-identifier hs-var">ins</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [InstrumentName] -&gt; UserPatchMap
+</span><a href="#local-6989586621679094408"><span class="hs-identifier hs-var">mkGMMap</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">[InstrumentName]
-</span><a href="#local-6989586621679094445"><span class="hs-identifier hs-var">ins</span></a></span><span>
-</span><span id="line-27"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679094444"><span class="annot"><span class="annottext">mkGMMap :: Int -&gt; [InstrumentName] -&gt; UserPatchMap
-</span><a href="#local-6989586621679094444"><span class="hs-identifier hs-var hs-var">mkGMMap</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094409"><span class="hs-identifier hs-var">ins</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679094408"><span class="annot"><span class="annottext">mkGMMap :: Int -&gt; [InstrumentName] -&gt; UserPatchMap
+</span><a href="#local-6989586621679094408"><span class="hs-identifier hs-var hs-var">mkGMMap</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-28"></span><span class="hs-operator">&gt;</span><span>         </span><span class="annot"><a href="#local-6989586621679094444"><span class="hs-identifier hs-var">mkGMMap</span></a></span><span> </span><span id="local-6989586621679094443"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094443"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="annot"><span class="annottext">[InstrumentName]
+</span><span id="line-28"></span><span class="hs-operator">&gt;</span><span>         </span><span class="annot"><a href="#local-6989586621679094408"><span class="hs-identifier hs-var">mkGMMap</span></a></span><span> </span><span id="local-6989586621679094407"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094407"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="annot"><span class="annottext">[InstrumentName]
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094443"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679094407"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">15</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
@@ -37,38 +37,38 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 forall a. HasCallStack =&gt; [Char] -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
 </span><span class="hs-string">&quot;makeGMMap: too many instruments.&quot;</span></span><span>
-</span><span id="line-30"></span><span class="hs-operator">&gt;</span><span>         </span><span class="annot"><a href="#local-6989586621679094444"><span class="hs-identifier hs-var">mkGMMap</span></a></span><span> </span><span id="local-6989586621679094441"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094441"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstrumentName
-</span><a href="Euterpea.Music.html#Percussion"><span class="hs-identifier hs-var">Percussion</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679094439"><span class="annot"><span class="annottext">[InstrumentName]
-</span><a href="#local-6989586621679094439"><span class="hs-identifier hs-var">ins</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span>
+</span><span id="line-30"></span><span class="hs-operator">&gt;</span><span>         </span><span class="annot"><a href="#local-6989586621679094408"><span class="hs-identifier hs-var">mkGMMap</span></a></span><span> </span><span id="local-6989586621679094405"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094405"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstrumentName
+</span><a href="Euterpea.Music.html#Percussion"><span class="hs-identifier hs-var">Percussion</span></a></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679094403"><span class="annot"><span class="annottext">[InstrumentName]
+</span><a href="#local-6989586621679094403"><span class="hs-identifier hs-var">ins</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span>
 </span><span id="line-31"></span><span class="hs-operator">&gt;</span><span>                   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstrumentName
 </span><a href="Euterpea.Music.html#Percussion"><span class="hs-identifier hs-var">Percussion</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">9</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(InstrumentName, Int) -&gt; UserPatchMap -&gt; UserPatchMap
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [InstrumentName] -&gt; UserPatchMap
-</span><a href="#local-6989586621679094444"><span class="hs-identifier hs-var">mkGMMap</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094441"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[InstrumentName]
-</span><a href="#local-6989586621679094439"><span class="hs-identifier hs-var">ins</span></a></span><span>
-</span><span id="line-32"></span><span class="hs-operator">&gt;</span><span>         </span><span class="annot"><a href="#local-6989586621679094444"><span class="hs-identifier hs-var">mkGMMap</span></a></span><span> </span><span id="local-6989586621679094438"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094438"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679094437"><span class="annot"><span class="annottext">InstrumentName
-</span><a href="#local-6989586621679094437"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679094436"><span class="annot"><span class="annottext">[InstrumentName]
-</span><a href="#local-6989586621679094436"><span class="hs-identifier hs-var">ins</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><a href="#local-6989586621679094408"><span class="hs-identifier hs-var">mkGMMap</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094405"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[InstrumentName]
+</span><a href="#local-6989586621679094403"><span class="hs-identifier hs-var">ins</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-operator">&gt;</span><span>         </span><span class="annot"><a href="#local-6989586621679094408"><span class="hs-identifier hs-var">mkGMMap</span></a></span><span> </span><span id="local-6989586621679094402"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094402"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679094401"><span class="annot"><span class="annottext">InstrumentName
+</span><a href="#local-6989586621679094401"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679094400"><span class="annot"><span class="annottext">[InstrumentName]
+</span><a href="#local-6989586621679094400"><span class="hs-identifier hs-var">ins</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span>
 </span><span id="line-33"></span><span class="hs-operator">&gt;</span><span>                   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstrumentName
-</span><a href="#local-6989586621679094437"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679094435"><span class="hs-identifier hs-var">chanList</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679094401"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679094399"><span class="hs-identifier hs-var">chanList</span></a></span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; Int -&gt; Int
 forall a. [a] -&gt; Int -&gt; a
 </span><span class="hs-operator hs-var">!!</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094438"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(InstrumentName, Int) -&gt; UserPatchMap -&gt; UserPatchMap
+</span><a href="#local-6989586621679094402"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(InstrumentName, Int) -&gt; UserPatchMap -&gt; UserPatchMap
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [InstrumentName] -&gt; UserPatchMap
-</span><a href="#local-6989586621679094444"><span class="hs-identifier hs-var">mkGMMap</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094438"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679094408"><span class="hs-identifier hs-var">mkGMMap</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094402"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[InstrumentName]
-</span><a href="#local-6989586621679094436"><span class="hs-identifier hs-var">ins</span></a></span><span>
-</span><span id="line-34"></span><span class="hs-operator">&gt;</span><span>         </span><span id="local-6989586621679094435"><span class="annot"><span class="annottext">chanList :: [Int]
-</span><a href="#local-6989586621679094435"><span class="hs-identifier hs-var hs-var">chanList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094400"><span class="hs-identifier hs-var">ins</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-operator">&gt;</span><span>         </span><span id="local-6989586621679094399"><span class="annot"><span class="annottext">chanList :: [Int]
+</span><a href="#local-6989586621679094399"><span class="hs-identifier hs-var hs-var">chanList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">8</span></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; [Int] -&gt; [Int]
 forall a. [a] -&gt; [a] -&gt; [a]
@@ -79,14 +79,14 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span id="line-36"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#upmLookup"><span class="hs-identifier hs-type">upmLookup</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#UserPatchMap"><span class="hs-identifier hs-type">UserPatchMap</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Euterpea.Music.html#InstrumentName"><span class="hs-identifier hs-type">InstrumentName</span></a></span><span> </span><span>
 </span><span id="line-37"></span><span class="hs-operator">&gt;</span><span>                            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Channel</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#ProgNum"><span class="hs-identifier hs-type">ProgNum</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-38"></span><span class="hs-operator">&gt;</span><span> </span><span id="upmLookup"><span class="annot"><span class="annottext">upmLookup :: UserPatchMap -&gt; InstrumentName -&gt; (Int, Int)
-</span><a href="Euterpea.IO.MIDI.ToMidi.html#upmLookup"><span class="hs-identifier hs-var hs-var">upmLookup</span></a></span></span><span> </span><span id="local-6989586621679094431"><span class="annot"><span class="annottext">UserPatchMap
-</span><a href="#local-6989586621679094431"><span class="hs-identifier hs-var">upm</span></a></span></span><span> </span><span id="local-6989586621679094430"><span class="annot"><span class="annottext">InstrumentName
-</span><a href="#local-6989586621679094430"><span class="hs-identifier hs-var">iName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094429"><span class="hs-identifier hs-var">chan</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">InstrumentName -&gt; Int
+</span><a href="Euterpea.IO.MIDI.ToMidi.html#upmLookup"><span class="hs-identifier hs-var hs-var">upmLookup</span></a></span></span><span> </span><span id="local-6989586621679094395"><span class="annot"><span class="annottext">UserPatchMap
+</span><a href="#local-6989586621679094395"><span class="hs-identifier hs-var">upm</span></a></span></span><span> </span><span id="local-6989586621679094394"><span class="annot"><span class="annottext">InstrumentName
+</span><a href="#local-6989586621679094394"><span class="hs-identifier hs-var">iName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094393"><span class="hs-identifier hs-var">chan</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">InstrumentName -&gt; Int
 </span><a href="Euterpea.IO.MIDI.GeneralMidi.html#toGM"><span class="hs-identifier hs-var">toGM</span></a></span><span> </span><span class="annot"><span class="annottext">InstrumentName
-</span><a href="#local-6989586621679094430"><span class="hs-identifier hs-var">iName</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-39"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679094429"><span class="annot"><span class="annottext">chan :: Int
-</span><a href="#local-6989586621679094429"><span class="hs-identifier hs-var hs-var">chan</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int -&gt; Int) -&gt; Maybe Int -&gt; Int
+</span><a href="#local-6989586621679094394"><span class="hs-identifier hs-var">iName</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679094393"><span class="annot"><span class="annottext">chan :: Int
+</span><a href="#local-6989586621679094393"><span class="hs-identifier hs-var hs-var">chan</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; (Int -&gt; Int) -&gt; Maybe Int -&gt; Int
 forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
 </span><span class="hs-identifier hs-var">maybe</span></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Char] -&gt; Int
 forall a. HasCallStack =&gt; [Char] -&gt; a
@@ -96,7 +96,7 @@ forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">InstrumentName -&gt; [Char]
 forall a. Show a =&gt; a -&gt; [Char]
 </span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">InstrumentName
-</span><a href="#local-6989586621679094430"><span class="hs-identifier hs-var">iName</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [Char] -&gt; [Char]
+</span><a href="#local-6989586621679094394"><span class="hs-identifier hs-var">iName</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [Char] -&gt; [Char]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span>
 </span><span id="line-40"></span><span class="hs-operator">&gt;</span><span>                                 </span><span class="annot"><span class="annottext">[Char]
@@ -106,8 +106,8 @@ forall a. a -&gt; a
 </span><span class="hs-identifier hs-var">id</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstrumentName -&gt; UserPatchMap -&gt; Maybe Int
 forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
 </span><span class="hs-identifier hs-var">lookup</span></span><span> </span><span class="annot"><span class="annottext">InstrumentName
-</span><a href="#local-6989586621679094430"><span class="hs-identifier hs-var">iName</span></a></span><span> </span><span class="annot"><span class="annottext">UserPatchMap
-</span><a href="#local-6989586621679094431"><span class="hs-identifier hs-var">upm</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679094394"><span class="hs-identifier hs-var">iName</span></a></span><span> </span><span class="annot"><span class="annottext">UserPatchMap
+</span><a href="#local-6989586621679094395"><span class="hs-identifier hs-var">upm</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-42"></span><span>
 </span><span id="line-43"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#toMidi"><span class="hs-identifier hs-type">toMidi</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Euterpea.IO.MIDI.MEvent.html#MEvent"><span class="hs-identifier hs-type">MEvent</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Midi</span></span><span>
 </span><span id="line-44"></span><span class="hs-operator">&gt;</span><span> </span><span id="toMidi"><span class="annot"><span class="annottext">toMidi :: [MEvent] -&gt; Midi
@@ -117,35 +117,35 @@ forall a b. Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b
 </span><span id="line-45"></span><span>
 </span><span id="line-46"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#toMidiUPM"><span class="hs-identifier hs-type">toMidiUPM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#UserPatchMap"><span class="hs-identifier hs-type">UserPatchMap</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Euterpea.IO.MIDI.MEvent.html#MEvent"><span class="hs-identifier hs-type">MEvent</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Midi</span></span><span>
 </span><span id="line-47"></span><span class="hs-operator">&gt;</span><span> </span><span id="toMidiUPM"><span class="annot"><span class="annottext">toMidiUPM :: UserPatchMap -&gt; [MEvent] -&gt; Midi
-</span><a href="Euterpea.IO.MIDI.ToMidi.html#toMidiUPM"><span class="hs-identifier hs-var hs-var">toMidiUPM</span></a></span></span><span> </span><span id="local-6989586621679094420"><span class="annot"><span class="annottext">UserPatchMap
-</span><a href="#local-6989586621679094420"><span class="hs-identifier hs-var">upm</span></a></span></span><span> </span><span id="local-6989586621679094419"><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094419"><span class="hs-identifier hs-var">pf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-48"></span><span class="hs-operator">&gt;</span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679094418"><span class="annot"><span class="annottext">split :: [(InstrumentName, [MEvent])]
-</span><a href="#local-6989586621679094418"><span class="hs-identifier hs-var hs-var">split</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[MEvent] -&gt; [(InstrumentName, [MEvent])]
+</span><a href="Euterpea.IO.MIDI.ToMidi.html#toMidiUPM"><span class="hs-identifier hs-var hs-var">toMidiUPM</span></a></span></span><span> </span><span id="local-6989586621679094384"><span class="annot"><span class="annottext">UserPatchMap
+</span><a href="#local-6989586621679094384"><span class="hs-identifier hs-var">upm</span></a></span></span><span> </span><span id="local-6989586621679094383"><span class="annot"><span class="annottext">[MEvent]
+</span><a href="#local-6989586621679094383"><span class="hs-identifier hs-var">pf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-48"></span><span class="hs-operator">&gt;</span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679094382"><span class="annot"><span class="annottext">split :: [(InstrumentName, [MEvent])]
+</span><a href="#local-6989586621679094382"><span class="hs-identifier hs-var hs-var">split</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[MEvent] -&gt; [(InstrumentName, [MEvent])]
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#splitByInst"><span class="hs-identifier hs-var">splitByInst</span></a></span><span> </span><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094419"><span class="hs-identifier hs-var">pf</span></a></span><span>
-</span><span id="line-49"></span><span class="hs-operator">&gt;</span><span>        </span><span id="local-6989586621679094416"><span class="annot"><span class="annottext">insts :: [InstrumentName]
-</span><a href="#local-6989586621679094416"><span class="hs-identifier hs-var hs-var">insts</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((InstrumentName, [MEvent]) -&gt; InstrumentName)
+</span><a href="#local-6989586621679094383"><span class="hs-identifier hs-var">pf</span></a></span><span>
+</span><span id="line-49"></span><span class="hs-operator">&gt;</span><span>        </span><span id="local-6989586621679094380"><span class="annot"><span class="annottext">insts :: [InstrumentName]
+</span><a href="#local-6989586621679094380"><span class="hs-identifier hs-var hs-var">insts</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((InstrumentName, [MEvent]) -&gt; InstrumentName)
 -&gt; [(InstrumentName, [MEvent])] -&gt; [InstrumentName]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(InstrumentName, [MEvent]) -&gt; InstrumentName
 forall a b. (a, b) -&gt; a
 </span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">[(InstrumentName, [MEvent])]
-</span><a href="#local-6989586621679094418"><span class="hs-identifier hs-var">split</span></a></span><span>
-</span><span id="line-50"></span><span class="hs-operator">&gt;</span><span>        </span><span id="local-6989586621679094415"><span class="annot"><span class="annottext">rightMap :: UserPatchMap
-</span><a href="#local-6989586621679094415"><span class="hs-identifier hs-var hs-var">rightMap</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">UserPatchMap -&gt; [InstrumentName] -&gt; Bool
+</span><a href="#local-6989586621679094382"><span class="hs-identifier hs-var">split</span></a></span><span>
+</span><span id="line-50"></span><span class="hs-operator">&gt;</span><span>        </span><span id="local-6989586621679094379"><span class="annot"><span class="annottext">rightMap :: UserPatchMap
+</span><a href="#local-6989586621679094379"><span class="hs-identifier hs-var hs-var">rightMap</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">UserPatchMap -&gt; [InstrumentName] -&gt; Bool
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#allValid"><span class="hs-identifier hs-var">allValid</span></a></span><span> </span><span class="annot"><span class="annottext">UserPatchMap
-</span><a href="#local-6989586621679094420"><span class="hs-identifier hs-var">upm</span></a></span><span> </span><span class="annot"><span class="annottext">[InstrumentName]
-</span><a href="#local-6989586621679094416"><span class="hs-identifier hs-var">insts</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">UserPatchMap
-</span><a href="#local-6989586621679094420"><span class="hs-identifier hs-var">upm</span></a></span><span>
+</span><a href="#local-6989586621679094384"><span class="hs-identifier hs-var">upm</span></a></span><span> </span><span class="annot"><span class="annottext">[InstrumentName]
+</span><a href="#local-6989586621679094380"><span class="hs-identifier hs-var">insts</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">UserPatchMap
+</span><a href="#local-6989586621679094384"><span class="hs-identifier hs-var">upm</span></a></span><span>
 </span><span id="line-51"></span><span class="hs-operator">&gt;</span><span>                     </span><span class="hs-keyword">else</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[InstrumentName] -&gt; UserPatchMap
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#makeGMMap"><span class="hs-identifier hs-var">makeGMMap</span></a></span><span> </span><span class="annot"><span class="annottext">[InstrumentName]
-</span><a href="#local-6989586621679094416"><span class="hs-identifier hs-var">insts</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679094380"><span class="hs-identifier hs-var">insts</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-52"></span><span class="hs-operator">&gt;</span><span>    </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">FileType -&gt; TimeDiv -&gt; [Track Int] -&gt; Midi
 </span><span class="hs-identifier hs-var">Midi</span></span><span>  </span><span class="hs-special">(</span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[(InstrumentName, [MEvent])] -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[(InstrumentName, [MEvent])]
-</span><a href="#local-6989586621679094418"><span class="hs-identifier hs-var">split</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679094382"><span class="hs-identifier hs-var">split</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span>  </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">FileType
@@ -167,8 +167,8 @@ forall a. Num a =&gt; Track a -&gt; Track a
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">UserPatchMap -&gt; (InstrumentName, [MEvent]) -&gt; Track Int
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#mevsToMessages"><span class="hs-identifier hs-var">mevsToMessages</span></a></span><span> </span><span class="annot"><span class="annottext">UserPatchMap
-</span><a href="#local-6989586621679094415"><span class="hs-identifier hs-var">rightMap</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(InstrumentName, [MEvent])]
-</span><a href="#local-6989586621679094418"><span class="hs-identifier hs-var">split</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679094379"><span class="hs-identifier hs-var">rightMap</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(InstrumentName, [MEvent])]
+</span><a href="#local-6989586621679094382"><span class="hs-identifier hs-var">split</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-56"></span><span>
 </span><span id="line-57"></span><span class="hs-operator">&gt;</span><span> </span><span id="division"><span class="annot"><span class="annottext">division :: Int
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#division"><span class="hs-identifier hs-var hs-var">division</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
@@ -176,8 +176,8 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-58"></span><span>
 </span><span id="line-59"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#allValid"><span class="hs-identifier hs-type">allValid</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#UserPatchMap"><span class="hs-identifier hs-type">UserPatchMap</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Euterpea.Music.html#InstrumentName"><span class="hs-identifier hs-type">InstrumentName</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-60"></span><span class="hs-operator">&gt;</span><span> </span><span id="allValid"><span class="annot"><span class="annottext">allValid :: UserPatchMap -&gt; [InstrumentName] -&gt; Bool
-</span><a href="Euterpea.IO.MIDI.ToMidi.html#allValid"><span class="hs-identifier hs-var hs-var">allValid</span></a></span></span><span> </span><span id="local-6989586621679094404"><span class="annot"><span class="annottext">UserPatchMap
-</span><a href="#local-6989586621679094404"><span class="hs-identifier hs-var">upm</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Bool] -&gt; Bool
+</span><a href="Euterpea.IO.MIDI.ToMidi.html#allValid"><span class="hs-identifier hs-var hs-var">allValid</span></a></span></span><span> </span><span id="local-6989586621679094368"><span class="annot"><span class="annottext">UserPatchMap
+</span><a href="#local-6989586621679094368"><span class="hs-identifier hs-var">upm</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Bool] -&gt; Bool
 forall (t :: * -&gt; *). Foldable t =&gt; t Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">and</span></span><span> </span><span class="annot"><span class="annottext">([Bool] -&gt; Bool)
 -&gt; ([InstrumentName] -&gt; [Bool]) -&gt; [InstrumentName] -&gt; Bool
@@ -186,20 +186,20 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">UserPatchMap -&gt; InstrumentName -&gt; Bool
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#lookupB"><span class="hs-identifier hs-var">lookupB</span></a></span><span> </span><span class="annot"><span class="annottext">UserPatchMap
-</span><a href="#local-6989586621679094404"><span class="hs-identifier hs-var">upm</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679094368"><span class="hs-identifier hs-var">upm</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-61"></span><span>
 </span><span id="line-62"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#lookupB"><span class="hs-identifier hs-type">lookupB</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#UserPatchMap"><span class="hs-identifier hs-type">UserPatchMap</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Euterpea.Music.html#InstrumentName"><span class="hs-identifier hs-type">InstrumentName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-63"></span><span class="hs-operator">&gt;</span><span> </span><span id="lookupB"><span class="annot"><span class="annottext">lookupB :: UserPatchMap -&gt; InstrumentName -&gt; Bool
-</span><a href="Euterpea.IO.MIDI.ToMidi.html#lookupB"><span class="hs-identifier hs-var hs-var">lookupB</span></a></span></span><span> </span><span id="local-6989586621679094401"><span class="annot"><span class="annottext">UserPatchMap
-</span><a href="#local-6989586621679094401"><span class="hs-identifier hs-var">upm</span></a></span></span><span> </span><span id="local-6989586621679094400"><span class="annot"><span class="annottext">InstrumentName
-</span><a href="#local-6989586621679094400"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Bool] -&gt; Bool
+</span><a href="Euterpea.IO.MIDI.ToMidi.html#lookupB"><span class="hs-identifier hs-var hs-var">lookupB</span></a></span></span><span> </span><span id="local-6989586621679094365"><span class="annot"><span class="annottext">UserPatchMap
+</span><a href="#local-6989586621679094365"><span class="hs-identifier hs-var">upm</span></a></span></span><span> </span><span id="local-6989586621679094364"><span class="annot"><span class="annottext">InstrumentName
+</span><a href="#local-6989586621679094364"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Bool] -&gt; Bool
 forall (t :: * -&gt; *). Foldable t =&gt; t Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">or</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((InstrumentName, Int) -&gt; Bool) -&gt; UserPatchMap -&gt; [Bool]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstrumentName -&gt; InstrumentName -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">InstrumentName
-</span><a href="#local-6989586621679094400"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(InstrumentName -&gt; Bool)
+</span><a href="#local-6989586621679094364"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(InstrumentName -&gt; Bool)
 -&gt; ((InstrumentName, Int) -&gt; InstrumentName)
 -&gt; (InstrumentName, Int)
 -&gt; Bool
@@ -207,38 +207,38 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(InstrumentName, Int) -&gt; InstrumentName
 forall a b. (a, b) -&gt; a
 </span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">UserPatchMap
-</span><a href="#local-6989586621679094401"><span class="hs-identifier hs-var">upm</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679094365"><span class="hs-identifier hs-var">upm</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-64"></span><span>
 </span><span id="line-65"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#splitByInst"><span class="hs-identifier hs-type">splitByInst</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Euterpea.IO.MIDI.MEvent.html#MEvent"><span class="hs-identifier hs-type">MEvent</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span>  </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="Euterpea.Music.html#InstrumentName"><span class="hs-identifier hs-type">InstrumentName</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Euterpea.IO.MIDI.MEvent.html#MEvent"><span class="hs-identifier hs-type">MEvent</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">]</span><span>
 </span><span id="line-66"></span><span class="hs-operator">&gt;</span><span> </span><span id="splitByInst"><span class="annot"><span class="annottext">splitByInst :: [MEvent] -&gt; [(InstrumentName, [MEvent])]
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#splitByInst"><span class="hs-identifier hs-var hs-var">splitByInst</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-67"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#splitByInst"><span class="hs-identifier hs-var">splitByInst</span></a></span><span> </span><span id="local-6989586621679094398"><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094398"><span class="hs-identifier hs-var">pf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstrumentName
-</span><a href="#local-6989586621679094397"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094396"><span class="hs-identifier hs-var">pf1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(InstrumentName, [MEvent])
+</span><span id="line-67"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#splitByInst"><span class="hs-identifier hs-var">splitByInst</span></a></span><span> </span><span id="local-6989586621679094362"><span class="annot"><span class="annottext">[MEvent]
+</span><a href="#local-6989586621679094362"><span class="hs-identifier hs-var">pf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">InstrumentName
+</span><a href="#local-6989586621679094361"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[MEvent]
+</span><a href="#local-6989586621679094360"><span class="hs-identifier hs-var">pf1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(InstrumentName, [MEvent])
 -&gt; [(InstrumentName, [MEvent])] -&gt; [(InstrumentName, [MEvent])]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[MEvent] -&gt; [(InstrumentName, [MEvent])]
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#splitByInst"><span class="hs-identifier hs-var">splitByInst</span></a></span><span> </span><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094395"><span class="hs-identifier hs-var">pf2</span></a></span><span>
-</span><span id="line-68"></span><span class="hs-operator">&gt;</span><span>        </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679094397"><span class="annot"><span class="annottext">i :: InstrumentName
-</span><a href="#local-6989586621679094397"><span class="hs-identifier hs-var hs-var">i</span></a></span></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MEvent -&gt; InstrumentName
+</span><a href="#local-6989586621679094359"><span class="hs-identifier hs-var">pf2</span></a></span><span>
+</span><span id="line-68"></span><span class="hs-operator">&gt;</span><span>        </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679094361"><span class="annot"><span class="annottext">i :: InstrumentName
+</span><a href="#local-6989586621679094361"><span class="hs-identifier hs-var hs-var">i</span></a></span></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MEvent -&gt; InstrumentName
 </span><a href="Euterpea.IO.MIDI.MEvent.html#eInst"><span class="hs-identifier hs-var hs-var">eInst</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[MEvent] -&gt; MEvent
 forall a. [a] -&gt; a
 </span><span class="hs-identifier hs-var">head</span></span><span> </span><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094398"><span class="hs-identifier hs-var">pf</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-69"></span><span class="hs-operator">&gt;</span><span>              </span><span class="hs-special">(</span><span id="local-6989586621679094396"><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094396"><span class="hs-identifier hs-var">pf1</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679094395"><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094395"><span class="hs-identifier hs-var">pf2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(MEvent -&gt; Bool) -&gt; [MEvent] -&gt; ([MEvent], [MEvent])
+</span><a href="#local-6989586621679094362"><span class="hs-identifier hs-var">pf</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span class="hs-operator">&gt;</span><span>              </span><span class="hs-special">(</span><span id="local-6989586621679094360"><span class="annot"><span class="annottext">[MEvent]
+</span><a href="#local-6989586621679094360"><span class="hs-identifier hs-var">pf1</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679094359"><span class="annot"><span class="annottext">[MEvent]
+</span><a href="#local-6989586621679094359"><span class="hs-identifier hs-var">pf2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(MEvent -&gt; Bool) -&gt; [MEvent] -&gt; ([MEvent], [MEvent])
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
-</span><span class="hs-identifier hs-var">partition</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679094392"><span class="annot"><span class="annottext">MEvent
-</span><a href="#local-6989586621679094392"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MEvent -&gt; InstrumentName
+</span><span class="hs-identifier hs-var">partition</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679094356"><span class="annot"><span class="annottext">MEvent
+</span><a href="#local-6989586621679094356"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MEvent -&gt; InstrumentName
 </span><a href="Euterpea.IO.MIDI.MEvent.html#eInst"><span class="hs-identifier hs-var hs-var">eInst</span></a></span><span> </span><span class="annot"><span class="annottext">MEvent
-</span><a href="#local-6989586621679094392"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">InstrumentName -&gt; InstrumentName -&gt; Bool
+</span><a href="#local-6989586621679094356"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">InstrumentName -&gt; InstrumentName -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">InstrumentName
-</span><a href="#local-6989586621679094397"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094398"><span class="hs-identifier hs-var">pf</span></a></span><span>
+</span><a href="#local-6989586621679094361"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[MEvent]
+</span><a href="#local-6989586621679094362"><span class="hs-identifier hs-var">pf</span></a></span><span>
 </span><span id="line-70"></span><span>
 </span><span id="line-71"></span><span class="hs-operator">&gt;</span><span> </span><span class="hs-keyword">type</span><span> </span><span id="MidiEvent"><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#MidiEvent"><span class="hs-identifier hs-var">MidiEvent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ticks</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Message</span></span><span class="hs-special">)</span><span>
 </span><span id="line-72"></span><span>
@@ -250,90 +250,90 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span id="line-76"></span><span class="hs-operator">&gt;</span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Euterpea.Music.html#InstrumentName"><span class="hs-identifier hs-type">InstrumentName</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Euterpea.IO.MIDI.MEvent.html#MEvent"><span class="hs-identifier hs-type">MEvent</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span>
 </span><span id="line-77"></span><span class="hs-operator">&gt;</span><span>                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#MidiEvent"><span class="hs-identifier hs-type">MidiEvent</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-78"></span><span class="hs-operator">&gt;</span><span> </span><span id="mevsToMessages"><span class="annot"><span class="annottext">mevsToMessages :: UserPatchMap -&gt; (InstrumentName, [MEvent]) -&gt; Track Int
-</span><a href="Euterpea.IO.MIDI.ToMidi.html#mevsToMessages"><span class="hs-identifier hs-var hs-var">mevsToMessages</span></a></span></span><span> </span><span id="local-6989586621679094388"><span class="annot"><span class="annottext">UserPatchMap
-</span><a href="#local-6989586621679094388"><span class="hs-identifier hs-var">upm</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679094387"><span class="annot"><span class="annottext">InstrumentName
-</span><a href="#local-6989586621679094387"><span class="hs-identifier hs-var">inm</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679094386"><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094386"><span class="hs-identifier hs-var">pf</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-79"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">let</span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679094385"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094385"><span class="hs-identifier hs-var">chan</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679094384"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094384"><span class="hs-identifier hs-var">progNum</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UserPatchMap -&gt; InstrumentName -&gt; (Int, Int)
+</span><a href="Euterpea.IO.MIDI.ToMidi.html#mevsToMessages"><span class="hs-identifier hs-var hs-var">mevsToMessages</span></a></span></span><span> </span><span id="local-6989586621679094352"><span class="annot"><span class="annottext">UserPatchMap
+</span><a href="#local-6989586621679094352"><span class="hs-identifier hs-var">upm</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679094351"><span class="annot"><span class="annottext">InstrumentName
+</span><a href="#local-6989586621679094351"><span class="hs-identifier hs-var">inm</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679094350"><span class="annot"><span class="annottext">[MEvent]
+</span><a href="#local-6989586621679094350"><span class="hs-identifier hs-var">pf</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-79"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">let</span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679094349"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094349"><span class="hs-identifier hs-var">chan</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679094348"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094348"><span class="hs-identifier hs-var">progNum</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UserPatchMap -&gt; InstrumentName -&gt; (Int, Int)
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#upmLookup"><span class="hs-identifier hs-var">upmLookup</span></a></span><span> </span><span class="annot"><span class="annottext">UserPatchMap
-</span><a href="#local-6989586621679094388"><span class="hs-identifier hs-var">upm</span></a></span><span> </span><span class="annot"><span class="annottext">InstrumentName
-</span><a href="#local-6989586621679094387"><span class="hs-identifier hs-var">inm</span></a></span><span>
-</span><span id="line-80"></span><span class="hs-operator">&gt;</span><span>        </span><span id="local-6989586621679094383"><span class="annot"><span class="annottext">setupInst :: (Int, Message)
-</span><a href="#local-6989586621679094383"><span class="hs-identifier hs-var hs-var">setupInst</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094352"><span class="hs-identifier hs-var">upm</span></a></span><span> </span><span class="annot"><span class="annottext">InstrumentName
+</span><a href="#local-6989586621679094351"><span class="hs-identifier hs-var">inm</span></a></span><span>
+</span><span id="line-80"></span><span class="hs-operator">&gt;</span><span>        </span><span id="local-6989586621679094347"><span class="annot"><span class="annottext">setupInst :: (Int, Message)
+</span><a href="#local-6989586621679094347"><span class="hs-identifier hs-var hs-var">setupInst</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Message
 </span><span class="hs-identifier hs-var">ProgramChange</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094385"><span class="hs-identifier hs-var">chan</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094384"><span class="hs-identifier hs-var">progNum</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-81"></span><span class="hs-operator">&gt;</span><span>        </span><span id="local-6989586621679094381"><span class="annot"><span class="annottext">setTempo :: (Int, Message)
-</span><a href="#local-6989586621679094381"><span class="hs-identifier hs-var hs-var">setTempo</span></a></span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094349"><span class="hs-identifier hs-var">chan</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094348"><span class="hs-identifier hs-var">progNum</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span class="hs-operator">&gt;</span><span>        </span><span id="local-6989586621679094345"><span class="annot"><span class="annottext">setTempo :: (Int, Message)
+</span><a href="#local-6989586621679094345"><span class="hs-identifier hs-var hs-var">setTempo</span></a></span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Message
 </span><span class="hs-identifier hs-var">TempoChange</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#defST"><span class="hs-identifier hs-var">defST</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-82"></span><span class="hs-operator">&gt;</span><span>        </span><span id="local-6989586621679094379"><span class="annot"><span class="annottext">loop :: [MEvent] -&gt; Track Int
-</span><a href="#local-6989586621679094379"><span class="hs-identifier hs-var hs-var">loop</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-glyph">=</span><span>  </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-83"></span><span class="hs-operator">&gt;</span><span>        </span><span class="annot"><a href="#local-6989586621679094379"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679094378"><span class="annot"><span class="annottext">MEvent
-</span><a href="#local-6989586621679094378"><span class="hs-identifier hs-var">e</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679094377"><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094377"><span class="hs-identifier hs-var">es</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679094376"><span class="annot"><span class="annottext">(Int, Message)
-</span><a href="#local-6989586621679094376"><span class="hs-identifier hs-var">mev1</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679094375"><span class="annot"><span class="annottext">(Int, Message)
-</span><a href="#local-6989586621679094375"><span class="hs-identifier hs-var">mev2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; MEvent -&gt; ((Int, Message), (Int, Message))
+</span><span id="line-82"></span><span class="hs-operator">&gt;</span><span>        </span><span id="local-6989586621679094343"><span class="annot"><span class="annottext">loop :: [MEvent] -&gt; Track Int
+</span><a href="#local-6989586621679094343"><span class="hs-identifier hs-var hs-var">loop</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-glyph">=</span><span>  </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-83"></span><span class="hs-operator">&gt;</span><span>        </span><span class="annot"><a href="#local-6989586621679094343"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679094342"><span class="annot"><span class="annottext">MEvent
+</span><a href="#local-6989586621679094342"><span class="hs-identifier hs-var">e</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679094341"><span class="annot"><span class="annottext">[MEvent]
+</span><a href="#local-6989586621679094341"><span class="hs-identifier hs-var">es</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679094340"><span class="annot"><span class="annottext">(Int, Message)
+</span><a href="#local-6989586621679094340"><span class="hs-identifier hs-var">mev1</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679094339"><span class="annot"><span class="annottext">(Int, Message)
+</span><a href="#local-6989586621679094339"><span class="hs-identifier hs-var">mev2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; MEvent -&gt; ((Int, Message), (Int, Message))
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#mkMEvents"><span class="hs-identifier hs-var">mkMEvents</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094385"><span class="hs-identifier hs-var">chan</span></a></span><span> </span><span class="annot"><span class="annottext">MEvent
-</span><a href="#local-6989586621679094378"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><a href="#local-6989586621679094349"><span class="hs-identifier hs-var">chan</span></a></span><span> </span><span class="annot"><span class="annottext">MEvent
+</span><a href="#local-6989586621679094342"><span class="hs-identifier hs-var">e</span></a></span><span>
 </span><span id="line-84"></span><span class="hs-operator">&gt;</span><span>                        </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">(Int, Message)
-</span><a href="#local-6989586621679094376"><span class="hs-identifier hs-var">mev1</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Message) -&gt; Track Int -&gt; Track Int
+</span><a href="#local-6989586621679094340"><span class="hs-identifier hs-var">mev1</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Message) -&gt; Track Int -&gt; Track Int
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">(Int, Message) -&gt; Track Int -&gt; Track Int
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#insertMEvent"><span class="hs-identifier hs-var">insertMEvent</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Message)
-</span><a href="#local-6989586621679094375"><span class="hs-identifier hs-var">mev2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[MEvent] -&gt; Track Int
-</span><a href="#local-6989586621679094379"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094377"><span class="hs-identifier hs-var">es</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679094339"><span class="hs-identifier hs-var">mev2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[MEvent] -&gt; Track Int
+</span><a href="#local-6989586621679094343"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="annot"><span class="annottext">[MEvent]
+</span><a href="#local-6989586621679094341"><span class="hs-identifier hs-var">es</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-85"></span><span class="hs-operator">&gt;</span><span>   </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">(Int, Message)
-</span><a href="#local-6989586621679094383"><span class="hs-identifier hs-var">setupInst</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Message) -&gt; Track Int -&gt; Track Int
+</span><a href="#local-6989586621679094347"><span class="hs-identifier hs-var">setupInst</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Message) -&gt; Track Int -&gt; Track Int
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">(Int, Message)
-</span><a href="#local-6989586621679094381"><span class="hs-identifier hs-var">setTempo</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Message) -&gt; Track Int -&gt; Track Int
+</span><a href="#local-6989586621679094345"><span class="hs-identifier hs-var">setTempo</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Message) -&gt; Track Int -&gt; Track Int
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[MEvent] -&gt; Track Int
-</span><a href="#local-6989586621679094379"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="annot"><span class="annottext">[MEvent]
-</span><a href="#local-6989586621679094386"><span class="hs-identifier hs-var">pf</span></a></span><span>
+</span><a href="#local-6989586621679094343"><span class="hs-identifier hs-var">loop</span></a></span><span> </span><span class="annot"><span class="annottext">[MEvent]
+</span><a href="#local-6989586621679094350"><span class="hs-identifier hs-var">pf</span></a></span><span>
 </span><span id="line-86"></span><span>
 </span><span id="line-87"></span><span>  </span><span>
 </span><span id="line-88"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#mkMEvents"><span class="hs-identifier hs-type">mkMEvents</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Channel</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.MEvent.html#MEvent"><span class="hs-identifier hs-type">MEvent</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#MidiEvent"><span class="hs-identifier hs-type">MidiEvent</span></a></span><span class="hs-special">,</span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#MidiEvent"><span class="hs-identifier hs-type">MidiEvent</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-89"></span><span class="hs-operator">&gt;</span><span> </span><span id="mkMEvents"><span class="annot"><span class="annottext">mkMEvents :: Int -&gt; MEvent -&gt; ((Int, Message), (Int, Message))
-</span><a href="Euterpea.IO.MIDI.ToMidi.html#mkMEvents"><span class="hs-identifier hs-var hs-var">mkMEvents</span></a></span></span><span>  </span><span id="local-6989586621679094372"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094372"><span class="hs-identifier hs-var">mChan</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Euterpea.IO.MIDI.MEvent.html#MEvent"><span class="hs-identifier hs-type">MEvent</span></a></span><span> </span><span class="hs-special">{</span><span>  </span><span class="annot"><span class="annottext">eTime :: MEvent -&gt; PTime
-</span><a href="Euterpea.IO.MIDI.MEvent.html#eTime"><span class="hs-identifier hs-var">eTime</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679094369"><span class="annot"><span class="annottext">PTime
-</span><a href="#local-6989586621679094369"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ePitch :: MEvent -&gt; Int
-</span><a href="Euterpea.IO.MIDI.MEvent.html#ePitch"><span class="hs-identifier hs-var">ePitch</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679094367"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094367"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span> </span><span>
+</span><a href="Euterpea.IO.MIDI.ToMidi.html#mkMEvents"><span class="hs-identifier hs-var hs-var">mkMEvents</span></a></span></span><span>  </span><span id="local-6989586621679094336"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094336"><span class="hs-identifier hs-var">mChan</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Euterpea.IO.MIDI.MEvent.html#MEvent"><span class="hs-identifier hs-type">MEvent</span></a></span><span> </span><span class="hs-special">{</span><span>  </span><span class="annot"><span class="annottext">eTime :: MEvent -&gt; PTime
+</span><a href="Euterpea.IO.MIDI.MEvent.html#eTime"><span class="hs-identifier hs-var">eTime</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679094333"><span class="annot"><span class="annottext">PTime
+</span><a href="#local-6989586621679094333"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ePitch :: MEvent -&gt; Int
+</span><a href="Euterpea.IO.MIDI.MEvent.html#ePitch"><span class="hs-identifier hs-var">ePitch</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679094331"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094331"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span> </span><span>
 </span><span id="line-90"></span><span class="hs-operator">&gt;</span><span>                            </span><span class="annot"><span class="annottext">eDur :: MEvent -&gt; PTime
-</span><a href="Euterpea.IO.MIDI.MEvent.html#eDur"><span class="hs-identifier hs-var">eDur</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679094365"><span class="annot"><span class="annottext">PTime
-</span><a href="#local-6989586621679094365"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">eVol :: MEvent -&gt; Int
-</span><a href="Euterpea.IO.MIDI.MEvent.html#eVol"><span class="hs-identifier hs-var">eVol</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679094363"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094363"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><a href="Euterpea.IO.MIDI.MEvent.html#eDur"><span class="hs-identifier hs-var">eDur</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679094329"><span class="annot"><span class="annottext">PTime
+</span><a href="#local-6989586621679094329"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">eVol :: MEvent -&gt; Int
+</span><a href="Euterpea.IO.MIDI.MEvent.html#eVol"><span class="hs-identifier hs-var">eVol</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="local-6989586621679094327"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094327"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
 </span><span id="line-91"></span><span class="hs-operator">&gt;</span><span>                   </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PTime -&gt; Int
 forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#toDelta"><span class="hs-identifier hs-var">toDelta</span></a></span><span> </span><span class="annot"><span class="annottext">PTime
-</span><a href="#local-6989586621679094369"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Message
+</span><a href="#local-6989586621679094333"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Message
 </span><span class="hs-identifier hs-var">NoteOn</span></span><span>  </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094372"><span class="hs-identifier hs-var">mChan</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094367"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094360"><span class="hs-identifier hs-var">v'</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621679094336"><span class="hs-identifier hs-var">mChan</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094331"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094324"><span class="hs-identifier hs-var">v'</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
 </span><span id="line-92"></span><span class="hs-operator">&gt;</span><span>                        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PTime -&gt; Int
 forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#toDelta"><span class="hs-identifier hs-var">toDelta</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PTime
-</span><a href="#local-6989586621679094369"><span class="hs-identifier hs-var">t</span></a></span><span class="annot"><span class="annottext">PTime -&gt; PTime -&gt; PTime
+</span><a href="#local-6989586621679094333"><span class="hs-identifier hs-var">t</span></a></span><span class="annot"><span class="annottext">PTime -&gt; PTime -&gt; PTime
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">PTime
-</span><a href="#local-6989586621679094365"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Message
+</span><a href="#local-6989586621679094329"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int -&gt; Message
 </span><span class="hs-identifier hs-var">NoteOff</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094372"><span class="hs-identifier hs-var">mChan</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094367"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094360"><span class="hs-identifier hs-var">v'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">)</span><span>
-</span><span id="line-93"></span><span class="hs-operator">&gt;</span><span>            </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679094360"><span class="annot"><span class="annottext">v' :: Int
-</span><a href="#local-6989586621679094360"><span class="hs-identifier hs-var hs-var">v'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679094336"><span class="hs-identifier hs-var">mChan</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094331"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094324"><span class="hs-identifier hs-var">v'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span class="hs-operator">&gt;</span><span>            </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679094324"><span class="annot"><span class="annottext">v' :: Int
+</span><a href="#local-6989586621679094324"><span class="hs-identifier hs-var hs-var">v'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">max</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
@@ -342,14 +342,14 @@ forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-number">127</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094363"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679094327"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-94"></span><span>
 </span><span id="line-95"></span><span class="hs-operator">&gt;</span><span> </span><span id="toDelta"><span class="annot"><span class="annottext">toDelta :: a -&gt; b
-</span><a href="Euterpea.IO.MIDI.ToMidi.html#toDelta"><span class="hs-identifier hs-var hs-var">toDelta</span></a></span></span><span> </span><span id="local-6989586621679094356"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679094356"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="Euterpea.IO.MIDI.ToMidi.html#toDelta"><span class="hs-identifier hs-var hs-var">toDelta</span></a></span></span><span> </span><span id="local-6989586621679094320"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679094320"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
 forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679094356"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679094320"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">2.0</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
@@ -361,34 +361,34 @@ forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span id="line-96"></span><span>
 </span><span id="line-97"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#insertMEvent"><span class="hs-identifier hs-type">insertMEvent</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#MidiEvent"><span class="hs-identifier hs-type">MidiEvent</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#MidiEvent"><span class="hs-identifier hs-type">MidiEvent</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#MidiEvent"><span class="hs-identifier hs-type">MidiEvent</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-98"></span><span class="hs-operator">&gt;</span><span> </span><span id="insertMEvent"><span class="annot"><span class="annottext">insertMEvent :: (Int, Message) -&gt; Track Int -&gt; Track Int
-</span><a href="Euterpea.IO.MIDI.ToMidi.html#insertMEvent"><span class="hs-identifier hs-var hs-var">insertMEvent</span></a></span></span><span> </span><span id="local-6989586621679094353"><span class="annot"><span class="annottext">(Int, Message)
-</span><a href="#local-6989586621679094353"><span class="hs-identifier hs-var">mev1</span></a></span></span><span>  </span><span class="hs-special">[</span><span class="hs-special">]</span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">(Int, Message)
-</span><a href="#local-6989586621679094353"><span class="hs-identifier hs-var">mev1</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-99"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#insertMEvent"><span class="hs-identifier hs-var">insertMEvent</span></a></span><span> </span><span id="local-6989586621679094352"><span class="annot"><span class="annottext">mev1 :: (Int, Message)
-</span><a href="#local-6989586621679094352"><span class="hs-identifier hs-var">mev1</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679094351"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094351"><span class="hs-identifier hs-var">t1</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Message
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679094350"><span class="annot"><span class="annottext">mevs :: Track Int
-</span><a href="#local-6989586621679094350"><span class="hs-identifier hs-var">mevs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679094349"><span class="annot"><span class="annottext">mev2 :: (Int, Message)
-</span><a href="#local-6989586621679094349"><span class="hs-identifier hs-var">mev2</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679094348"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094348"><span class="hs-identifier hs-var">t2</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Message
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679094347"><span class="annot"><span class="annottext">Track Int
-</span><a href="#local-6989586621679094347"><span class="hs-identifier hs-var">mevs'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><a href="Euterpea.IO.MIDI.ToMidi.html#insertMEvent"><span class="hs-identifier hs-var hs-var">insertMEvent</span></a></span></span><span> </span><span id="local-6989586621679094317"><span class="annot"><span class="annottext">(Int, Message)
+</span><a href="#local-6989586621679094317"><span class="hs-identifier hs-var">mev1</span></a></span></span><span>  </span><span class="hs-special">[</span><span class="hs-special">]</span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">(Int, Message)
+</span><a href="#local-6989586621679094317"><span class="hs-identifier hs-var">mev1</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-99"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#insertMEvent"><span class="hs-identifier hs-var">insertMEvent</span></a></span><span> </span><span id="local-6989586621679094316"><span class="annot"><span class="annottext">mev1 :: (Int, Message)
+</span><a href="#local-6989586621679094316"><span class="hs-identifier hs-var">mev1</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679094315"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094315"><span class="hs-identifier hs-var">t1</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Message
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679094314"><span class="annot"><span class="annottext">mevs :: Track Int
+</span><a href="#local-6989586621679094314"><span class="hs-identifier hs-var">mevs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679094313"><span class="annot"><span class="annottext">mev2 :: (Int, Message)
+</span><a href="#local-6989586621679094313"><span class="hs-identifier hs-var">mev2</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679094312"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679094312"><span class="hs-identifier hs-var">t2</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Message
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679094311"><span class="annot"><span class="annottext">Track Int
+</span><a href="#local-6989586621679094311"><span class="hs-identifier hs-var">mevs'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span>
 </span><span id="line-100"></span><span class="hs-operator">&gt;</span><span>       </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094351"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679094315"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679094348"><span class="hs-identifier hs-var">t2</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">(Int, Message)
-</span><a href="#local-6989586621679094352"><span class="hs-identifier hs-var">mev1</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Message) -&gt; Track Int -&gt; Track Int
+</span><a href="#local-6989586621679094312"><span class="hs-identifier hs-var">t2</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">(Int, Message)
+</span><a href="#local-6989586621679094316"><span class="hs-identifier hs-var">mev1</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Message) -&gt; Track Int -&gt; Track Int
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Track Int
-</span><a href="#local-6989586621679094350"><span class="hs-identifier hs-var">mevs</span></a></span><span>
+</span><a href="#local-6989586621679094314"><span class="hs-identifier hs-var">mevs</span></a></span><span>
 </span><span id="line-101"></span><span class="hs-operator">&gt;</span><span>                   </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">(Int, Message)
-</span><a href="#local-6989586621679094349"><span class="hs-identifier hs-var">mev2</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Message) -&gt; Track Int -&gt; Track Int
+</span><a href="#local-6989586621679094313"><span class="hs-identifier hs-var">mev2</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Message) -&gt; Track Int -&gt; Track Int
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">(Int, Message) -&gt; Track Int -&gt; Track Int
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#insertMEvent"><span class="hs-identifier hs-var">insertMEvent</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Message)
-</span><a href="#local-6989586621679094352"><span class="hs-identifier hs-var">mev1</span></a></span><span> </span><span class="annot"><span class="annottext">Track Int
-</span><a href="#local-6989586621679094347"><span class="hs-identifier hs-var">mevs'</span></a></span><span>
+</span><a href="#local-6989586621679094316"><span class="hs-identifier hs-var">mev1</span></a></span><span> </span><span class="annot"><span class="annottext">Track Int
+</span><a href="#local-6989586621679094311"><span class="hs-identifier hs-var">mevs'</span></a></span><span>
 </span><span id="line-102"></span><span>
 </span><span id="line-103"></span><span class="hs-operator">&gt;</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#defUpm"><span class="hs-identifier hs-type">defUpm</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#UserPatchMap"><span class="hs-identifier hs-type">UserPatchMap</span></a></span><span>
 </span><span id="line-104"></span><span class="hs-operator">&gt;</span><span> </span><span id="defUpm"><span class="annot"><span class="annottext">defUpm :: UserPatchMap
@@ -425,13 +425,13 @@ forall a. a -&gt; [a] -&gt; [a]
 </span><span id="line-114"></span><span class="hs-operator">&gt;</span><span>            </span><span class="hs-comment">--  the GM name for drums is unimportant, only channel 9</span><span>
 </span><span id="line-115"></span><span>
 </span><span id="line-116"></span><span>
-</span><span id="line-117"></span><span class="hs-operator">&gt;</span><span> </span><span id="local-6989586621679094336"><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#writeMidi"><span class="hs-identifier hs-type">writeMidi</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Euterpea.Music.html#ToMusic1"><span class="hs-identifier hs-type">ToMusic1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679094336"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Euterpea.Music.html#Music"><span class="hs-identifier hs-type">Music</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679094336"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-117"></span><span class="hs-operator">&gt;</span><span> </span><span id="local-6989586621679094300"><span class="annot"><a href="Euterpea.IO.MIDI.ToMidi.html#writeMidi"><span class="hs-identifier hs-type">writeMidi</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Euterpea.Music.html#ToMusic1"><span class="hs-identifier hs-type">ToMusic1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679094300"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Euterpea.Music.html#Music"><span class="hs-identifier hs-type">Music</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679094300"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
 </span><span id="line-118"></span><span class="hs-operator">&gt;</span><span> </span><span id="writeMidi"><span class="annot"><span class="annottext">writeMidi :: [Char] -&gt; Music a -&gt; IO ()
-</span><a href="Euterpea.IO.MIDI.ToMidi.html#writeMidi"><span class="hs-identifier hs-var hs-var">writeMidi</span></a></span></span><span> </span><span id="local-6989586621679094333"><span class="annot"><span class="annottext">[Char]
-</span><a href="#local-6989586621679094333"><span class="hs-identifier hs-var">fn</span></a></span></span><span> </span><span id="local-6989586621679094332"><span class="annot"><span class="annottext">Music a
-</span><a href="#local-6989586621679094332"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Midi -&gt; IO ()
+</span><a href="Euterpea.IO.MIDI.ToMidi.html#writeMidi"><span class="hs-identifier hs-var hs-var">writeMidi</span></a></span></span><span> </span><span id="local-6989586621679094297"><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621679094297"><span class="hs-identifier hs-var">fn</span></a></span></span><span> </span><span id="local-6989586621679094296"><span class="annot"><span class="annottext">Music a
+</span><a href="#local-6989586621679094296"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Midi -&gt; IO ()
 </span><a href="Euterpea.IO.MIDI.ExportMidiFile.html#exportMidiFile"><span class="hs-identifier hs-var">exportMidiFile</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
-</span><a href="#local-6989586621679094333"><span class="hs-identifier hs-var">fn</span></a></span><span> </span><span class="annot"><span class="annottext">(Midi -&gt; IO ()) -&gt; Midi -&gt; IO ()
+</span><a href="#local-6989586621679094297"><span class="hs-identifier hs-var">fn</span></a></span><span> </span><span class="annot"><span class="annottext">(Midi -&gt; IO ()) -&gt; Midi -&gt; IO ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[MEvent] -&gt; Midi
 </span><a href="Euterpea.IO.MIDI.ToMidi.html#toMidi"><span class="hs-identifier hs-var">toMidi</span></a></span><span> </span><span class="annot"><span class="annottext">([MEvent] -&gt; Midi) -&gt; [MEvent] -&gt; Midi
@@ -439,7 +439,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Music a -&gt; [MEvent]
 forall a. ToMusic1 a =&gt; Music a -&gt; [MEvent]
 </span><a href="Euterpea.IO.MIDI.MEvent.html#perform"><span class="hs-identifier hs-var">perform</span></a></span><span> </span><span class="annot"><span class="annottext">Music a
-</span><a href="#local-6989586621679094332"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><a href="#local-6989586621679094296"><span class="hs-identifier hs-var">m</span></a></span><span>
 </span><span id="line-119"></span><span>
 </span><span id="line-120"></span><span> </span><span class="hs-identifier">play</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier">ToMusic1</span><span> </span><span class="hs-identifier">a</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier">Music</span><span> </span><span class="hs-identifier">a</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier">IO</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-121"></span><span> </span><span class="hs-identifier">play</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">playM</span><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-identifier">toMidi</span><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-identifier">perform</span><span>

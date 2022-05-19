@@ -55,10 +55,10 @@
 </span><span id="line-55"></span><span>
 </span><span id="line-56"></span><span class="hs-comment">-- | Set the contents of the colour source, for</span><span>
 </span><span id="line-57"></span><span class="hs-comment">-- subsequent plots</span><span>
-</span><span id="line-58"></span><span id="local-6989586621679380361"><span class="annot"><a href="Graphics.Rendering.Chart.Easy.html#setColors"><span class="hs-identifier hs-type">setColors</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">AlphaColour</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.State.html#EC"><span class="hs-identifier hs-type">EC</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380361"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-58"></span><span id="local-6989586621679381023"><span class="annot"><a href="Graphics.Rendering.Chart.Easy.html#setColors"><span class="hs-identifier hs-type">setColors</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">AlphaColour</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.State.html#EC"><span class="hs-identifier hs-type">EC</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679381023"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
 </span><span id="line-59"></span><span id="setColors"><span class="annot"><span class="annottext">setColors :: [AlphaColour Double] -&gt; EC l ()
-</span><a href="Graphics.Rendering.Chart.Easy.html#setColors"><span class="hs-identifier hs-var hs-var">setColors</span></a></span></span><span> </span><span id="local-6989586621679380360"><span class="annot"><span class="annottext">[AlphaColour Double]
-</span><a href="#local-6989586621679380360"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">State CState () -&gt; EC l ()
+</span><a href="Graphics.Rendering.Chart.Easy.html#setColors"><span class="hs-identifier hs-var hs-var">setColors</span></a></span></span><span> </span><span id="local-6989586621679381022"><span class="annot"><span class="annottext">[AlphaColour Double]
+</span><a href="#local-6989586621679381022"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">State CState () -&gt; EC l ()
 forall a l. State CState a -&gt; EC l a
 </span><a href="Graphics.Rendering.Chart.State.html#liftCState"><span class="hs-identifier hs-var">liftCState</span></a></span><span> </span><span class="annot"><span class="annottext">(State CState () -&gt; EC l ()) -&gt; State CState () -&gt; EC l ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
@@ -74,14 +74,14 @@ ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[AlphaColour Double] -&gt; [AlphaColour Double]
 forall a. [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">cycle</span></span><span> </span><span class="annot"><span class="annottext">[AlphaColour Double]
-</span><a href="#local-6989586621679380360"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><a href="#local-6989586621679381022"><span class="hs-identifier hs-var">cs</span></a></span><span>
 </span><span id="line-60"></span><span>
 </span><span id="line-61"></span><span class="hs-comment">-- | Set the contents of the shape source, for</span><span>
 </span><span id="line-62"></span><span class="hs-comment">-- subsequent plots</span><span>
-</span><span id="line-63"></span><span id="local-6989586621679380355"><span class="annot"><a href="Graphics.Rendering.Chart.Easy.html#setShapes"><span class="hs-identifier hs-type">setShapes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Rendering.Chart.Drawing.html#PointShape"><span class="hs-identifier hs-type">PointShape</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.State.html#EC"><span class="hs-identifier hs-type">EC</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380355"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-63"></span><span id="local-6989586621679381017"><span class="annot"><a href="Graphics.Rendering.Chart.Easy.html#setShapes"><span class="hs-identifier hs-type">setShapes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Rendering.Chart.Drawing.html#PointShape"><span class="hs-identifier hs-type">PointShape</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.State.html#EC"><span class="hs-identifier hs-type">EC</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679381017"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
 </span><span id="line-64"></span><span id="setShapes"><span class="annot"><span class="annottext">setShapes :: [PointShape] -&gt; EC l ()
-</span><a href="Graphics.Rendering.Chart.Easy.html#setShapes"><span class="hs-identifier hs-var hs-var">setShapes</span></a></span></span><span> </span><span id="local-6989586621679380354"><span class="annot"><span class="annottext">[PointShape]
-</span><a href="#local-6989586621679380354"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">State CState () -&gt; EC l ()
+</span><a href="Graphics.Rendering.Chart.Easy.html#setShapes"><span class="hs-identifier hs-var hs-var">setShapes</span></a></span></span><span> </span><span id="local-6989586621679381016"><span class="annot"><span class="annottext">[PointShape]
+</span><a href="#local-6989586621679381016"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">State CState () -&gt; EC l ()
 forall a l. State CState a -&gt; EC l a
 </span><a href="Graphics.Rendering.Chart.State.html#liftCState"><span class="hs-identifier hs-var">liftCState</span></a></span><span> </span><span class="annot"><span class="annottext">(State CState () -&gt; EC l ()) -&gt; State CState () -&gt; EC l ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
@@ -97,22 +97,22 @@ ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[PointShape] -&gt; [PointShape]
 forall a. [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">cycle</span></span><span> </span><span class="annot"><span class="annottext">[PointShape]
-</span><a href="#local-6989586621679380354"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><a href="#local-6989586621679381016"><span class="hs-identifier hs-var">ps</span></a></span><span>
 </span><span id="line-65"></span><span>
 </span><span id="line-66"></span><span class="hs-comment">-- | Constuct a line plot with the given title and</span><span>
 </span><span id="line-67"></span><span class="hs-comment">-- data, using the next available color.</span><span>
-</span><span id="line-68"></span><span id="local-6989586621679380350"><span id="local-6989586621679380351"><span id="local-6989586621679380352"><span class="annot"><a href="Graphics.Rendering.Chart.Easy.html#line"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679380352"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679380351"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">]</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.State.html#EC"><span class="hs-identifier hs-type">EC</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380350"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Lines.html#PlotLines"><span class="hs-identifier hs-type">PlotLines</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380352"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380351"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-68"></span><span id="local-6989586621679381012"><span id="local-6989586621679381013"><span id="local-6989586621679381014"><span class="annot"><a href="Graphics.Rendering.Chart.Easy.html#line"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679381014"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679381013"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">]</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.State.html#EC"><span class="hs-identifier hs-type">EC</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679381012"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Lines.html#PlotLines"><span class="hs-identifier hs-type">PlotLines</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679381014"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679381013"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span></span></span></span><span>
 </span><span id="line-69"></span><span id="line"><span class="annot"><span class="annottext">line :: String -&gt; [[(x, y)]] -&gt; EC l (PlotLines x y)
-</span><a href="Graphics.Rendering.Chart.Easy.html#line"><span class="hs-identifier hs-var hs-var">line</span></a></span></span><span> </span><span id="local-6989586621679380349"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679380349"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679380348"><span class="annot"><span class="annottext">[[(x, y)]]
-</span><a href="#local-6989586621679380348"><span class="hs-identifier hs-var">values</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (PlotLines x y) () -&gt; EC l (PlotLines x y)
+</span><a href="Graphics.Rendering.Chart.Easy.html#line"><span class="hs-identifier hs-var hs-var">line</span></a></span></span><span> </span><span id="local-6989586621679381011"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679381011"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679381010"><span class="annot"><span class="annottext">[[(x, y)]]
+</span><a href="#local-6989586621679381010"><span class="hs-identifier hs-var">values</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (PlotLines x y) () -&gt; EC l (PlotLines x y)
 forall l1 a l2. Default l1 =&gt; EC l1 a -&gt; EC l2 l1
 </span><a href="Graphics.Rendering.Chart.State.html#liftEC"><span class="hs-identifier hs-var">liftEC</span></a></span><span> </span><span class="annot"><span class="annottext">(EC (PlotLines x y) () -&gt; EC l (PlotLines x y))
 -&gt; EC (PlotLines x y) () -&gt; EC l (PlotLines x y)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-70"></span><span>    </span><span id="local-6989586621679380346"><span class="annot"><span class="annottext">AlphaColour Double
-</span><a href="#local-6989586621679380346"><span class="hs-identifier hs-var">color</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">EC (PlotLines x y) (AlphaColour Double)
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621679381008"><span class="annot"><span class="annottext">AlphaColour Double
+</span><a href="#local-6989586621679381008"><span class="hs-identifier hs-var">color</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">EC (PlotLines x y) (AlphaColour Double)
 forall l. EC l (AlphaColour Double)
 </span><a href="Graphics.Rendering.Chart.State.html#takeColor"><span class="hs-identifier hs-var">takeColor</span></a></span><span>
 </span><span id="line-71"></span><span>    </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
@@ -125,7 +125,7 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679380349"><span class="hs-identifier hs-var">title</span></a></span><span>
+</span><a href="#local-6989586621679381011"><span class="hs-identifier hs-var">title</span></a></span><span>
 </span><span id="line-72"></span><span>    </span><span class="annot"><span class="annottext">([[(x, y)]] -&gt; Identity [[(x, y)]])
 -&gt; PlotLines x y -&gt; Identity (PlotLines x y)
 forall x y. Lens' (PlotLines x y) [[(x, y)]]
@@ -136,7 +136,7 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[[(x, y)]]
-</span><a href="#local-6989586621679380348"><span class="hs-identifier hs-var">values</span></a></span><span>
+</span><a href="#local-6989586621679381010"><span class="hs-identifier hs-var">values</span></a></span><span>
 </span><span id="line-73"></span><span>    </span><span class="annot"><span class="annottext">(LineStyle -&gt; Identity LineStyle)
 -&gt; PlotLines x y -&gt; Identity (PlotLines x y)
 forall x y. Lens' (PlotLines x y) LineStyle
@@ -158,26 +158,26 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">AlphaColour Double
-</span><a href="#local-6989586621679380346"><span class="hs-identifier hs-var">color</span></a></span><span>
+</span><a href="#local-6989586621679381008"><span class="hs-identifier hs-var">color</span></a></span><span>
 </span><span id="line-74"></span><span>
 </span><span id="line-75"></span><span class="hs-comment">-- | Construct a scatter plot with the given title and data, using the</span><span>
 </span><span id="line-76"></span><span class="hs-comment">-- next available color and point shape.</span><span>
-</span><span id="line-77"></span><span id="local-6989586621679380337"><span id="local-6989586621679380338"><span id="local-6989586621679380339"><span class="annot"><a href="Graphics.Rendering.Chart.Easy.html#points"><span class="hs-identifier hs-type">points</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679380339"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679380338"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.State.html#EC"><span class="hs-identifier hs-type">EC</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380337"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Points.html#PlotPoints"><span class="hs-identifier hs-type">PlotPoints</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380339"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380338"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-77"></span><span id="local-6989586621679380999"><span id="local-6989586621679381000"><span id="local-6989586621679381001"><span class="annot"><a href="Graphics.Rendering.Chart.Easy.html#points"><span class="hs-identifier hs-type">points</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679381001"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679381000"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.State.html#EC"><span class="hs-identifier hs-type">EC</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380999"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Points.html#PlotPoints"><span class="hs-identifier hs-type">PlotPoints</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679381001"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679381000"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span></span></span></span><span>
 </span><span id="line-78"></span><span id="points"><span class="annot"><span class="annottext">points :: String -&gt; [(x, y)] -&gt; EC l (PlotPoints x y)
-</span><a href="Graphics.Rendering.Chart.Easy.html#points"><span class="hs-identifier hs-var hs-var">points</span></a></span></span><span> </span><span id="local-6989586621679380336"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679380336"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679380335"><span class="annot"><span class="annottext">[(x, y)]
-</span><a href="#local-6989586621679380335"><span class="hs-identifier hs-var">values</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (PlotPoints x y) () -&gt; EC l (PlotPoints x y)
+</span><a href="Graphics.Rendering.Chart.Easy.html#points"><span class="hs-identifier hs-var hs-var">points</span></a></span></span><span> </span><span id="local-6989586621679380998"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679380998"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679380997"><span class="annot"><span class="annottext">[(x, y)]
+</span><a href="#local-6989586621679380997"><span class="hs-identifier hs-var">values</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (PlotPoints x y) () -&gt; EC l (PlotPoints x y)
 forall l1 a l2. Default l1 =&gt; EC l1 a -&gt; EC l2 l1
 </span><a href="Graphics.Rendering.Chart.State.html#liftEC"><span class="hs-identifier hs-var">liftEC</span></a></span><span> </span><span class="annot"><span class="annottext">(EC (PlotPoints x y) () -&gt; EC l (PlotPoints x y))
 -&gt; EC (PlotPoints x y) () -&gt; EC l (PlotPoints x y)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-79"></span><span>    </span><span id="local-6989586621679380334"><span class="annot"><span class="annottext">AlphaColour Double
-</span><a href="#local-6989586621679380334"><span class="hs-identifier hs-var">color</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">EC (PlotPoints x y) (AlphaColour Double)
+</span><span id="line-79"></span><span>    </span><span id="local-6989586621679380996"><span class="annot"><span class="annottext">AlphaColour Double
+</span><a href="#local-6989586621679380996"><span class="hs-identifier hs-var">color</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">EC (PlotPoints x y) (AlphaColour Double)
 forall l. EC l (AlphaColour Double)
 </span><a href="Graphics.Rendering.Chart.State.html#takeColor"><span class="hs-identifier hs-var">takeColor</span></a></span><span>
-</span><span id="line-80"></span><span>    </span><span id="local-6989586621679380333"><span class="annot"><span class="annottext">PointShape
-</span><a href="#local-6989586621679380333"><span class="hs-identifier hs-var">shape</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">EC (PlotPoints x y) PointShape
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679380995"><span class="annot"><span class="annottext">PointShape
+</span><a href="#local-6989586621679380995"><span class="hs-identifier hs-var">shape</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">EC (PlotPoints x y) PointShape
 forall l. EC l PointShape
 </span><a href="Graphics.Rendering.Chart.State.html#takeShape"><span class="hs-identifier hs-var">takeShape</span></a></span><span>
 </span><span id="line-81"></span><span>    </span><span class="annot"><span class="annottext">([(x, y)] -&gt; Identity [(x, y)])
@@ -191,7 +191,7 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[(x, y)]
-</span><a href="#local-6989586621679380335"><span class="hs-identifier hs-var">values</span></a></span><span>
+</span><a href="#local-6989586621679380997"><span class="hs-identifier hs-var">values</span></a></span><span>
 </span><span id="line-82"></span><span>    </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
 -&gt; PlotPoints x y -&gt; Identity (PlotPoints x y)
 forall x1 y1. Lens' (PlotPoints x1 y1) String
@@ -202,7 +202,7 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679380336"><span class="hs-identifier hs-var">title</span></a></span><span>
+</span><a href="#local-6989586621679380998"><span class="hs-identifier hs-var">title</span></a></span><span>
 </span><span id="line-83"></span><span>    </span><span class="annot"><span class="annottext">(PointStyle -&gt; Identity PointStyle)
 -&gt; PlotPoints x y -&gt; Identity (PlotPoints x y)
 forall x1 y1. Lens' (PlotPoints x1 y1) PointStyle
@@ -224,7 +224,7 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">AlphaColour Double
-</span><a href="#local-6989586621679380334"><span class="hs-identifier hs-var">color</span></a></span><span>
+</span><a href="#local-6989586621679380996"><span class="hs-identifier hs-var">color</span></a></span><span>
 </span><span id="line-84"></span><span>    </span><span class="annot"><span class="annottext">(PointStyle -&gt; Identity PointStyle)
 -&gt; PlotPoints x y -&gt; Identity (PlotPoints x y)
 forall x1 y1. Lens' (PlotPoints x1 y1) PointStyle
@@ -246,7 +246,7 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">PointShape
-</span><a href="#local-6989586621679380333"><span class="hs-identifier hs-var">shape</span></a></span><span>
+</span><a href="#local-6989586621679380995"><span class="hs-identifier hs-var">shape</span></a></span><span>
 </span><span id="line-85"></span><span>    </span><span class="annot"><span class="annottext">(PointStyle -&gt; Identity PointStyle)
 -&gt; PlotPoints x y -&gt; Identity (PlotPoints x y)
 forall x1 y1. Lens' (PlotPoints x1 y1) PointStyle
@@ -275,7 +275,7 @@ forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PointShape -&gt; Bool
 </span><a href="Graphics.Rendering.Chart.Easy.html#isFilled"><span class="hs-identifier hs-var">isFilled</span></a></span><span> </span><span class="annot"><span class="annottext">PointShape
-</span><a href="#local-6989586621679380333"><span class="hs-identifier hs-var">shape</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(EC (PlotPoints x y) () -&gt; EC (PlotPoints x y) ())
+</span><a href="#local-6989586621679380995"><span class="hs-identifier hs-var">shape</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(EC (PlotPoints x y) () -&gt; EC (PlotPoints x y) ())
 -&gt; EC (PlotPoints x y) () -&gt; EC (PlotPoints x y) ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
@@ -300,7 +300,7 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">AlphaColour Double
-</span><a href="#local-6989586621679380334"><span class="hs-identifier hs-var">color</span></a></span><span>
+</span><a href="#local-6989586621679380996"><span class="hs-identifier hs-var">color</span></a></span><span>
 </span><span id="line-90"></span><span>        </span><span class="annot"><span class="annottext">(PointStyle -&gt; Identity PointStyle)
 -&gt; PlotPoints x y -&gt; Identity (PlotPoints x y)
 forall x1 y1. Lens' (PlotPoints x1 y1) PointStyle
@@ -336,18 +336,18 @@ ASetter s s a b -&gt; b -&gt; m ()
 </span><span id="line-96"></span><span>    </span><span>
 </span><span id="line-97"></span><span class="hs-comment">-- | Construct a bar chart with the given titles and data, using the</span><span>
 </span><span id="line-98"></span><span class="hs-comment">-- next available colors    </span><span>
-</span><span id="line-99"></span><span id="local-6989586621679380317"><span id="local-6989586621679380318"><span id="local-6989586621679380319"><span class="annot"><a href="Graphics.Rendering.Chart.Easy.html#bars"><span class="hs-identifier hs-type">bars</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Types.html#PlotValue"><span class="hs-identifier hs-type">PlotValue</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380319"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Bars.html#BarsPlotValue"><span class="hs-identifier hs-type">BarsPlotValue</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380318"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679380319"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">,</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380318"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.State.html#EC"><span class="hs-identifier hs-type">EC</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380317"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Bars.html#PlotBars"><span class="hs-identifier hs-type">PlotBars</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380319"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380318"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-99"></span><span id="local-6989586621679380979"><span id="local-6989586621679380980"><span id="local-6989586621679380981"><span class="annot"><a href="Graphics.Rendering.Chart.Easy.html#bars"><span class="hs-identifier hs-type">bars</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Axis.Types.html#PlotValue"><span class="hs-identifier hs-type">PlotValue</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380981"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Bars.html#BarsPlotValue"><span class="hs-identifier hs-type">BarsPlotValue</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380980"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679380981"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">,</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679380980"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.State.html#EC"><span class="hs-identifier hs-type">EC</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380979"><span class="hs-identifier hs-type">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Bars.html#PlotBars"><span class="hs-identifier hs-type">PlotBars</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380981"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679380980"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span></span></span></span><span>
 </span><span id="line-100"></span><span id="bars"><span class="annot"><span class="annottext">bars :: [String] -&gt; [(x, [y])] -&gt; EC l (PlotBars x y)
-</span><a href="Graphics.Rendering.Chart.Easy.html#bars"><span class="hs-identifier hs-var hs-var">bars</span></a></span></span><span> </span><span id="local-6989586621679380314"><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679380314"><span class="hs-identifier hs-var">titles</span></a></span></span><span> </span><span id="local-6989586621679380313"><span class="annot"><span class="annottext">[(x, [y])]
-</span><a href="#local-6989586621679380313"><span class="hs-identifier hs-var">vals</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (PlotBars x y) () -&gt; EC l (PlotBars x y)
+</span><a href="Graphics.Rendering.Chart.Easy.html#bars"><span class="hs-identifier hs-var hs-var">bars</span></a></span></span><span> </span><span id="local-6989586621679380976"><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679380976"><span class="hs-identifier hs-var">titles</span></a></span></span><span> </span><span id="local-6989586621679380975"><span class="annot"><span class="annottext">[(x, [y])]
+</span><a href="#local-6989586621679380975"><span class="hs-identifier hs-var">vals</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (PlotBars x y) () -&gt; EC l (PlotBars x y)
 forall l1 a l2. Default l1 =&gt; EC l1 a -&gt; EC l2 l1
 </span><a href="Graphics.Rendering.Chart.State.html#liftEC"><span class="hs-identifier hs-var">liftEC</span></a></span><span> </span><span class="annot"><span class="annottext">(EC (PlotBars x y) () -&gt; EC l (PlotBars x y))
 -&gt; EC (PlotBars x y) () -&gt; EC l (PlotBars x y)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-101"></span><span>    </span><span id="local-6989586621679380312"><span class="annot"><span class="annottext">[(FillStyle, Maybe LineStyle)]
-</span><a href="#local-6989586621679380312"><span class="hs-identifier hs-var">styles</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[StateT (PlotBars x y) (State CState) (FillStyle, Maybe LineStyle)]
+</span><span id="line-101"></span><span>    </span><span id="local-6989586621679380974"><span class="annot"><span class="annottext">[(FillStyle, Maybe LineStyle)]
+</span><a href="#local-6989586621679380974"><span class="hs-identifier hs-var">styles</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[StateT (PlotBars x y) (State CState) (FillStyle, Maybe LineStyle)]
 -&gt; StateT
      (PlotBars x y) (State CState) [(FillStyle, Maybe LineStyle)]
 forall (t :: * -&gt; *) (m :: * -&gt; *) a.
@@ -359,11 +359,11 @@ t (m a) -&gt; m (t a)
      (PlotBars x y) (State CState) (FillStyle, Maybe LineStyle)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">AlphaColour Double -&gt; (FillStyle, Maybe LineStyle)
-</span><a href="#local-6989586621679380310"><span class="hs-identifier hs-var">mkStyle</span></a></span><span> </span><span class="annot"><span class="annottext">StateT (PlotBars x y) (State CState) (AlphaColour Double)
+</span><a href="#local-6989586621679380972"><span class="hs-identifier hs-var">mkStyle</span></a></span><span> </span><span class="annot"><span class="annottext">StateT (PlotBars x y) (State CState) (AlphaColour Double)
 forall l. EC l (AlphaColour Double)
 </span><a href="Graphics.Rendering.Chart.State.html#takeColor"><span class="hs-identifier hs-var">takeColor</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679380314"><span class="hs-identifier hs-var">titles</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679380976"><span class="hs-identifier hs-var">titles</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-102"></span><span>    </span><span class="annot"><span class="annottext">([String] -&gt; Identity [String])
 -&gt; PlotBars x y -&gt; Identity (PlotBars x y)
 forall x y. Lens' (PlotBars x y) [String]
@@ -374,7 +374,7 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679380314"><span class="hs-identifier hs-var">titles</span></a></span><span>
+</span><a href="#local-6989586621679380976"><span class="hs-identifier hs-var">titles</span></a></span><span>
 </span><span id="line-103"></span><span>    </span><span class="annot"><span class="annottext">([(x, [y])] -&gt; Identity [(x, [y])])
 -&gt; PlotBars x y -&gt; Identity (PlotBars x y)
 forall x y x2.
@@ -386,7 +386,7 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[(x, [y])]
-</span><a href="#local-6989586621679380313"><span class="hs-identifier hs-var">vals</span></a></span><span>
+</span><a href="#local-6989586621679380975"><span class="hs-identifier hs-var">vals</span></a></span><span>
 </span><span id="line-104"></span><span>    </span><span class="annot"><span class="annottext">(PlotBarsStyle -&gt; Identity PlotBarsStyle)
 -&gt; PlotBars x y -&gt; Identity (PlotBars x y)
 forall x y. Lens' (PlotBars x y) PlotBarsStyle
@@ -423,13 +423,13 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[(FillStyle, Maybe LineStyle)]
-</span><a href="#local-6989586621679380312"><span class="hs-identifier hs-var">styles</span></a></span><span>
+</span><a href="#local-6989586621679380974"><span class="hs-identifier hs-var">styles</span></a></span><span>
 </span><span id="line-107"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-108"></span><span>    </span><span id="local-6989586621679380310"><span class="annot"><span class="annottext">mkStyle :: AlphaColour Double -&gt; (FillStyle, Maybe LineStyle)
-</span><a href="#local-6989586621679380310"><span class="hs-identifier hs-var hs-var">mkStyle</span></a></span></span><span> </span><span id="local-6989586621679380302"><span class="annot"><span class="annottext">AlphaColour Double
-</span><a href="#local-6989586621679380302"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">AlphaColour Double -&gt; FillStyle
+</span><span id="line-108"></span><span>    </span><span id="local-6989586621679380972"><span class="annot"><span class="annottext">mkStyle :: AlphaColour Double -&gt; (FillStyle, Maybe LineStyle)
+</span><a href="#local-6989586621679380972"><span class="hs-identifier hs-var hs-var">mkStyle</span></a></span></span><span> </span><span id="local-6989586621679380964"><span class="annot"><span class="annottext">AlphaColour Double
+</span><a href="#local-6989586621679380964"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">AlphaColour Double -&gt; FillStyle
 </span><a href="Graphics.Rendering.Chart.Drawing.html#solidFillStyle"><span class="hs-identifier hs-var">solidFillStyle</span></a></span><span> </span><span class="annot"><span class="annottext">AlphaColour Double
-</span><a href="#local-6989586621679380302"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">LineStyle -&gt; Maybe LineStyle
+</span><a href="#local-6989586621679380964"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">LineStyle -&gt; Maybe LineStyle
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; AlphaColour Double -&gt; LineStyle
 </span><a href="Graphics.Rendering.Chart.Drawing.html#solidLine"><span class="hs-identifier hs-var">solidLine</span></a></span><span> </span><span class="annot"><span class="annottext">Double

@@ -23,7 +23,7 @@
 --   You can automatically derive generic instances. for example:
 --   
 --   <pre>
---   {--}
+--   {-# LANGUAGE <a>DeriveGeneric</a>, TypeOperators, TypeFamilies #-}
 --   import Data.MemoTrie
 --   import GHC.Generics (Generic) 
 --   

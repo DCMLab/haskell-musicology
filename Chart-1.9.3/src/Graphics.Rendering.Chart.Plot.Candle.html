@@ -40,7 +40,7 @@
 </span><span id="line-40"></span><span class="hs-comment">--   the price rises (open &lt; close) or falls (close &lt; open).</span><span>
 </span><span id="line-41"></span><span class="hs-comment">--   (This plot type can also be re-purposed for statistical intervals, e.g.</span><span>
 </span><span id="line-42"></span><span class="hs-comment">--    minimum, first quartile, median, third quartile, maximum.)</span><span>
-</span><span id="line-43"></span><span class="hs-keyword">data</span><span> </span><span id="PlotCandle"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-var">PlotCandle</span></a></span></span><span> </span><span id="local-6989586621679371958"><span class="annot"><a href="#local-6989586621679371958"><span class="hs-identifier hs-type">x</span></a></span></span><span> </span><span id="local-6989586621679371957"><span class="annot"><a href="#local-6989586621679371957"><span class="hs-identifier hs-type">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PlotCandle"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-var">PlotCandle</span></a></span></span><span> </span><span class="hs-special">{</span><span>
+</span><span id="line-43"></span><span class="hs-keyword">data</span><span> </span><span id="PlotCandle"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-var">PlotCandle</span></a></span></span><span> </span><span id="local-6989586621679372620"><span class="annot"><a href="#local-6989586621679372620"><span class="hs-identifier hs-type">x</span></a></span></span><span> </span><span id="local-6989586621679372619"><span class="annot"><a href="#local-6989586621679372619"><span class="hs-identifier hs-type">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PlotCandle"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-var">PlotCandle</span></a></span></span><span> </span><span class="hs-special">{</span><span>
 </span><span id="line-44"></span><span>    </span><span id="_plot_candle_title"><span class="annot"><span class="annottext">PlotCandle x y -&gt; String
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_title"><span class="hs-identifier hs-var hs-var">_plot_candle_title</span></a></span></span><span>           </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span>
 </span><span id="line-45"></span><span>    </span><span id="_plot_candle_line_style"><span class="annot"><span class="annottext">PlotCandle x y -&gt; LineStyle
@@ -58,25 +58,25 @@
 </span><span id="line-51"></span><span>    </span><span id="_plot_candle_centre"><span class="annot"><span class="annottext">PlotCandle x y -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_centre"><span class="hs-identifier hs-var hs-var">_plot_candle_centre</span></a></span></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">,</span><span>
 </span><span id="line-52"></span><span>    </span><span id="_plot_candle_values"><span class="annot"><span class="annottext">PlotCandle x y -&gt; [Candle x y]
-</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_values"><span class="hs-identifier hs-var hs-var">_plot_candle_values</span></a></span></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-type">Candle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371958"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371957"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">]</span><span>
+</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_values"><span class="hs-identifier hs-var hs-var">_plot_candle_values</span></a></span></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-type">Candle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679372620"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679372619"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-53"></span><span class="hs-special">}</span><span>
 </span><span id="line-54"></span><span>
 </span><span id="line-55"></span><span class="hs-comment">-- | A Value holding price intervals for a given x-coord.</span><span>
 </span><span id="line-56"></span><span class="hs-comment">--   An alternative view is that these are statistical intervals: the</span><span>
 </span><span id="line-57"></span><span class="hs-comment">--   0th, 25th, 50th, 75th, and 100th percentiles.</span><span>
-</span><span id="line-58"></span><span class="hs-keyword">data</span><span> </span><span id="Candle"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-var">Candle</span></a></span></span><span> </span><span id="local-6989586621679371952"><span class="annot"><a href="#local-6989586621679371952"><span class="hs-identifier hs-type">x</span></a></span></span><span> </span><span id="local-6989586621679371951"><span class="annot"><a href="#local-6989586621679371951"><span class="hs-identifier hs-type">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Candle"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-var">Candle</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="candle_x"><span class="annot"><span class="annottext">Candle x y -&gt; x
-</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_x"><span class="hs-identifier hs-var hs-var">candle_x</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679371952"><span class="hs-identifier hs-type">x</span></a></span><span>
+</span><span id="line-58"></span><span class="hs-keyword">data</span><span> </span><span id="Candle"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-var">Candle</span></a></span></span><span> </span><span id="local-6989586621679372614"><span class="annot"><a href="#local-6989586621679372614"><span class="hs-identifier hs-type">x</span></a></span></span><span> </span><span id="local-6989586621679372613"><span class="annot"><a href="#local-6989586621679372613"><span class="hs-identifier hs-type">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Candle"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-var">Candle</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="candle_x"><span class="annot"><span class="annottext">Candle x y -&gt; x
+</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_x"><span class="hs-identifier hs-var hs-var">candle_x</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679372614"><span class="hs-identifier hs-type">x</span></a></span><span>
 </span><span id="line-59"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="candle_low"><span class="annot"><span class="annottext">Candle x y -&gt; y
-</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_low"><span class="hs-identifier hs-var hs-var">candle_low</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679371951"><span class="hs-identifier hs-type">y</span></a></span><span>
+</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_low"><span class="hs-identifier hs-var hs-var">candle_low</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679372613"><span class="hs-identifier hs-type">y</span></a></span><span>
 </span><span id="line-60"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="candle_open"><span class="annot"><span class="annottext">Candle x y -&gt; y
-</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_open"><span class="hs-identifier hs-var hs-var">candle_open</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679371951"><span class="hs-identifier hs-type">y</span></a></span><span>
+</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_open"><span class="hs-identifier hs-var hs-var">candle_open</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679372613"><span class="hs-identifier hs-type">y</span></a></span><span>
 </span><span id="line-61"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="candle_mid"><span class="annot"><span class="annottext">Candle x y -&gt; y
-</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_mid"><span class="hs-identifier hs-var hs-var">candle_mid</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679371951"><span class="hs-identifier hs-type">y</span></a></span><span>
+</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_mid"><span class="hs-identifier hs-var hs-var">candle_mid</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679372613"><span class="hs-identifier hs-type">y</span></a></span><span>
 </span><span id="line-62"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="candle_close"><span class="annot"><span class="annottext">Candle x y -&gt; y
-</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_close"><span class="hs-identifier hs-var hs-var">candle_close</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679371951"><span class="hs-identifier hs-type">y</span></a></span><span>
+</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_close"><span class="hs-identifier hs-var hs-var">candle_close</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679372613"><span class="hs-identifier hs-type">y</span></a></span><span>
 </span><span id="line-63"></span><span>                         </span><span class="hs-special">,</span><span> </span><span id="candle_high"><span class="annot"><span class="annottext">Candle x y -&gt; y
-</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_high"><span class="hs-identifier hs-var hs-var">candle_high</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679371951"><span class="hs-identifier hs-type">y</span></a></span><span>
-</span><span id="line-64"></span><span>                         </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679371845"><span id="local-6989586621679371847"><span id="local-6989586621679371849"><span class="annot"><span class="annottext">Int -&gt; Candle x y -&gt; ShowS
+</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_high"><span class="hs-identifier hs-var hs-var">candle_high</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679372613"><span class="hs-identifier hs-type">y</span></a></span><span>
+</span><span id="line-64"></span><span>                         </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679372507"><span id="local-6989586621679372509"><span id="local-6989586621679372511"><span class="annot"><span class="annottext">Int -&gt; Candle x y -&gt; ShowS
 [Candle x y] -&gt; ShowS
 Candle x y -&gt; String
 (Int -&gt; Candle x y -&gt; ShowS)
@@ -97,57 +97,57 @@ $cshowsPrec :: forall x y. (Show x, Show y) =&gt; Int -&gt; Candle x y -&gt; Sho
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-65"></span><span>
 </span><span id="line-66"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Types.html#ToPlot"><span class="hs-identifier hs-type">ToPlot</span></a></span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-type">PlotCandle</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-67"></span><span>    </span><span id="local-6989586621679371841"><span class="annot"><span class="annottext">toPlot :: PlotCandle x y -&gt; Plot x y
-</span><a href="Graphics.Rendering.Chart.Plot.Types.html#toPlot"><span class="hs-identifier hs-var hs-var hs-var hs-var">toPlot</span></a></span></span><span> </span><span id="local-6989586621679371839"><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371839"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Plot :: forall x y.
+</span><span id="line-67"></span><span>    </span><span id="local-6989586621679372503"><span class="annot"><span class="annottext">toPlot :: PlotCandle x y -&gt; Plot x y
+</span><a href="Graphics.Rendering.Chart.Plot.Types.html#toPlot"><span class="hs-identifier hs-var hs-var hs-var hs-var">toPlot</span></a></span></span><span> </span><span id="local-6989586621679372501"><span class="annot"><span class="annottext">PlotCandle x y
+</span><a href="#local-6989586621679372501"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Plot :: forall x y.
 (PointMapFn x y -&gt; BackendProgram ())
 -&gt; [(String, Rect -&gt; BackendProgram ())] -&gt; ([x], [y]) -&gt; Plot x y
 </span><a href="Graphics.Rendering.Chart.Plot.Types.html#Plot"><span class="hs-identifier hs-type">Plot</span></a></span><span> </span><span class="hs-special">{</span><span>
 </span><span id="line-68"></span><span>        </span><span class="annot"><span class="annottext">_plot_render :: PointMapFn x y -&gt; BackendProgram ()
-</span><a href="#local-6989586621679371837"><span class="hs-identifier hs-var">_plot_render</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; PointMapFn x y -&gt; BackendProgram ()
+</span><a href="#local-6989586621679372499"><span class="hs-identifier hs-var">_plot_render</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; PointMapFn x y -&gt; BackendProgram ()
 forall x y. PlotCandle x y -&gt; PointMapFn x y -&gt; BackendProgram ()
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#renderPlotCandle"><span class="hs-identifier hs-var">renderPlotCandle</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371839"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621679372501"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-69"></span><span>        </span><span class="annot"><span class="annottext">_plot_legend :: [(String, Rect -&gt; BackendProgram ())]
-</span><a href="#local-6989586621679371835"><span class="hs-identifier hs-var">_plot_legend</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">PlotCandle x y -&gt; String
+</span><a href="#local-6989586621679372497"><span class="hs-identifier hs-var">_plot_legend</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">PlotCandle x y -&gt; String
 forall x y. PlotCandle x y -&gt; String
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_title"><span class="hs-identifier hs-var hs-var">_plot_candle_title</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371839"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; Rect -&gt; BackendProgram ()
+</span><a href="#local-6989586621679372501"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; Rect -&gt; BackendProgram ()
 forall x y. PlotCandle x y -&gt; Rect -&gt; BackendProgram ()
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#renderPlotLegendCandle"><span class="hs-identifier hs-var">renderPlotLegendCandle</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371839"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span>
+</span><a href="#local-6989586621679372501"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span>
 </span><span id="line-70"></span><span>        </span><span class="annot"><span class="annottext">_plot_all_points :: ([x], [y])
-</span><a href="#local-6989586621679371833"><span class="hs-identifier hs-var">_plot_all_points</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">(Candle x y -&gt; x) -&gt; [Candle x y] -&gt; [x]
+</span><a href="#local-6989586621679372495"><span class="hs-identifier hs-var">_plot_all_points</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">(Candle x y -&gt; x) -&gt; [Candle x y] -&gt; [x]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Candle x y -&gt; x
 forall x y. Candle x y -&gt; x
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_x"><span class="hs-identifier hs-var hs-var">candle_x</span></a></span><span> </span><span class="annot"><span class="annottext">[Candle x y]
-</span><a href="#local-6989586621679371832"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><a href="#local-6989586621679372494"><span class="hs-identifier hs-var">pts</span></a></span><span>
 </span><span id="line-71"></span><span>                           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[[y]] -&gt; [y]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">concat</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Candle x y -&gt; y
 forall x y. Candle x y -&gt; y
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_low"><span class="hs-identifier hs-var hs-var">candle_low</span></a></span><span> </span><span class="annot"><span class="annottext">Candle x y
-</span><a href="#local-6989586621679371830"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Candle x y -&gt; y
+</span><a href="#local-6989586621679372492"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Candle x y -&gt; y
 forall x y. Candle x y -&gt; y
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#candle_high"><span class="hs-identifier hs-var hs-var">candle_high</span></a></span><span> </span><span class="annot"><span class="annottext">Candle x y
-</span><a href="#local-6989586621679371830"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-72"></span><span>                                    </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679371830"><span class="annot"><span class="annottext">Candle x y
-</span><a href="#local-6989586621679371830"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Candle x y]
-</span><a href="#local-6989586621679371832"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679372492"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-72"></span><span>                                    </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679372492"><span class="annot"><span class="annottext">Candle x y
+</span><a href="#local-6989586621679372492"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Candle x y]
+</span><a href="#local-6989586621679372494"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="hs-special">]</span><span> </span><span class="hs-special">)</span><span>
 </span><span id="line-73"></span><span>    </span><span class="hs-special">}</span><span>
 </span><span id="line-74"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-75"></span><span>        </span><span id="local-6989586621679371832"><span class="annot"><span class="annottext">pts :: [Candle x y]
-</span><a href="#local-6989586621679371832"><span class="hs-identifier hs-var hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; [Candle x y]
+</span><span id="line-75"></span><span>        </span><span id="local-6989586621679372494"><span class="annot"><span class="annottext">pts :: [Candle x y]
+</span><a href="#local-6989586621679372494"><span class="hs-identifier hs-var hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; [Candle x y]
 forall x y. PlotCandle x y -&gt; [Candle x y]
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_values"><span class="hs-identifier hs-var hs-var">_plot_candle_values</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371839"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><a href="#local-6989586621679372501"><span class="hs-identifier hs-var">p</span></a></span><span>
 </span><span id="line-76"></span><span>
-</span><span id="line-77"></span><span id="local-6989586621679371959"><span id="local-6989586621679371960"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#renderPlotCandle"><span class="hs-identifier hs-type">renderPlotCandle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-type">PlotCandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371960"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371959"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#PointMapFn"><span class="hs-identifier hs-type">PointMapFn</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371960"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371959"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Impl.html#BackendProgram"><span class="hs-identifier hs-type">BackendProgram</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-77"></span><span id="local-6989586621679372621"><span id="local-6989586621679372622"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#renderPlotCandle"><span class="hs-identifier hs-type">renderPlotCandle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-type">PlotCandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679372622"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679372621"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#PointMapFn"><span class="hs-identifier hs-type">PointMapFn</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679372622"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679372621"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Impl.html#BackendProgram"><span class="hs-identifier hs-type">BackendProgram</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-78"></span><span id="renderPlotCandle"><span class="annot"><span class="annottext">renderPlotCandle :: PlotCandle x y -&gt; PointMapFn x y -&gt; BackendProgram ()
-</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#renderPlotCandle"><span class="hs-identifier hs-var hs-var">renderPlotCandle</span></a></span></span><span> </span><span id="local-6989586621679371829"><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371829"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679371828"><span class="annot"><span class="annottext">PointMapFn x y
-</span><a href="#local-6989586621679371828"><span class="hs-identifier hs-var">pmap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
+</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#renderPlotCandle"><span class="hs-identifier hs-var hs-var">renderPlotCandle</span></a></span></span><span> </span><span id="local-6989586621679372491"><span class="annot"><span class="annottext">PlotCandle x y
+</span><a href="#local-6989586621679372491"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679372490"><span class="annot"><span class="annottext">PointMapFn x y
+</span><a href="#local-6989586621679372490"><span class="hs-identifier hs-var">pmap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span>
 </span><span id="line-79"></span><span>    </span><span class="annot"><span class="annottext">(Candle x y -&gt; BackendProgram ())
 -&gt; [Candle x y] -&gt; BackendProgram ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
@@ -157,25 +157,25 @@ forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 forall x y.
 PlotCandle x y -&gt; Candle Double Double -&gt; BackendProgram ()
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#drawCandle"><span class="hs-identifier hs-var">drawCandle</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371829"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">(Candle Double Double -&gt; BackendProgram ())
+</span><a href="#local-6989586621679372491"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">(Candle Double Double -&gt; BackendProgram ())
 -&gt; (Candle x y -&gt; Candle Double Double)
 -&gt; Candle x y
 -&gt; BackendProgram ()
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Candle x y -&gt; Candle Double Double
-</span><a href="#local-6989586621679371824"><span class="hs-identifier hs-var">candlemap</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PlotCandle x y -&gt; [Candle x y]
+</span><a href="#local-6989586621679372486"><span class="hs-identifier hs-var">candlemap</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PlotCandle x y -&gt; [Candle x y]
 forall x y. PlotCandle x y -&gt; [Candle x y]
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_values"><span class="hs-identifier hs-var hs-var">_plot_candle_values</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371829"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679372491"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-80"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-81"></span><span>    </span><span id="local-6989586621679371824"><span class="annot"><span class="annottext">candlemap :: Candle x y -&gt; Candle Double Double
-</span><a href="#local-6989586621679371824"><span class="hs-identifier hs-var hs-var">candlemap</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-type">Candle</span></a></span><span> </span><span id="local-6989586621679371823"><span class="annot"><span class="annottext">x
-</span><a href="#local-6989586621679371823"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679371822"><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679371822"><span class="hs-identifier hs-var">lo</span></a></span></span><span> </span><span id="local-6989586621679371821"><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679371821"><span class="hs-identifier hs-var">op</span></a></span></span><span> </span><span id="local-6989586621679371820"><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679371820"><span class="hs-identifier hs-var">mid</span></a></span></span><span> </span><span id="local-6989586621679371819"><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679371819"><span class="hs-identifier hs-var">cl</span></a></span></span><span> </span><span id="local-6989586621679371818"><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679371818"><span class="hs-identifier hs-var">hi</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-81"></span><span>    </span><span id="local-6989586621679372486"><span class="annot"><span class="annottext">candlemap :: Candle x y -&gt; Candle Double Double
+</span><a href="#local-6989586621679372486"><span class="hs-identifier hs-var hs-var">candlemap</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-type">Candle</span></a></span><span> </span><span id="local-6989586621679372485"><span class="annot"><span class="annottext">x
+</span><a href="#local-6989586621679372485"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679372484"><span class="annot"><span class="annottext">y
+</span><a href="#local-6989586621679372484"><span class="hs-identifier hs-var">lo</span></a></span></span><span> </span><span id="local-6989586621679372483"><span class="annot"><span class="annottext">y
+</span><a href="#local-6989586621679372483"><span class="hs-identifier hs-var">op</span></a></span></span><span> </span><span id="local-6989586621679372482"><span class="annot"><span class="annottext">y
+</span><a href="#local-6989586621679372482"><span class="hs-identifier hs-var">mid</span></a></span></span><span> </span><span id="local-6989586621679372481"><span class="annot"><span class="annottext">y
+</span><a href="#local-6989586621679372481"><span class="hs-identifier hs-var">cl</span></a></span></span><span> </span><span id="local-6989586621679372480"><span class="annot"><span class="annottext">y
+</span><a href="#local-6989586621679372480"><span class="hs-identifier hs-var">hi</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-82"></span><span>        </span><span class="annot"><span class="annottext">Double
 -&gt; Double
 -&gt; Double
@@ -185,100 +185,100 @@ forall x y. PlotCandle x y -&gt; [Candle x y]
 -&gt; Candle Double Double
 forall x y. x -&gt; y -&gt; y -&gt; y -&gt; y -&gt; y -&gt; Candle x y
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-var">Candle</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371817"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371816"><span class="hs-identifier hs-var">lo'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371815"><span class="hs-identifier hs-var">op'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371814"><span class="hs-identifier hs-var">mid'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371813"><span class="hs-identifier hs-var">cl'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371812"><span class="hs-identifier hs-var">hi'</span></a></span><span>
-</span><span id="line-83"></span><span>        </span><span class="hs-keyword">where</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span id="local-6989586621679371817"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371817"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span id="local-6989586621679371814"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371814"><span class="hs-identifier hs-var">mid'</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(x, y) -&gt; Point
-</span><a href="#local-6989586621679371810"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x
-</span><a href="#local-6989586621679371823"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679371820"><span class="hs-identifier hs-var">mid</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679372479"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372478"><span class="hs-identifier hs-var">lo'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372477"><span class="hs-identifier hs-var">op'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372476"><span class="hs-identifier hs-var">mid'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372475"><span class="hs-identifier hs-var">cl'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372474"><span class="hs-identifier hs-var">hi'</span></a></span><span>
+</span><span id="line-83"></span><span>        </span><span class="hs-keyword">where</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span id="local-6989586621679372479"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372479"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span id="local-6989586621679372476"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372476"><span class="hs-identifier hs-var">mid'</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(x, y) -&gt; Point
+</span><a href="#local-6989586621679372472"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x
+</span><a href="#local-6989586621679372485"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">y
+</span><a href="#local-6989586621679372482"><span class="hs-identifier hs-var">mid</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-84"></span><span>              </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><span class="hs-identifier">_</span></span><span>  </span><span id="local-6989586621679371816"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371816"><span class="hs-identifier hs-var">lo'</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(x, y) -&gt; Point
-</span><a href="#local-6989586621679371810"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x
-</span><a href="#local-6989586621679371823"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679371822"><span class="hs-identifier hs-var">lo</span></a></span><span class="hs-special">)</span><span>
+</span><span class="hs-identifier">_</span></span><span>  </span><span id="local-6989586621679372478"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372478"><span class="hs-identifier hs-var">lo'</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(x, y) -&gt; Point
+</span><a href="#local-6989586621679372472"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x
+</span><a href="#local-6989586621679372485"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">y
+</span><a href="#local-6989586621679372484"><span class="hs-identifier hs-var">lo</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-85"></span><span>              </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><span class="hs-identifier">_</span></span><span>  </span><span id="local-6989586621679371815"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371815"><span class="hs-identifier hs-var">op'</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(x, y) -&gt; Point
-</span><a href="#local-6989586621679371810"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x
-</span><a href="#local-6989586621679371823"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679371821"><span class="hs-identifier hs-var">op</span></a></span><span class="hs-special">)</span><span>
+</span><span class="hs-identifier">_</span></span><span>  </span><span id="local-6989586621679372477"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372477"><span class="hs-identifier hs-var">op'</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(x, y) -&gt; Point
+</span><a href="#local-6989586621679372472"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x
+</span><a href="#local-6989586621679372485"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">y
+</span><a href="#local-6989586621679372483"><span class="hs-identifier hs-var">op</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-86"></span><span>              </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><span class="hs-identifier">_</span></span><span>  </span><span id="local-6989586621679371813"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371813"><span class="hs-identifier hs-var">cl'</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(x, y) -&gt; Point
-</span><a href="#local-6989586621679371810"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x
-</span><a href="#local-6989586621679371823"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679371819"><span class="hs-identifier hs-var">cl</span></a></span><span class="hs-special">)</span><span>
+</span><span class="hs-identifier">_</span></span><span>  </span><span id="local-6989586621679372475"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372475"><span class="hs-identifier hs-var">cl'</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(x, y) -&gt; Point
+</span><a href="#local-6989586621679372472"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x
+</span><a href="#local-6989586621679372485"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">y
+</span><a href="#local-6989586621679372481"><span class="hs-identifier hs-var">cl</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-87"></span><span>              </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><span class="hs-identifier">_</span></span><span>  </span><span id="local-6989586621679371812"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371812"><span class="hs-identifier hs-var">hi'</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(x, y) -&gt; Point
-</span><a href="#local-6989586621679371810"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x
-</span><a href="#local-6989586621679371823"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679371818"><span class="hs-identifier hs-var">hi</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-88"></span><span>    </span><span id="local-6989586621679371810"><span class="annot"><span class="annottext">pmap' :: (x, y) -&gt; Point
-</span><a href="#local-6989586621679371810"><span class="hs-identifier hs-var hs-var">pmap'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PointMapFn x y -&gt; (x, y) -&gt; Point
+</span><span class="hs-identifier">_</span></span><span>  </span><span id="local-6989586621679372474"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372474"><span class="hs-identifier hs-var">hi'</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(x, y) -&gt; Point
+</span><a href="#local-6989586621679372472"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x
+</span><a href="#local-6989586621679372485"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">y
+</span><a href="#local-6989586621679372480"><span class="hs-identifier hs-var">hi</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>    </span><span id="local-6989586621679372472"><span class="annot"><span class="annottext">pmap' :: (x, y) -&gt; Point
+</span><a href="#local-6989586621679372472"><span class="hs-identifier hs-var hs-var">pmap'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PointMapFn x y -&gt; (x, y) -&gt; Point
 forall x y. PointMapFn x y -&gt; (x, y) -&gt; Point
 </span><a href="Graphics.Rendering.Chart.Plot.Types.html#mapXY"><span class="hs-identifier hs-var">mapXY</span></a></span><span> </span><span class="annot"><span class="annottext">PointMapFn x y
-</span><a href="#local-6989586621679371828"><span class="hs-identifier hs-var">pmap</span></a></span><span>
+</span><a href="#local-6989586621679372490"><span class="hs-identifier hs-var">pmap</span></a></span><span>
 </span><span id="line-89"></span><span>
-</span><span id="line-90"></span><span id="local-6989586621679371941"><span id="local-6989586621679371942"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#drawCandle"><span class="hs-identifier hs-type">drawCandle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-type">PlotCandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371942"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371941"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-type">Candle</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Impl.html#BackendProgram"><span class="hs-identifier hs-type">BackendProgram</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-90"></span><span id="local-6989586621679372603"><span id="local-6989586621679372604"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#drawCandle"><span class="hs-identifier hs-type">drawCandle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-type">PlotCandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679372604"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679372603"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-type">Candle</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Impl.html#BackendProgram"><span class="hs-identifier hs-type">BackendProgram</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-91"></span><span id="drawCandle"><span class="annot"><span class="annottext">drawCandle :: PlotCandle x y -&gt; Candle Double Double -&gt; BackendProgram ()
-</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#drawCandle"><span class="hs-identifier hs-var hs-var">drawCandle</span></a></span></span><span> </span><span id="local-6989586621679371808"><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371808"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-type">Candle</span></a></span><span> </span><span id="local-6989586621679371807"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679371806"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371806"><span class="hs-identifier hs-var">lo</span></a></span></span><span> </span><span id="local-6989586621679371805"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371805"><span class="hs-identifier hs-var">open</span></a></span></span><span> </span><span id="local-6989586621679371804"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371804"><span class="hs-identifier hs-var">mid</span></a></span></span><span> </span><span id="local-6989586621679371803"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371803"><span class="hs-identifier hs-var">close</span></a></span></span><span> </span><span id="local-6989586621679371802"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371802"><span class="hs-identifier hs-var">hi</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-92"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679371801"><span class="annot"><span class="annottext">tl :: Double
-</span><a href="#local-6989586621679371801"><span class="hs-identifier hs-var hs-var">tl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; Double
+</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#drawCandle"><span class="hs-identifier hs-var hs-var">drawCandle</span></a></span></span><span> </span><span id="local-6989586621679372470"><span class="annot"><span class="annottext">PlotCandle x y
+</span><a href="#local-6989586621679372470"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-type">Candle</span></a></span><span> </span><span id="local-6989586621679372469"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679372468"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372468"><span class="hs-identifier hs-var">lo</span></a></span></span><span> </span><span id="local-6989586621679372467"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372467"><span class="hs-identifier hs-var">open</span></a></span></span><span> </span><span id="local-6989586621679372466"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372466"><span class="hs-identifier hs-var">mid</span></a></span></span><span> </span><span id="local-6989586621679372465"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372465"><span class="hs-identifier hs-var">close</span></a></span></span><span> </span><span id="local-6989586621679372464"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372464"><span class="hs-identifier hs-var">hi</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-92"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679372463"><span class="annot"><span class="annottext">tl :: Double
+</span><a href="#local-6989586621679372463"><span class="hs-identifier hs-var hs-var">tl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; Double
 forall x y. PlotCandle x y -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_tick_length"><span class="hs-identifier hs-var hs-var">_plot_candle_tick_length</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371808"><span class="hs-identifier hs-var">ps</span></a></span><span>
-</span><span id="line-93"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679371800"><span class="annot"><span class="annottext">wd :: Double
-</span><a href="#local-6989586621679371800"><span class="hs-identifier hs-var hs-var">wd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; Double
+</span><a href="#local-6989586621679372470"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-93"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679372462"><span class="annot"><span class="annottext">wd :: Double
+</span><a href="#local-6989586621679372462"><span class="hs-identifier hs-var hs-var">wd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; Double
 forall x y. PlotCandle x y -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_width"><span class="hs-identifier hs-var hs-var">_plot_candle_width</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371808"><span class="hs-identifier hs-var">ps</span></a></span><span>
-</span><span id="line-94"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679371799"><span class="annot"><span class="annottext">ct :: Double
-</span><a href="#local-6989586621679371799"><span class="hs-identifier hs-var hs-var">ct</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; Double
+</span><a href="#local-6989586621679372470"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-94"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679372461"><span class="annot"><span class="annottext">ct :: Double
+</span><a href="#local-6989586621679372461"><span class="hs-identifier hs-var hs-var">ct</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; Double
 forall x y. PlotCandle x y -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_centre"><span class="hs-identifier hs-var hs-var">_plot_candle_centre</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371808"><span class="hs-identifier hs-var">ps</span></a></span><span>
-</span><span id="line-95"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679371798"><span class="annot"><span class="annottext">f :: Bool
-</span><a href="#local-6989586621679371798"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; Bool
+</span><a href="#local-6989586621679372470"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-95"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679372460"><span class="annot"><span class="annottext">f :: Bool
+</span><a href="#local-6989586621679372460"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; Bool
 forall x y. PlotCandle x y -&gt; Bool
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_fill"><span class="hs-identifier hs-var hs-var">_plot_candle_fill</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371808"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><a href="#local-6989586621679372470"><span class="hs-identifier hs-var">ps</span></a></span><span>
 </span><span id="line-96"></span><span>        </span><span class="hs-comment">-- the pixel coordinate system is inverted wrt the value coords.</span><span>
 </span><span id="line-97"></span><span>        </span><span class="annot"><span class="annottext">Bool -&gt; BackendProgram () -&gt; BackendProgram ()
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679371798"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(BackendProgram () -&gt; BackendProgram ())
+</span><a href="#local-6989586621679372460"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(BackendProgram () -&gt; BackendProgram ())
 -&gt; BackendProgram () -&gt; BackendProgram ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">FillStyle -&gt; BackendProgram () -&gt; BackendProgram ()
 forall a. FillStyle -&gt; BackendProgram a -&gt; BackendProgram a
 </span><a href="Graphics.Rendering.Chart.Backend.Impl.html#withFillStyle"><span class="hs-identifier hs-var">withFillStyle</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371805"><span class="hs-identifier hs-var">open</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Bool
+</span><a href="#local-6989586621679372467"><span class="hs-identifier hs-var">open</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371803"><span class="hs-identifier hs-var">close</span></a></span><span>
+</span><a href="#local-6989586621679372465"><span class="hs-identifier hs-var">close</span></a></span><span>
 </span><span id="line-98"></span><span>                                   </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; FillStyle
 forall x y. PlotCandle x y -&gt; FillStyle
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_rise_fill_style"><span class="hs-identifier hs-var hs-var">_plot_candle_rise_fill_style</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371808"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><a href="#local-6989586621679372470"><span class="hs-identifier hs-var">ps</span></a></span><span>
 </span><span id="line-99"></span><span>                                   </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; FillStyle
 forall x y. PlotCandle x y -&gt; FillStyle
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_fall_fill_style"><span class="hs-identifier hs-var hs-var">_plot_candle_fall_fill_style</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371808"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(BackendProgram () -&gt; BackendProgram ())
+</span><a href="#local-6989586621679372470"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(BackendProgram () -&gt; BackendProgram ())
 -&gt; BackendProgram () -&gt; BackendProgram ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span>
@@ -287,54 +287,54 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#moveTo%27"><span class="hs-identifier hs-var">moveTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371800"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371805"><span class="hs-identifier hs-var">open</span></a></span><span>
+</span><a href="#local-6989586621679372462"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372467"><span class="hs-identifier hs-var">open</span></a></span><span>
 </span><span id="line-101"></span><span>                            </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371800"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371803"><span class="hs-identifier hs-var">close</span></a></span><span>
+</span><a href="#local-6989586621679372462"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372465"><span class="hs-identifier hs-var">close</span></a></span><span>
 </span><span id="line-102"></span><span>                            </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371800"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371803"><span class="hs-identifier hs-var">close</span></a></span><span>
+</span><a href="#local-6989586621679372462"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372465"><span class="hs-identifier hs-var">close</span></a></span><span>
 </span><span id="line-103"></span><span>                            </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371800"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371805"><span class="hs-identifier hs-var">open</span></a></span><span>
+</span><a href="#local-6989586621679372462"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372467"><span class="hs-identifier hs-var">open</span></a></span><span>
 </span><span id="line-104"></span><span>                            </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371800"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371805"><span class="hs-identifier hs-var">open</span></a></span><span>
+</span><a href="#local-6989586621679372462"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372467"><span class="hs-identifier hs-var">open</span></a></span><span>
 </span><span id="line-105"></span><span>
 </span><span id="line-106"></span><span>        </span><span class="annot"><span class="annottext">LineStyle -&gt; BackendProgram () -&gt; BackendProgram ()
 forall a. LineStyle -&gt; BackendProgram a -&gt; BackendProgram a
 </span><a href="Graphics.Rendering.Chart.Backend.Impl.html#withLineStyle"><span class="hs-identifier hs-var">withLineStyle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PlotCandle x y -&gt; LineStyle
 forall x y. PlotCandle x y -&gt; LineStyle
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_line_style"><span class="hs-identifier hs-var hs-var">_plot_candle_line_style</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371808"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(BackendProgram () -&gt; BackendProgram ())
+</span><a href="#local-6989586621679372470"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(BackendProgram () -&gt; BackendProgram ())
 -&gt; BackendProgram () -&gt; BackendProgram ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
@@ -343,90 +343,90 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#moveTo%27"><span class="hs-identifier hs-var">moveTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371800"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371805"><span class="hs-identifier hs-var">open</span></a></span><span>
+</span><a href="#local-6989586621679372462"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372467"><span class="hs-identifier hs-var">open</span></a></span><span>
 </span><span id="line-108"></span><span>                    </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371800"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371803"><span class="hs-identifier hs-var">close</span></a></span><span>
+</span><a href="#local-6989586621679372462"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372465"><span class="hs-identifier hs-var">close</span></a></span><span>
 </span><span id="line-109"></span><span>                    </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371800"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371803"><span class="hs-identifier hs-var">close</span></a></span><span>
+</span><a href="#local-6989586621679372462"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372465"><span class="hs-identifier hs-var">close</span></a></span><span>
 </span><span id="line-110"></span><span>                    </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371800"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371805"><span class="hs-identifier hs-var">open</span></a></span><span>
+</span><a href="#local-6989586621679372462"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372467"><span class="hs-identifier hs-var">open</span></a></span><span>
 </span><span id="line-111"></span><span>                    </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371800"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371805"><span class="hs-identifier hs-var">open</span></a></span><span>
+</span><a href="#local-6989586621679372462"><span class="hs-identifier hs-var">wd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372467"><span class="hs-identifier hs-var">open</span></a></span><span>
 </span><span id="line-112"></span><span>
 </span><span id="line-113"></span><span>          </span><span class="annot"><span class="annottext">Path -&gt; BackendProgram ()
 </span><a href="Graphics.Rendering.Chart.Backend.Impl.html#strokePath"><span class="hs-identifier hs-var">strokePath</span></a></span><span> </span><span class="annot"><span class="annottext">(Path -&gt; BackendProgram ()) -&gt; Path -&gt; BackendProgram ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#moveTo%27"><span class="hs-identifier hs-var">moveTo'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371806"><span class="hs-identifier hs-var">lo</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371802"><span class="hs-identifier hs-var">hi</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679372468"><span class="hs-identifier hs-var">lo</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372464"><span class="hs-identifier hs-var">hi</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-114"></span><span>                    </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371805"><span class="hs-identifier hs-var">open</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371803"><span class="hs-identifier hs-var">close</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679372467"><span class="hs-identifier hs-var">open</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372465"><span class="hs-identifier hs-var">close</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-115"></span><span>                    </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#moveTo%27"><span class="hs-identifier hs-var">moveTo'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">max</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371805"><span class="hs-identifier hs-var">open</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371803"><span class="hs-identifier hs-var">close</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679372467"><span class="hs-identifier hs-var">open</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372465"><span class="hs-identifier hs-var">close</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-116"></span><span>                    </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">max</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371802"><span class="hs-identifier hs-var">hi</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371806"><span class="hs-identifier hs-var">lo</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679372464"><span class="hs-identifier hs-var">hi</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372468"><span class="hs-identifier hs-var">lo</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-117"></span><span>
 </span><span id="line-118"></span><span>          </span><span class="annot"><span class="annottext">Bool -&gt; BackendProgram () -&gt; BackendProgram ()
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371801"><span class="hs-identifier hs-var">tl</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Bool
+</span><a href="#local-6989586621679372463"><span class="hs-identifier hs-var">tl</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(BackendProgram () -&gt; BackendProgram ())
@@ -437,43 +437,43 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#moveTo%27"><span class="hs-identifier hs-var">moveTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371801"><span class="hs-identifier hs-var">tl</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371806"><span class="hs-identifier hs-var">lo</span></a></span><span>
+</span><a href="#local-6989586621679372463"><span class="hs-identifier hs-var">tl</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372468"><span class="hs-identifier hs-var">lo</span></a></span><span>
 </span><span id="line-119"></span><span>                                    </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371801"><span class="hs-identifier hs-var">tl</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371806"><span class="hs-identifier hs-var">lo</span></a></span><span>
+</span><a href="#local-6989586621679372463"><span class="hs-identifier hs-var">tl</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372468"><span class="hs-identifier hs-var">lo</span></a></span><span>
 </span><span id="line-120"></span><span>                                    </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#moveTo%27"><span class="hs-identifier hs-var">moveTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371801"><span class="hs-identifier hs-var">tl</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371802"><span class="hs-identifier hs-var">hi</span></a></span><span>
+</span><a href="#local-6989586621679372463"><span class="hs-identifier hs-var">tl</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372464"><span class="hs-identifier hs-var">hi</span></a></span><span>
 </span><span id="line-121"></span><span>                                    </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371801"><span class="hs-identifier hs-var">tl</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371802"><span class="hs-identifier hs-var">hi</span></a></span><span>
+</span><a href="#local-6989586621679372463"><span class="hs-identifier hs-var">tl</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372464"><span class="hs-identifier hs-var">hi</span></a></span><span>
 </span><span id="line-122"></span><span>          </span><span>
 </span><span id="line-123"></span><span>          </span><span class="annot"><span class="annottext">Bool -&gt; BackendProgram () -&gt; BackendProgram ()
 forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
 </span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371799"><span class="hs-identifier hs-var">ct</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Bool
+</span><a href="#local-6989586621679372461"><span class="hs-identifier hs-var">ct</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(BackendProgram () -&gt; BackendProgram ())
@@ -484,32 +484,32 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#moveTo%27"><span class="hs-identifier hs-var">moveTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371799"><span class="hs-identifier hs-var">ct</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371804"><span class="hs-identifier hs-var">mid</span></a></span><span>
+</span><a href="#local-6989586621679372461"><span class="hs-identifier hs-var">ct</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372466"><span class="hs-identifier hs-var">mid</span></a></span><span>
 </span><span id="line-124"></span><span>                                    </span><span class="annot"><span class="annottext">Path -&gt; Path -&gt; Path
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Path
 </span><a href="Graphics.Rendering.Chart.Geometry.html#lineTo%27"><span class="hs-identifier hs-var">lineTo'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371807"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372469"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371799"><span class="hs-identifier hs-var">ct</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371804"><span class="hs-identifier hs-var">mid</span></a></span><span>
+</span><a href="#local-6989586621679372461"><span class="hs-identifier hs-var">ct</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372466"><span class="hs-identifier hs-var">mid</span></a></span><span>
 </span><span id="line-125"></span><span>
-</span><span id="line-126"></span><span id="local-6989586621679371955"><span id="local-6989586621679371956"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#renderPlotLegendCandle"><span class="hs-identifier hs-type">renderPlotLegendCandle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-type">PlotCandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371956"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371955"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#Rect"><span class="hs-identifier hs-type">Rect</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Impl.html#BackendProgram"><span class="hs-identifier hs-type">BackendProgram</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-126"></span><span id="local-6989586621679372617"><span id="local-6989586621679372618"><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#renderPlotLegendCandle"><span class="hs-identifier hs-type">renderPlotLegendCandle</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-type">PlotCandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679372618"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679372617"><span class="hs-identifier hs-type">y</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#Rect"><span class="hs-identifier hs-type">Rect</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Impl.html#BackendProgram"><span class="hs-identifier hs-type">BackendProgram</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-127"></span><span id="renderPlotLegendCandle"><span class="annot"><span class="annottext">renderPlotLegendCandle :: PlotCandle x y -&gt; Rect -&gt; BackendProgram ()
-</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#renderPlotLegendCandle"><span class="hs-identifier hs-var hs-var">renderPlotLegendCandle</span></a></span></span><span> </span><span id="local-6989586621679371786"><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371786"><span class="hs-identifier hs-var">pc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#Rect"><span class="hs-identifier hs-type">Rect</span></a></span><span> </span><span id="local-6989586621679371784"><span class="annot"><span class="annottext">Point
-</span><a href="#local-6989586621679371784"><span class="hs-identifier hs-var">p1</span></a></span></span><span> </span><span id="local-6989586621679371783"><span class="annot"><span class="annottext">Point
-</span><a href="#local-6989586621679371783"><span class="hs-identifier hs-var">p2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="Graphics.Rendering.Chart.Plot.Candle.html#renderPlotLegendCandle"><span class="hs-identifier hs-var hs-var">renderPlotLegendCandle</span></a></span></span><span> </span><span id="local-6989586621679372448"><span class="annot"><span class="annottext">PlotCandle x y
+</span><a href="#local-6989586621679372448"><span class="hs-identifier hs-var">pc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#Rect"><span class="hs-identifier hs-type">Rect</span></a></span><span> </span><span id="local-6989586621679372446"><span class="annot"><span class="annottext">Point
+</span><a href="#local-6989586621679372446"><span class="hs-identifier hs-var">p1</span></a></span></span><span> </span><span id="local-6989586621679372445"><span class="annot"><span class="annottext">Point
+</span><a href="#local-6989586621679372445"><span class="hs-identifier hs-var">p2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-128"></span><span>    </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; Candle Double Double -&gt; BackendProgram ()
 forall x y.
 PlotCandle x y -&gt; Candle Double Double -&gt; BackendProgram ()
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#drawCandle"><span class="hs-identifier hs-var">drawCandle</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371782"><span class="hs-identifier hs-var">pc2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372444"><span class="hs-identifier hs-var">pc2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
 -&gt; Double
 -&gt; Double
 -&gt; Double
@@ -518,23 +518,23 @@ PlotCandle x y -&gt; Candle Double Double -&gt; BackendProgram ()
 -&gt; Candle Double Double
 forall x y. x -&gt; y -&gt; y -&gt; y -&gt; y -&gt; y -&gt; Candle x y
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-var">Candle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371781"><span class="hs-identifier hs-var">xwid</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372443"><span class="hs-identifier hs-var">xwid</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">4</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371778"><span class="hs-identifier hs-var">lo</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371777"><span class="hs-identifier hs-var">open</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371776"><span class="hs-identifier hs-var">mid</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371775"><span class="hs-identifier hs-var">close</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371774"><span class="hs-identifier hs-var">hi</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679372440"><span class="hs-identifier hs-var">lo</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372439"><span class="hs-identifier hs-var">open</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372438"><span class="hs-identifier hs-var">mid</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372437"><span class="hs-identifier hs-var">close</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372436"><span class="hs-identifier hs-var">hi</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-129"></span><span>    </span><span class="annot"><span class="annottext">PlotCandle x y -&gt; Candle Double Double -&gt; BackendProgram ()
 forall x y.
 PlotCandle x y -&gt; Candle Double Double -&gt; BackendProgram ()
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#drawCandle"><span class="hs-identifier hs-var">drawCandle</span></a></span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371782"><span class="hs-identifier hs-var">pc2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372444"><span class="hs-identifier hs-var">pc2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
 -&gt; Double
 -&gt; Double
 -&gt; Double
@@ -543,80 +543,80 @@ PlotCandle x y -&gt; Candle Double Double -&gt; BackendProgram ()
 -&gt; Candle Double Double
 forall x y. x -&gt; y -&gt; y -&gt; y -&gt; y -&gt; y -&gt; Candle x y
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#Candle"><span class="hs-identifier hs-var">Candle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371781"><span class="hs-identifier hs-var">xwid</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372443"><span class="hs-identifier hs-var">xwid</span></a></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">3</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371778"><span class="hs-identifier hs-var">lo</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371775"><span class="hs-identifier hs-var">close</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371776"><span class="hs-identifier hs-var">mid</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371777"><span class="hs-identifier hs-var">open</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371774"><span class="hs-identifier hs-var">hi</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679372440"><span class="hs-identifier hs-var">lo</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372437"><span class="hs-identifier hs-var">close</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372438"><span class="hs-identifier hs-var">mid</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372439"><span class="hs-identifier hs-var">open</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372436"><span class="hs-identifier hs-var">hi</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-130"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-131"></span><span>    </span><span id="local-6989586621679371782"><span class="annot"><span class="annottext">pc2 :: PlotCandle x y
-</span><a href="#local-6989586621679371782"><span class="hs-identifier hs-var hs-var">pc2</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
-</span><a href="#local-6989586621679371786"><span class="hs-identifier hs-var">pc</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">_plot_candle_width :: Double
+</span><span id="line-131"></span><span>    </span><span id="local-6989586621679372444"><span class="annot"><span class="annottext">pc2 :: PlotCandle x y
+</span><a href="#local-6989586621679372444"><span class="hs-identifier hs-var hs-var">pc2</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle x y
+</span><a href="#local-6989586621679372448"><span class="hs-identifier hs-var">pc</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">_plot_candle_width :: Double
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_width"><span class="hs-identifier hs-var">_plot_candle_width</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">2</span></span><span> </span><span class="hs-special">}</span><span>
-</span><span id="line-132"></span><span>    </span><span id="local-6989586621679371781"><span class="annot"><span class="annottext">xwid :: Double
-</span><a href="#local-6989586621679371781"><span class="hs-identifier hs-var hs-var">xwid</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point -&gt; Double
+</span><span id="line-132"></span><span>    </span><span id="local-6989586621679372443"><span class="annot"><span class="annottext">xwid :: Double
+</span><a href="#local-6989586621679372443"><span class="hs-identifier hs-var hs-var">xwid</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Geometry.html#p_x"><span class="hs-identifier hs-var hs-var">p_x</span></a></span><span> </span><span class="annot"><span class="annottext">Point
-</span><a href="#local-6989586621679371784"><span class="hs-identifier hs-var">p1</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372446"><span class="hs-identifier hs-var">p1</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Point -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Geometry.html#p_x"><span class="hs-identifier hs-var hs-var">p_x</span></a></span><span> </span><span class="annot"><span class="annottext">Point
-</span><a href="#local-6989586621679371783"><span class="hs-identifier hs-var">p2</span></a></span><span>
-</span><span id="line-133"></span><span>    </span><span id="local-6989586621679371778"><span class="annot"><span class="annottext">lo :: Double
-</span><a href="#local-6989586621679371778"><span class="hs-identifier hs-var hs-var">lo</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372445"><span class="hs-identifier hs-var">p2</span></a></span><span>
+</span><span id="line-133"></span><span>    </span><span id="local-6989586621679372440"><span class="annot"><span class="annottext">lo :: Double
+</span><a href="#local-6989586621679372440"><span class="hs-identifier hs-var hs-var">lo</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">max</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Geometry.html#p_y"><span class="hs-identifier hs-var hs-var">p_y</span></a></span><span> </span><span class="annot"><span class="annottext">Point
-</span><a href="#local-6989586621679371784"><span class="hs-identifier hs-var">p1</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point -&gt; Double
+</span><a href="#local-6989586621679372446"><span class="hs-identifier hs-var">p1</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Geometry.html#p_y"><span class="hs-identifier hs-var hs-var">p_y</span></a></span><span> </span><span class="annot"><span class="annottext">Point
-</span><a href="#local-6989586621679371783"><span class="hs-identifier hs-var">p2</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-134"></span><span>    </span><span id="local-6989586621679371776"><span class="annot"><span class="annottext">mid :: Double
-</span><a href="#local-6989586621679371776"><span class="hs-identifier hs-var hs-var">mid</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point -&gt; Double
+</span><a href="#local-6989586621679372445"><span class="hs-identifier hs-var">p2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span>    </span><span id="local-6989586621679372438"><span class="annot"><span class="annottext">mid :: Double
+</span><a href="#local-6989586621679372438"><span class="hs-identifier hs-var hs-var">mid</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Geometry.html#p_y"><span class="hs-identifier hs-var hs-var">p_y</span></a></span><span> </span><span class="annot"><span class="annottext">Point
-</span><a href="#local-6989586621679371784"><span class="hs-identifier hs-var">p1</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372446"><span class="hs-identifier hs-var">p1</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Point -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Geometry.html#p_y"><span class="hs-identifier hs-var hs-var">p_y</span></a></span><span> </span><span class="annot"><span class="annottext">Point
-</span><a href="#local-6989586621679371783"><span class="hs-identifier hs-var">p2</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372445"><span class="hs-identifier hs-var">p2</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">2</span></span><span>
-</span><span id="line-135"></span><span>    </span><span id="local-6989586621679371774"><span class="annot"><span class="annottext">hi :: Double
-</span><a href="#local-6989586621679371774"><span class="hs-identifier hs-var hs-var">hi</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><span id="line-135"></span><span>    </span><span id="local-6989586621679372436"><span class="annot"><span class="annottext">hi :: Double
+</span><a href="#local-6989586621679372436"><span class="hs-identifier hs-var hs-var">hi</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Geometry.html#p_y"><span class="hs-identifier hs-var hs-var">p_y</span></a></span><span> </span><span class="annot"><span class="annottext">Point
-</span><a href="#local-6989586621679371784"><span class="hs-identifier hs-var">p1</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point -&gt; Double
+</span><a href="#local-6989586621679372446"><span class="hs-identifier hs-var">p1</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Geometry.html#p_y"><span class="hs-identifier hs-var hs-var">p_y</span></a></span><span> </span><span class="annot"><span class="annottext">Point
-</span><a href="#local-6989586621679371783"><span class="hs-identifier hs-var">p2</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-136"></span><span>    </span><span id="local-6989586621679371777"><span class="annot"><span class="annottext">open :: Double
-</span><a href="#local-6989586621679371777"><span class="hs-identifier hs-var hs-var">open</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371778"><span class="hs-identifier hs-var">lo</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372445"><span class="hs-identifier hs-var">p2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>    </span><span id="local-6989586621679372439"><span class="annot"><span class="annottext">open :: Double
+</span><a href="#local-6989586621679372439"><span class="hs-identifier hs-var hs-var">open</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372440"><span class="hs-identifier hs-var">lo</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371776"><span class="hs-identifier hs-var">mid</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372438"><span class="hs-identifier hs-var">mid</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">2</span></span><span>
-</span><span id="line-137"></span><span>    </span><span id="local-6989586621679371775"><span class="annot"><span class="annottext">close :: Double
-</span><a href="#local-6989586621679371775"><span class="hs-identifier hs-var hs-var">close</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371776"><span class="hs-identifier hs-var">mid</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><span id="line-137"></span><span>    </span><span id="local-6989586621679372437"><span class="annot"><span class="annottext">close :: Double
+</span><a href="#local-6989586621679372437"><span class="hs-identifier hs-var hs-var">close</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679372438"><span class="hs-identifier hs-var">mid</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679371774"><span class="hs-identifier hs-var">hi</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679372436"><span class="hs-identifier hs-var">hi</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">2</span></span><span>
 </span><span id="line-138"></span><span>
-</span><span id="line-139"></span><span id="local-6989586621679371770"><span id="local-6989586621679371771"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Default</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-type">PlotCandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371771"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371770"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-140"></span><span>  </span><span id="local-6989586621679371767"><span class="annot"><span class="annottext">def :: PlotCandle x y
+</span><span id="line-139"></span><span id="local-6989586621679372432"><span id="local-6989586621679372433"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Default</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Plot.Candle.html#PlotCandle"><span class="hs-identifier hs-type">PlotCandle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679372433"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679372432"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-140"></span><span>  </span><span id="local-6989586621679372429"><span class="annot"><span class="annottext">def :: PlotCandle x y
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">def</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlotCandle :: forall x y.
 String
 -&gt; LineStyle
@@ -679,5 +679,5 @@ forall a. (Ord a, Floating a) =&gt; Colour a
 </span><a href="Graphics.Rendering.Chart.Plot.Candle.html#_plot_candle_values"><span class="hs-identifier hs-var">_plot_candle_values</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-150"></span><span>    </span><span class="hs-special">}</span></span></span><span>
 </span><span id="line-151"></span><span>
-</span><span id="line-152"></span><span class="hs-special">$(</span><span> </span><span id="local-6989586621679371762"><span id="local-6989586621679371763"><span id="plot_candle_values"><span id="plot_candle_fall_fill_style"><span id="plot_candle_rise_fill_style"><span id="plot_candle_fill"><span id="plot_candle_centre"><span id="plot_candle_width"><span id="plot_candle_tick_length"><span id="plot_candle_line_style"><span id="plot_candle_title"><span id="local-6989586621679371957"><span id="local-6989586621679371958"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">PlotCandle</span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-152"></span><span class="hs-special">$(</span><span> </span><span id="local-6989586621679372424"><span id="local-6989586621679372425"><span id="plot_candle_values"><span id="plot_candle_fall_fill_style"><span id="plot_candle_rise_fill_style"><span id="plot_candle_fill"><span id="plot_candle_centre"><span id="plot_candle_width"><span id="plot_candle_tick_length"><span id="plot_candle_line_style"><span id="plot_candle_title"><span id="local-6989586621679372619"><span id="local-6989586621679372620"><span class="hs-identifier">makeLenses</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">PlotCandle</span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-special">)</span><span>
 </span><span id="line-153"></span></pre></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_EvGeSpJ3UOUEHC5aGs84Y3"><span id="%24con2tag_9NyT33nOvRG8oHGRoTYYrK"><span id="%24con2tag_6KPeTd32IdtIJj8s8FZxaU"><span id="%24con2tag_KJSsegGJvpm9qMAk0I2348"><span id="%24con2tag_DKRpBGeLiI18jS7IQWuyta"><span id="%24con2tag_7CsKy14Wq1M45xOHVE7oO5"></span></span></span></span></span></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_12is9fb2eiKD4VDmlDmAj9"><span id="%24con2tag_Fc8a0UEGz28DrR9PZkbYmM"><span id="%24con2tag_8qV1AA3s0EG2Kp0rvETVmC"><span id="%24con2tag_3QDrd7lUHhIwwAya0Uveb"><span id="%24con2tag_IxHNLXdNAw9CGeWh6TA2EZ"><span id="%24con2tag_GcJw5F5mjTsEQUUKkeij8A"></span></span></span></span></span></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
 </span><span id="line-2"></span><span>
 </span><span id="line-3"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
 </span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
@@ -24,7 +24,7 @@
 </span><span id="line-24"></span><span class="hs-keyword">data</span><span> </span><span id="LineCap"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#LineCap"><span class="hs-identifier hs-var">LineCap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="LineCapButt"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#LineCapButt"><span class="hs-identifier hs-var">LineCapButt</span></a></span></span><span>   </span><span class="hs-comment">-- ^ Just cut the line straight.</span><span>
 </span><span id="line-25"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span id="LineCapRound"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#LineCapRound"><span class="hs-identifier hs-var">LineCapRound</span></a></span></span><span>  </span><span class="hs-comment">-- ^ Make a rounded line end.</span><span>
 </span><span id="line-26"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span id="LineCapSquare"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#LineCapSquare"><span class="hs-identifier hs-var">LineCapSquare</span></a></span></span><span> </span><span class="hs-comment">-- ^ Make a square that ends the line.</span><span>
-</span><span id="line-27"></span><span>             </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370385"><span id="local-6989586621679370387"><span id="local-6989586621679370389"><span class="annot"><span class="annottext">Int -&gt; LineCap -&gt; ShowS
+</span><span id="line-27"></span><span>             </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679371047"><span id="local-6989586621679371049"><span id="local-6989586621679371051"><span class="annot"><span class="annottext">Int -&gt; LineCap -&gt; ShowS
 [LineCap] -&gt; ShowS
 LineCap -&gt; String
 (Int -&gt; LineCap -&gt; ShowS)
@@ -37,7 +37,7 @@ show :: LineCap -&gt; String
 $cshow :: LineCap -&gt; String
 showsPrec :: Int -&gt; LineCap -&gt; ShowS
 $cshowsPrec :: Int -&gt; LineCap -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370380"><span id="local-6989586621679370382"><span class="annot"><span class="annottext">LineCap -&gt; LineCap -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679371042"><span id="local-6989586621679371044"><span class="annot"><span class="annottext">LineCap -&gt; LineCap -&gt; Bool
 (LineCap -&gt; LineCap -&gt; Bool)
 -&gt; (LineCap -&gt; LineCap -&gt; Bool) -&gt; Eq LineCap
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -45,7 +45,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: LineCap -&gt; LineCap -&gt; Bool
 == :: LineCap -&gt; LineCap -&gt; Bool
 $c== :: LineCap -&gt; LineCap -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370364"><span id="local-6989586621679370366"><span id="local-6989586621679370368"><span id="local-6989586621679370370"><span id="local-6989586621679370372"><span id="local-6989586621679370374"><span id="local-6989586621679370376"><span class="annot"><span class="annottext">Eq LineCap
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679371026"><span id="local-6989586621679371028"><span id="local-6989586621679371030"><span id="local-6989586621679371032"><span id="local-6989586621679371034"><span id="local-6989586621679371036"><span id="local-6989586621679371038"><span class="annot"><span class="annottext">Eq LineCap
 Eq LineCap
 -&gt; (LineCap -&gt; LineCap -&gt; Ordering)
 -&gt; (LineCap -&gt; LineCap -&gt; Bool)
@@ -90,7 +90,7 @@ $cp1Ord :: Eq LineCap
 </span><span id="line-31"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span id="LineJoinRound"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#LineJoinRound"><span class="hs-identifier hs-var">LineJoinRound</span></a></span></span><span> </span><span class="hs-comment">-- ^ Draw a circle fragment to connet line end.</span><span>
 </span><span id="line-32"></span><span>              </span><span class="hs-glyph">|</span><span> </span><span id="LineJoinBevel"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#LineJoinBevel"><span class="hs-identifier hs-var">LineJoinBevel</span></a></span></span><span> </span><span class="hs-comment">-- ^ Like miter, but cuts it off if a certain </span><span>
 </span><span id="line-33"></span><span>                              </span><span class="hs-comment">--   threshold is exceeded.</span><span>
-</span><span id="line-34"></span><span>              </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370354"><span id="local-6989586621679370356"><span id="local-6989586621679370358"><span class="annot"><span class="annottext">Int -&gt; LineJoin -&gt; ShowS
+</span><span id="line-34"></span><span>              </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679371016"><span id="local-6989586621679371018"><span id="local-6989586621679371020"><span class="annot"><span class="annottext">Int -&gt; LineJoin -&gt; ShowS
 [LineJoin] -&gt; ShowS
 LineJoin -&gt; String
 (Int -&gt; LineJoin -&gt; ShowS)
@@ -103,7 +103,7 @@ show :: LineJoin -&gt; String
 $cshow :: LineJoin -&gt; String
 showsPrec :: Int -&gt; LineJoin -&gt; ShowS
 $cshowsPrec :: Int -&gt; LineJoin -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370350"><span id="local-6989586621679370352"><span class="annot"><span class="annottext">LineJoin -&gt; LineJoin -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679371012"><span id="local-6989586621679371014"><span class="annot"><span class="annottext">LineJoin -&gt; LineJoin -&gt; Bool
 (LineJoin -&gt; LineJoin -&gt; Bool)
 -&gt; (LineJoin -&gt; LineJoin -&gt; Bool) -&gt; Eq LineJoin
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -111,7 +111,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: LineJoin -&gt; LineJoin -&gt; Bool
 == :: LineJoin -&gt; LineJoin -&gt; Bool
 $c== :: LineJoin -&gt; LineJoin -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370335"><span id="local-6989586621679370337"><span id="local-6989586621679370339"><span id="local-6989586621679370341"><span id="local-6989586621679370343"><span id="local-6989586621679370345"><span id="local-6989586621679370347"><span class="annot"><span class="annottext">Eq LineJoin
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370997"><span id="local-6989586621679370999"><span id="local-6989586621679371001"><span id="local-6989586621679371003"><span id="local-6989586621679371005"><span id="local-6989586621679371007"><span id="local-6989586621679371009"><span class="annot"><span class="annottext">Eq LineJoin
 Eq LineJoin
 -&gt; (LineJoin -&gt; LineJoin -&gt; Ordering)
 -&gt; (LineJoin -&gt; LineJoin -&gt; Bool)
@@ -169,7 +169,7 @@ $cp1Ord :: Eq LineJoin
 </span><span id="line-47"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="_line_join"><span class="annot"><span class="annottext">LineStyle -&gt; LineJoin
 </span><a href="Graphics.Rendering.Chart.Backend.Types.html#_line_join"><span class="hs-identifier hs-var hs-var">_line_join</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#LineJoin"><span class="hs-identifier hs-type">LineJoin</span></a></span><span>
 </span><span id="line-48"></span><span>  </span><span class="hs-comment">-- ^ How to connect two lines.</span><span>
-</span><span id="line-49"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370323"><span id="local-6989586621679370325"><span id="local-6989586621679370327"><span class="annot"><span class="annottext">Int -&gt; LineStyle -&gt; ShowS
+</span><span id="line-49"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370985"><span id="local-6989586621679370987"><span id="local-6989586621679370989"><span class="annot"><span class="annottext">Int -&gt; LineStyle -&gt; ShowS
 [LineStyle] -&gt; ShowS
 LineStyle -&gt; String
 (Int -&gt; LineStyle -&gt; ShowS)
@@ -184,7 +184,7 @@ show :: LineStyle -&gt; String
 $cshow :: LineStyle -&gt; String
 showsPrec :: Int -&gt; LineStyle -&gt; ShowS
 $cshowsPrec :: Int -&gt; LineStyle -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370319"><span id="local-6989586621679370321"><span class="annot"><span class="annottext">LineStyle -&gt; LineStyle -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370981"><span id="local-6989586621679370983"><span class="annot"><span class="annottext">LineStyle -&gt; LineStyle -&gt; Bool
 (LineStyle -&gt; LineStyle -&gt; Bool)
 -&gt; (LineStyle -&gt; LineStyle -&gt; Bool) -&gt; Eq LineStyle
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -196,7 +196,7 @@ $c== :: LineStyle -&gt; LineStyle -&gt; Bool
 </span><span id="line-50"></span><span>
 </span><span id="line-51"></span><span class="hs-comment">-- | The default line style.</span><span>
 </span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Default</span></span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#LineStyle"><span class="hs-identifier hs-type">LineStyle</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-53"></span><span>  </span><span id="local-6989586621679370316"><span class="annot"><span class="annottext">def :: LineStyle
+</span><span id="line-53"></span><span>  </span><span id="local-6989586621679370978"><span class="annot"><span class="annottext">def :: LineStyle
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">def</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineStyle :: Double
 -&gt; AlphaColour Double
 -&gt; [Double]
@@ -231,7 +231,7 @@ forall a. Num a =&gt; Colour a
 </span><span id="line-66"></span><span class="hs-keyword">data</span><span> </span><span id="FontSlant"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FontSlant"><span class="hs-identifier hs-var">FontSlant</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="FontSlantNormal"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FontSlantNormal"><span class="hs-identifier hs-var">FontSlantNormal</span></a></span></span><span>  </span><span class="hs-comment">-- ^ Normal font style without slant.</span><span>
 </span><span id="line-67"></span><span>               </span><span class="hs-glyph">|</span><span> </span><span id="FontSlantItalic"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FontSlantItalic"><span class="hs-identifier hs-var">FontSlantItalic</span></a></span></span><span>  </span><span class="hs-comment">-- ^ With a slight slant.</span><span>
 </span><span id="line-68"></span><span>               </span><span class="hs-glyph">|</span><span> </span><span id="FontSlantOblique"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FontSlantOblique"><span class="hs-identifier hs-var">FontSlantOblique</span></a></span></span><span> </span><span class="hs-comment">-- ^ With a greater slant.</span><span>
-</span><span id="line-69"></span><span>               </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370304"><span id="local-6989586621679370306"><span id="local-6989586621679370308"><span class="annot"><span class="annottext">Int -&gt; FontSlant -&gt; ShowS
+</span><span id="line-69"></span><span>               </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370966"><span id="local-6989586621679370968"><span id="local-6989586621679370970"><span class="annot"><span class="annottext">Int -&gt; FontSlant -&gt; ShowS
 [FontSlant] -&gt; ShowS
 FontSlant -&gt; String
 (Int -&gt; FontSlant -&gt; ShowS)
@@ -246,7 +246,7 @@ show :: FontSlant -&gt; String
 $cshow :: FontSlant -&gt; String
 showsPrec :: Int -&gt; FontSlant -&gt; ShowS
 $cshowsPrec :: Int -&gt; FontSlant -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370300"><span id="local-6989586621679370302"><span class="annot"><span class="annottext">FontSlant -&gt; FontSlant -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370962"><span id="local-6989586621679370964"><span class="annot"><span class="annottext">FontSlant -&gt; FontSlant -&gt; Bool
 (FontSlant -&gt; FontSlant -&gt; Bool)
 -&gt; (FontSlant -&gt; FontSlant -&gt; Bool) -&gt; Eq FontSlant
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -254,7 +254,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: FontSlant -&gt; FontSlant -&gt; Bool
 == :: FontSlant -&gt; FontSlant -&gt; Bool
 $c== :: FontSlant -&gt; FontSlant -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370285"><span id="local-6989586621679370287"><span id="local-6989586621679370289"><span id="local-6989586621679370291"><span id="local-6989586621679370293"><span id="local-6989586621679370295"><span id="local-6989586621679370297"><span class="annot"><span class="annottext">Eq FontSlant
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370947"><span id="local-6989586621679370949"><span id="local-6989586621679370951"><span id="local-6989586621679370953"><span id="local-6989586621679370955"><span id="local-6989586621679370957"><span id="local-6989586621679370959"><span class="annot"><span class="annottext">Eq FontSlant
 Eq FontSlant
 -&gt; (FontSlant -&gt; FontSlant -&gt; Ordering)
 -&gt; (FontSlant -&gt; FontSlant -&gt; Bool)
@@ -296,14 +296,14 @@ $cp1Ord :: Eq FontSlant
 </span><span id="line-70"></span><span>
 </span><span id="line-71"></span><span class="hs-comment">-- | The default font slant.</span><span>
 </span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Default</span></span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FontSlant"><span class="hs-identifier hs-type">FontSlant</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-73"></span><span>  </span><span id="local-6989586621679370283"><span class="annot"><span class="annottext">def :: FontSlant
-</span><a href="#local-6989586621679370283"><span class="hs-identifier hs-var hs-var hs-var hs-var">def</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FontSlant
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621679370945"><span class="annot"><span class="annottext">def :: FontSlant
+</span><a href="#local-6989586621679370945"><span class="hs-identifier hs-var hs-var hs-var hs-var">def</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FontSlant
 </span><a href="Graphics.Rendering.Chart.Backend.Types.html#FontSlantNormal"><span class="hs-identifier hs-var">FontSlantNormal</span></a></span><span>
 </span><span id="line-74"></span><span>
 </span><span id="line-75"></span><span class="hs-comment">-- | The possible weights of a font.</span><span>
 </span><span id="line-76"></span><span class="hs-keyword">data</span><span> </span><span id="FontWeight"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FontWeight"><span class="hs-identifier hs-var">FontWeight</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="FontWeightNormal"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FontWeightNormal"><span class="hs-identifier hs-var">FontWeightNormal</span></a></span></span><span> </span><span class="hs-comment">-- ^ Normal font style without weight.</span><span>
 </span><span id="line-77"></span><span>                </span><span class="hs-glyph">|</span><span> </span><span id="FontWeightBold"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FontWeightBold"><span class="hs-identifier hs-var">FontWeightBold</span></a></span></span><span>   </span><span class="hs-comment">-- ^ Bold font.</span><span>
-</span><span id="line-78"></span><span>                </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370275"><span id="local-6989586621679370277"><span id="local-6989586621679370279"><span class="annot"><span class="annottext">Int -&gt; FontWeight -&gt; ShowS
+</span><span id="line-78"></span><span>                </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370937"><span id="local-6989586621679370939"><span id="local-6989586621679370941"><span class="annot"><span class="annottext">Int -&gt; FontWeight -&gt; ShowS
 [FontWeight] -&gt; ShowS
 FontWeight -&gt; String
 (Int -&gt; FontWeight -&gt; ShowS)
@@ -318,7 +318,7 @@ show :: FontWeight -&gt; String
 $cshow :: FontWeight -&gt; String
 showsPrec :: Int -&gt; FontWeight -&gt; ShowS
 $cshowsPrec :: Int -&gt; FontWeight -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370271"><span id="local-6989586621679370273"><span class="annot"><span class="annottext">FontWeight -&gt; FontWeight -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370933"><span id="local-6989586621679370935"><span class="annot"><span class="annottext">FontWeight -&gt; FontWeight -&gt; Bool
 (FontWeight -&gt; FontWeight -&gt; Bool)
 -&gt; (FontWeight -&gt; FontWeight -&gt; Bool) -&gt; Eq FontWeight
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -326,7 +326,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: FontWeight -&gt; FontWeight -&gt; Bool
 == :: FontWeight -&gt; FontWeight -&gt; Bool
 $c== :: FontWeight -&gt; FontWeight -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370256"><span id="local-6989586621679370258"><span id="local-6989586621679370260"><span id="local-6989586621679370262"><span id="local-6989586621679370264"><span id="local-6989586621679370266"><span id="local-6989586621679370268"><span class="annot"><span class="annottext">Eq FontWeight
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370918"><span id="local-6989586621679370920"><span id="local-6989586621679370922"><span id="local-6989586621679370924"><span id="local-6989586621679370926"><span id="local-6989586621679370928"><span id="local-6989586621679370930"><span class="annot"><span class="annottext">Eq FontWeight
 Eq FontWeight
 -&gt; (FontWeight -&gt; FontWeight -&gt; Ordering)
 -&gt; (FontWeight -&gt; FontWeight -&gt; Bool)
@@ -368,8 +368,8 @@ $cp1Ord :: Eq FontWeight
 </span><span id="line-79"></span><span>
 </span><span id="line-80"></span><span class="hs-comment">-- | The default font weight.</span><span>
 </span><span id="line-81"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Default</span></span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FontWeight"><span class="hs-identifier hs-type">FontWeight</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-82"></span><span>  </span><span id="local-6989586621679370254"><span class="annot"><span class="annottext">def :: FontWeight
-</span><a href="#local-6989586621679370254"><span class="hs-identifier hs-var hs-var hs-var hs-var">def</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FontWeight
+</span><span id="line-82"></span><span>  </span><span id="local-6989586621679370916"><span class="annot"><span class="annottext">def :: FontWeight
+</span><a href="#local-6989586621679370916"><span class="hs-identifier hs-var hs-var hs-var hs-var">def</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FontWeight
 </span><a href="Graphics.Rendering.Chart.Backend.Types.html#FontWeightNormal"><span class="hs-identifier hs-var">FontWeightNormal</span></a></span><span>
 </span><span id="line-83"></span><span>
 </span><span id="line-84"></span><span class="hs-comment">-- | Data type for a font.</span><span>
@@ -389,7 +389,7 @@ $cp1Ord :: Eq FontWeight
 </span><span id="line-94"></span><span>      </span><span id="_font_color"><span class="annot"><span class="annottext">FontStyle -&gt; AlphaColour Double
 </span><a href="Graphics.Rendering.Chart.Backend.Types.html#_font_color"><span class="hs-identifier hs-var hs-var">_font_color</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AlphaColour</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
 </span><span id="line-95"></span><span>      </span><span class="hs-comment">-- ^ The color to render text with.</span><span>
-</span><span id="line-96"></span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370242"><span id="local-6989586621679370244"><span id="local-6989586621679370246"><span class="annot"><span class="annottext">Int -&gt; FontStyle -&gt; ShowS
+</span><span id="line-96"></span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370904"><span id="local-6989586621679370906"><span id="local-6989586621679370908"><span class="annot"><span class="annottext">Int -&gt; FontStyle -&gt; ShowS
 [FontStyle] -&gt; ShowS
 FontStyle -&gt; String
 (Int -&gt; FontStyle -&gt; ShowS)
@@ -404,7 +404,7 @@ show :: FontStyle -&gt; String
 $cshow :: FontStyle -&gt; String
 showsPrec :: Int -&gt; FontStyle -&gt; ShowS
 $cshowsPrec :: Int -&gt; FontStyle -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370238"><span id="local-6989586621679370240"><span class="annot"><span class="annottext">FontStyle -&gt; FontStyle -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370900"><span id="local-6989586621679370902"><span class="annot"><span class="annottext">FontStyle -&gt; FontStyle -&gt; Bool
 (FontStyle -&gt; FontStyle -&gt; Bool)
 -&gt; (FontStyle -&gt; FontStyle -&gt; Bool) -&gt; Eq FontStyle
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -416,8 +416,8 @@ $c== :: FontStyle -&gt; FontStyle -&gt; Bool
 </span><span id="line-97"></span><span>
 </span><span id="line-98"></span><span class="hs-comment">-- | The default font style.</span><span>
 </span><span id="line-99"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Default</span></span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FontStyle"><span class="hs-identifier hs-type">FontStyle</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-100"></span><span>  </span><span id="local-6989586621679370236"><span class="annot"><span class="annottext">def :: FontStyle
-</span><a href="#local-6989586621679370236"><span class="hs-identifier hs-var hs-var hs-var hs-var">def</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FontStyle :: String
+</span><span id="line-100"></span><span>  </span><span id="local-6989586621679370898"><span class="annot"><span class="annottext">def :: FontStyle
+</span><a href="#local-6989586621679370898"><span class="hs-identifier hs-var hs-var hs-var hs-var">def</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FontStyle :: String
 -&gt; Double
 -&gt; FontSlant
 -&gt; FontWeight
@@ -450,7 +450,7 @@ forall a. Num a =&gt; Colour a
 </span><span id="line-109"></span><span class="hs-keyword">data</span><span> </span><span id="HTextAnchor"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#HTextAnchor"><span class="hs-identifier hs-var">HTextAnchor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="HTA_Left"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#HTA_Left"><span class="hs-identifier hs-var">HTA_Left</span></a></span></span><span> </span><span>
 </span><span id="line-110"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="HTA_Centre"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#HTA_Centre"><span class="hs-identifier hs-var">HTA_Centre</span></a></span></span><span> </span><span>
 </span><span id="line-111"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="HTA_Right"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#HTA_Right"><span class="hs-identifier hs-var">HTA_Right</span></a></span></span><span> </span><span>
-</span><span id="line-112"></span><span>                 </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370227"><span id="local-6989586621679370229"><span id="local-6989586621679370231"><span class="annot"><span class="annottext">Int -&gt; HTextAnchor -&gt; ShowS
+</span><span id="line-112"></span><span>                 </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370889"><span id="local-6989586621679370891"><span id="local-6989586621679370893"><span class="annot"><span class="annottext">Int -&gt; HTextAnchor -&gt; ShowS
 [HTextAnchor] -&gt; ShowS
 HTextAnchor -&gt; String
 (Int -&gt; HTextAnchor -&gt; ShowS)
@@ -465,7 +465,7 @@ show :: HTextAnchor -&gt; String
 $cshow :: HTextAnchor -&gt; String
 showsPrec :: Int -&gt; HTextAnchor -&gt; ShowS
 $cshowsPrec :: Int -&gt; HTextAnchor -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370223"><span id="local-6989586621679370225"><span class="annot"><span class="annottext">HTextAnchor -&gt; HTextAnchor -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370885"><span id="local-6989586621679370887"><span class="annot"><span class="annottext">HTextAnchor -&gt; HTextAnchor -&gt; Bool
 (HTextAnchor -&gt; HTextAnchor -&gt; Bool)
 -&gt; (HTextAnchor -&gt; HTextAnchor -&gt; Bool) -&gt; Eq HTextAnchor
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -473,7 +473,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: HTextAnchor -&gt; HTextAnchor -&gt; Bool
 == :: HTextAnchor -&gt; HTextAnchor -&gt; Bool
 $c== :: HTextAnchor -&gt; HTextAnchor -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370208"><span id="local-6989586621679370210"><span id="local-6989586621679370212"><span id="local-6989586621679370214"><span id="local-6989586621679370216"><span id="local-6989586621679370218"><span id="local-6989586621679370220"><span class="annot"><span class="annottext">Eq HTextAnchor
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370870"><span id="local-6989586621679370872"><span id="local-6989586621679370874"><span id="local-6989586621679370876"><span id="local-6989586621679370878"><span id="local-6989586621679370880"><span id="local-6989586621679370882"><span class="annot"><span class="annottext">Eq HTextAnchor
 Eq HTextAnchor
 -&gt; (HTextAnchor -&gt; HTextAnchor -&gt; Ordering)
 -&gt; (HTextAnchor -&gt; HTextAnchor -&gt; Bool)
@@ -518,7 +518,7 @@ $cp1Ord :: Eq HTextAnchor
 </span><span id="line-116"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="VTA_Centre"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#VTA_Centre"><span class="hs-identifier hs-var">VTA_Centre</span></a></span></span><span> </span><span>
 </span><span id="line-117"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="VTA_Bottom"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#VTA_Bottom"><span class="hs-identifier hs-var">VTA_Bottom</span></a></span></span><span> </span><span>
 </span><span id="line-118"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span id="VTA_BaseLine"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#VTA_BaseLine"><span class="hs-identifier hs-var">VTA_BaseLine</span></a></span></span><span> </span><span>
-</span><span id="line-119"></span><span>                 </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370198"><span id="local-6989586621679370200"><span id="local-6989586621679370202"><span class="annot"><span class="annottext">Int -&gt; VTextAnchor -&gt; ShowS
+</span><span id="line-119"></span><span>                 </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370860"><span id="local-6989586621679370862"><span id="local-6989586621679370864"><span class="annot"><span class="annottext">Int -&gt; VTextAnchor -&gt; ShowS
 [VTextAnchor] -&gt; ShowS
 VTextAnchor -&gt; String
 (Int -&gt; VTextAnchor -&gt; ShowS)
@@ -533,7 +533,7 @@ show :: VTextAnchor -&gt; String
 $cshow :: VTextAnchor -&gt; String
 showsPrec :: Int -&gt; VTextAnchor -&gt; ShowS
 $cshowsPrec :: Int -&gt; VTextAnchor -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370194"><span id="local-6989586621679370196"><span class="annot"><span class="annottext">VTextAnchor -&gt; VTextAnchor -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370856"><span id="local-6989586621679370858"><span class="annot"><span class="annottext">VTextAnchor -&gt; VTextAnchor -&gt; Bool
 (VTextAnchor -&gt; VTextAnchor -&gt; Bool)
 -&gt; (VTextAnchor -&gt; VTextAnchor -&gt; Bool) -&gt; Eq VTextAnchor
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -541,7 +541,7 @@ forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c/= :: VTextAnchor -&gt; VTextAnchor -&gt; Bool
 == :: VTextAnchor -&gt; VTextAnchor -&gt; Bool
 $c== :: VTextAnchor -&gt; VTextAnchor -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370179"><span id="local-6989586621679370181"><span id="local-6989586621679370183"><span id="local-6989586621679370185"><span id="local-6989586621679370187"><span id="local-6989586621679370189"><span id="local-6989586621679370191"><span class="annot"><span class="annottext">Eq VTextAnchor
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370841"><span id="local-6989586621679370843"><span id="local-6989586621679370845"><span id="local-6989586621679370847"><span id="local-6989586621679370849"><span id="local-6989586621679370851"><span id="local-6989586621679370853"><span class="annot"><span class="annottext">Eq VTextAnchor
 Eq VTextAnchor
 -&gt; (VTextAnchor -&gt; VTextAnchor -&gt; Ordering)
 -&gt; (VTextAnchor -&gt; VTextAnchor -&gt; Bool)
@@ -593,7 +593,7 @@ $cp1Ord :: Eq VTextAnchor
 </span><a href="Graphics.Rendering.Chart.Backend.Types.html#textSizeYBearing"><span class="hs-identifier hs-var hs-var">textSizeYBearing</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-comment">-- ^ The Y bearing.</span><span>
 </span><span id="line-127"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="textSizeHeight"><span class="annot"><span class="annottext">TextSize -&gt; Double
 </span><a href="Graphics.Rendering.Chart.Backend.Types.html#textSizeHeight"><span class="hs-identifier hs-var hs-var">textSizeHeight</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-comment">-- ^ The total height of the text.</span><span>
-</span><span id="line-128"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370167"><span id="local-6989586621679370169"><span id="local-6989586621679370171"><span class="annot"><span class="annottext">Int -&gt; TextSize -&gt; ShowS
+</span><span id="line-128"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370829"><span id="local-6989586621679370831"><span id="local-6989586621679370833"><span class="annot"><span class="annottext">Int -&gt; TextSize -&gt; ShowS
 [TextSize] -&gt; ShowS
 TextSize -&gt; String
 (Int -&gt; TextSize -&gt; ShowS)
@@ -606,7 +606,7 @@ show :: TextSize -&gt; String
 $cshow :: TextSize -&gt; String
 showsPrec :: Int -&gt; TextSize -&gt; ShowS
 $cshowsPrec :: Int -&gt; TextSize -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370163"><span id="local-6989586621679370165"><span class="annot"><span class="annottext">TextSize -&gt; TextSize -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370825"><span id="local-6989586621679370827"><span class="annot"><span class="annottext">TextSize -&gt; TextSize -&gt; Bool
 (TextSize -&gt; TextSize -&gt; Bool)
 -&gt; (TextSize -&gt; TextSize -&gt; Bool) -&gt; Eq TextSize
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -627,7 +627,7 @@ $c== :: TextSize -&gt; TextSize -&gt; Bool
 </span><span id="line-138"></span><span class="hs-keyword">newtype</span><span> </span><span id="FillStyle"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FillStyle"><span class="hs-identifier hs-var">FillStyle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="FillStyleSolid"><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FillStyleSolid"><span class="hs-identifier hs-var">FillStyleSolid</span></a></span></span><span> </span><span>
 </span><span id="line-139"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="_fill_color"><span class="annot"><span class="annottext">FillStyle -&gt; AlphaColour Double
 </span><a href="Graphics.Rendering.Chart.Backend.Types.html#_fill_color"><span class="hs-identifier hs-var hs-var">_fill_color</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AlphaColour</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span>
-</span><span id="line-140"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370155"><span id="local-6989586621679370157"><span id="local-6989586621679370159"><span class="annot"><span class="annottext">Int -&gt; FillStyle -&gt; ShowS
+</span><span id="line-140"></span><span>  </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679370817"><span id="local-6989586621679370819"><span id="local-6989586621679370821"><span class="annot"><span class="annottext">Int -&gt; FillStyle -&gt; ShowS
 [FillStyle] -&gt; ShowS
 FillStyle -&gt; String
 (Int -&gt; FillStyle -&gt; ShowS)
@@ -642,7 +642,7 @@ show :: FillStyle -&gt; String
 $cshow :: FillStyle -&gt; String
 showsPrec :: Int -&gt; FillStyle -&gt; ShowS
 $cshowsPrec :: Int -&gt; FillStyle -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370151"><span id="local-6989586621679370153"><span class="annot"><span class="annottext">FillStyle -&gt; FillStyle -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679370813"><span id="local-6989586621679370815"><span class="annot"><span class="annottext">FillStyle -&gt; FillStyle -&gt; Bool
 (FillStyle -&gt; FillStyle -&gt; Bool)
 -&gt; (FillStyle -&gt; FillStyle -&gt; Bool) -&gt; Eq FillStyle
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -654,8 +654,8 @@ $c== :: FillStyle -&gt; FillStyle -&gt; Bool
 </span><span id="line-141"></span><span>
 </span><span id="line-142"></span><span class="hs-comment">-- | The default fill style.</span><span>
 </span><span id="line-143"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Default</span></span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#FillStyle"><span class="hs-identifier hs-type">FillStyle</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-144"></span><span>  </span><span id="local-6989586621679370149"><span class="annot"><span class="annottext">def :: FillStyle
-</span><a href="#local-6989586621679370149"><span class="hs-identifier hs-var hs-var hs-var hs-var">def</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FillStyleSolid :: AlphaColour Double -&gt; FillStyle
+</span><span id="line-144"></span><span>  </span><span id="local-6989586621679370811"><span class="annot"><span class="annottext">def :: FillStyle
+</span><a href="#local-6989586621679370811"><span class="hs-identifier hs-var hs-var hs-var hs-var">def</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FillStyleSolid :: AlphaColour Double -&gt; FillStyle
 </span><a href="Graphics.Rendering.Chart.Backend.Types.html#FillStyleSolid"><span class="hs-identifier hs-type">FillStyleSolid</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">_fill_color :: AlphaColour Double
 </span><a href="Graphics.Rendering.Chart.Backend.Types.html#_fill_color"><span class="hs-identifier hs-var">_fill_color</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Colour Double -&gt; AlphaColour Double
 forall a. Num a =&gt; Colour a -&gt; AlphaColour a
@@ -695,40 +695,40 @@ forall a. (Ord a, Floating a) =&gt; Colour a
 </span><span id="line-173"></span><span id="bitmapAlignmentFns"><span class="annot"><span class="annottext">bitmapAlignmentFns :: AlignmentFns
 </span><a href="Graphics.Rendering.Chart.Backend.Types.html#bitmapAlignmentFns"><span class="hs-identifier hs-var hs-var">bitmapAlignmentFns</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AlignmentFn -&gt; AlignmentFn -&gt; AlignmentFns
 </span><a href="Graphics.Rendering.Chart.Backend.Types.html#AlignmentFns"><span class="hs-identifier hs-var">AlignmentFns</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; AlignmentFn
-</span><a href="#local-6989586621679370143"><span class="hs-identifier hs-var">adjfn</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679370805"><span class="hs-identifier hs-var">adjfn</span></a></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">0.5</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; AlignmentFn
-</span><a href="#local-6989586621679370143"><span class="hs-identifier hs-var">adjfn</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679370805"><span class="hs-identifier hs-var">adjfn</span></a></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">0.0</span></span><span class="hs-special">)</span><span> </span><span>
 </span><span id="line-174"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-175"></span><span>    </span><span id="local-6989586621679370143"><span class="annot"><span class="annottext">adjfn :: Double -&gt; AlignmentFn
-</span><a href="#local-6989586621679370143"><span class="hs-identifier hs-var hs-var">adjfn</span></a></span></span><span> </span><span id="local-6989586621679370142"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679370142"><span class="hs-identifier hs-var">offset</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span id="local-6989586621679370140"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679370140"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679370139"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679370139"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Point
+</span><span id="line-175"></span><span>    </span><span id="local-6989586621679370805"><span class="annot"><span class="annottext">adjfn :: Double -&gt; AlignmentFn
+</span><a href="#local-6989586621679370805"><span class="hs-identifier hs-var hs-var">adjfn</span></a></span></span><span> </span><span id="local-6989586621679370804"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679370804"><span class="hs-identifier hs-var">offset</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Rendering.Chart.Geometry.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span id="local-6989586621679370802"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679370802"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679370801"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679370801"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Point
 </span><a href="Graphics.Rendering.Chart.Geometry.html#Point"><span class="hs-identifier hs-var">Point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double
-</span><a href="#local-6989586621679370138"><span class="hs-identifier hs-var">adj</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679370140"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double
-</span><a href="#local-6989586621679370138"><span class="hs-identifier hs-var">adj</span></a></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679370139"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679370800"><span class="hs-identifier hs-var">adj</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679370802"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double
+</span><a href="#local-6989586621679370800"><span class="hs-identifier hs-var">adj</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679370801"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-176"></span><span>      </span><span class="hs-keyword">where</span><span>
 </span><span id="line-177"></span><span>        </span><span class="hs-comment">-- avoid messages about Integer default</span><span>
-</span><span id="line-178"></span><span>        </span><span class="annot"><a href="#local-6989586621679370137"><span class="hs-identifier hs-type">rnd</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
-</span><span id="line-179"></span><span>        </span><span id="local-6989586621679370137"><span class="annot"><span class="annottext">rnd :: Double -&gt; Integer
-</span><a href="#local-6989586621679370137"><span class="hs-identifier hs-var hs-var">rnd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Integer
+</span><span id="line-178"></span><span>        </span><span class="annot"><a href="#local-6989586621679370799"><span class="hs-identifier hs-type">rnd</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span>
+</span><span id="line-179"></span><span>        </span><span id="local-6989586621679370799"><span class="annot"><span class="annottext">rnd :: Double -&gt; Integer
+</span><a href="#local-6989586621679370799"><span class="hs-identifier hs-var hs-var">rnd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Integer
 forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">round</span></span><span>
-</span><span id="line-180"></span><span>        </span><span id="local-6989586621679370138"><span class="annot"><span class="annottext">adj :: Double -&gt; Double
-</span><a href="#local-6989586621679370138"><span class="hs-identifier hs-var hs-var">adj</span></a></span></span><span> </span><span id="local-6989586621679370135"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679370135"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Double
+</span><span id="line-180"></span><span>        </span><span id="local-6989586621679370800"><span class="annot"><span class="annottext">adj :: Double -&gt; Double
+</span><a href="#local-6989586621679370800"><span class="hs-identifier hs-var hs-var">adj</span></a></span></span><span> </span><span id="local-6989586621679370797"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679370797"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Double
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span class="annot"><span class="annottext">(Integer -&gt; Double) -&gt; (Double -&gt; Integer) -&gt; Double -&gt; Double
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">Double -&gt; Integer
-</span><a href="#local-6989586621679370137"><span class="hs-identifier hs-var">rnd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679370135"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679370799"><span class="hs-identifier hs-var">rnd</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679370797"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679370142"><span class="hs-identifier hs-var">offset</span></a></span><span>
+</span><a href="#local-6989586621679370804"><span class="hs-identifier hs-var">offset</span></a></span><span>
 </span><span id="line-181"></span><span>
 </span><span id="line-182"></span><span class="hs-comment">-- | Alignment to render on vector based graphics.</span><span>
 </span><span id="line-183"></span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#vectorAlignmentFns"><span class="hs-identifier hs-type">vectorAlignmentFns</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Rendering.Chart.Backend.Types.html#AlignmentFns"><span class="hs-identifier hs-type">AlignmentFns</span></a></span><span>
