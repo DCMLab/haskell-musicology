@@ -277,6 +277,10 @@ testSpelled = describe "Spelled" $ do
       ic (rsic "M3") `shouldBe` rsic "M3"
       emb (rsic "M3") `shouldBe` rsi "M3:0"
       emb (rsic "m3") `shouldBe` rsi "m3:0"
+      emb (rsic "M7") `shouldBe` rsi "M7:0"
+      emb (rsic "a1") `shouldBe` rsi "a1:0"
+      emb (rsic "d1") `shouldBe` rsi "d1:0"
+      emb (rsic "P4") `shouldBe` rsi "P4:0"
 
     it "steps (true)" $ do
       isStep (rsic "d1") `shouldBe` True
