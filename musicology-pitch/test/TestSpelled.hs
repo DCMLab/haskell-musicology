@@ -180,6 +180,9 @@ testSpelled = describe "Spelled" $ do
     alteration (rsi "-a4:0") `shouldBe` 1
     alteration (rsi "-m7:0") `shouldBe` (-1)
 
+    alteration (rsic "d1") `shouldBe` (-1)
+    alteration (rsi "d1:0") `shouldBe` 1 -- d1:0 == -a1:0
+
     alteration (rspc "F") `shouldBe` 0
     alteration (rspc "B") `shouldBe` 0
     alteration (rsp "Cb-1") `shouldBe` (-1)
