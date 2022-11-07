@@ -45,6 +45,8 @@ testSIntervalProps = describe "SInterval properties" $ do
       i1 ^+^ i2 ^-^ i2 `shouldBe` (i1 :: SInterval)
     it "returns zeroV for i ^-^ i" $ property $ \i ->
       (i :: SInterval) ^-^ i `shouldBe` zeroV
+  describe "ordering" $ it "is symmetric to interval inversion" $ property $ \i1 i2 ->
+      (i1 :: SInterval) < (i2 :: SInterval) `shouldBe` (down i1 > down i2)
   describe "notation" $ it "returns input on readN . showN" $ property $ \i ->
     readNotation (showNotation i) `shouldBe` Just (i :: SInterval)
 
@@ -67,8 +69,10 @@ testSICProps = describe "SIC properties" $ do
       direction (dim fifth') `shouldBe` LT
     it "is neutral for unisons" $ do
       direction (unison :: SIC) `shouldBe` EQ
-      direction (aug unison :: SIC) `shouldBe` EQ
-      direction (dim unison :: SIC) `shouldBe` EQ
+      direction (aug unison :: SIC) `shouldBe` GT
+      direction (dim unison :: SIC) `shouldBe` LT
+  describe "ordering" $ it "is symmetric to interval inversion" $ property $ \i1 i2 ->
+      (i1 :: SIC) < (i2 :: SIC) `shouldBe` (down i1 > down i2)
   describe "notation" $ it "returns input on readN . showN" $ property $ \i ->
     readNotation (showNotation i) `shouldBe` Just (i :: SIC)
 
@@ -208,13 +212,17 @@ testSpelled = describe "Spelled" $ do
       4 *^ rsi "-M3:0" `shouldBe` rsi "-aa2:1"
       5 *^ rsi "M3:0" `shouldBe` rsi "aaa4:1"
 
-    it "numeric operations" $ do
+    it "ordering" $ do
       direction (rsi "m2:0") `shouldBe` GT
       direction (rsi "P1:0") `shouldBe` EQ
-      direction (rsi "a1:0") `shouldBe` EQ
-      direction (rsi "d1:0") `shouldBe` EQ
+      direction (rsi "a1:0") `shouldBe` GT
+      direction (rsi "d1:0") `shouldBe` LT
       direction (rsi "-m3:0") `shouldBe` LT
+      direction (rsi "P4:0") `shouldBe` GT
+      direction (rsi "-M7:0") `shouldBe` LT
       iabs (rsi "-m3:0") `shouldBe` rsi "m3:0"
+      (rsi "m2:0" < rsi "M2:0") `shouldBe` True
+      (rsi "-m2:0" > rsi "-M2:0") `shouldBe` True
 
     it "interval class conversion" $ do
       ic (rsi "M3:3") `shouldBe` rsic "M3"
@@ -265,12 +273,14 @@ testSpelled = describe "Spelled" $ do
       4 *^ rsic "-M3" `shouldBe` rsic "-aa2"
       5 *^ rsic "M3" `shouldBe` rsic "aaa4"
 
-    it "numeric operations" $ do
+    it "ordering" $ do
       direction (rsic "m2") `shouldBe` GT
       direction (rsic "P1") `shouldBe` EQ
-      direction (rsic "a1") `shouldBe` EQ
-      direction (rsic "d1") `shouldBe` EQ
+      direction (rsic "a1") `shouldBe` GT
+      direction (rsic "d1") `shouldBe` LT
       direction (rsic "-m3") `shouldBe` LT
+      direction (rsic "P4") `shouldBe` GT
+      direction (rsic "M7") `shouldBe` LT
       iabs (rsic "-m3") `shouldBe` rsic "m3"
 
     it "interval conversion" $ do
@@ -311,6 +321,7 @@ testSpelled = describe "Spelled" $ do
       rsp "Eb4" -^ rsi "P5:0" `shouldBe` rsp "Ab3"
       rsp "G4" `pfrom` rsp "C#4" `shouldBe` rsi "d5:0"
       rsp "G4" `pto` rsp "C#4" `shouldBe` rsi "-d5:0"
+      rsp "C-1" > rsp "Cb-1" `shouldBe` True
 
   describe "Pitch Class Interface" $ do
     it "conversion" $ do
@@ -325,3 +336,4 @@ testSpelled = describe "Spelled" $ do
       rspc "Eb" -^ rsic "P5" `shouldBe` rspc "Ab"
       rspc "G" `pfrom` rspc "C#" `shouldBe` rsic "d5"
       rspc "G" `pto` rspc "C#" `shouldBe` rsic "a4"
+      rspc "C" > rspc "Cb" `shouldBe` True

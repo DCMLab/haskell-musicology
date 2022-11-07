@@ -171,9 +171,9 @@ instance Spelled SInterval where
   alteration i = (fifths (iabs i) + 1) `div` 7
 
 instance Ord SInterval where
-  i1 <= i2 = (diasteps i1, alteration i1) <= (diasteps i2, alteration i2)
-  compare i1 i2 =
-    compare (diasteps i1, alteration i1) (diasteps i2, alteration i2)
+  i1 <= i2 = direction (i1 ^-^ i2) /= GT --(diasteps i1, alteration i1) <= (diasteps i2, alteration i2)
+  compare i1 i2 = direction (i1 ^-^ i2)
+    -- compare (diasteps i1, alteration i1) (diasteps i2, alteration i2)
 
 -- instance Show SInterval where
 --   -- show (SInterval d c) = diaget diaints d <> accstr augs '+' '-' <> show (div d 7)
@@ -194,7 +194,7 @@ instance Interval SInterval where
   type ICOf SInterval = SIC
   ic (SInterval f _) = sic f
   octave = SInterval 0 1
-  direction i = compare (diasteps i) 0
+  direction i = compare (diasteps i, (fifths i + 1) `div` 7) (0, 0)
 
 instance Diatonic SInterval where
   isStep i = abs (diasteps i) < 2
@@ -227,6 +227,7 @@ altQual = do
     'P' -> pure $ \pf -> if pf then pure 0 else R.pfail
     'M' -> pure $ \pf -> if pf then R.pfail else pure 0
     'm' -> pure $ \pf -> if pf then R.pfail else pure (-1)
+    _ -> R.pfail
 
 parseDia = do
   falt <- altQual <|> altAug <|> altDim
@@ -257,7 +258,7 @@ instance Notation SInterval where
 -- spc are based on the line of fifth
 
 newtype SIC = SIC { sFifth :: Int }
-  deriving (Ord, Eq, Show, Generic, NFData, Hashable)
+  deriving (Eq, Ord, Show, Generic, NFData, Hashable)
 
 instance ToJSON SIC -- TODO: better keys in object
 instance FromJSON SIC
@@ -297,7 +298,7 @@ instance Interval SIC where
   ic     = id
   octave = zeroV
   direction (SIC 0) = EQ
-  direction i | d == 0    = EQ
+  direction i | d == 0    = compare (alteration i) 0
               | d < 4     = GT
               | otherwise = LT
     where d = diasteps i
@@ -337,8 +338,8 @@ instance (Spelled i, Interval i, Spelled (ICOf i)) => Spelled (Pitch i) where
   octaves (Pitch i) = octaves i
   internalOctaves (Pitch i) = internalOctaves i
   degree (Pitch i) = degree i
-  generic (Pitch i) = generic i
-  diasteps (Pitch i) = diasteps i
+  generic (Pitch i) = degree i -- not well-defined for pitches
+  diasteps (Pitch i) = degree i -- not well-defined for pitches
   alteration (Pitch i) = alteration $ ic i
 
 letter :: Spelled i => i -> Char
