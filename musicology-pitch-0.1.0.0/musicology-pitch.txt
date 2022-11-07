@@ -192,8 +192,8 @@ instance Data.Hashable.Class.Hashable Musicology.Pitch.Spelled.SIC
 instance Control.DeepSeq.NFData Musicology.Pitch.Spelled.SIC
 instance GHC.Generics.Generic Musicology.Pitch.Spelled.SIC
 instance GHC.Show.Show Musicology.Pitch.Spelled.SIC
-instance GHC.Classes.Eq Musicology.Pitch.Spelled.SIC
 instance GHC.Classes.Ord Musicology.Pitch.Spelled.SIC
+instance GHC.Classes.Eq Musicology.Pitch.Spelled.SIC
 instance GHC.Show.Show Musicology.Pitch.Spelled.SPC
 instance Musicology.Pitch.Class.Notation Musicology.Pitch.Spelled.SPC
 instance Musicology.Pitch.Class.ToMidi Musicology.Pitch.Spelled.SPC
