@@ -5,57 +5,22 @@
 
 packages:
 - completed:
-    hackage: Frames-0.7.0@sha256:a7f68646ab369e6940143f2ed233e61c910158fc4018bac65580534dbd19e99e,8898
-    pantry-tree:
-      size: 4069
-      sha256: 6f2c3d26700905d18fa7e4d0f577cf27e2a529f8128546b0fb8724cf616af445
-  original:
-    hackage: Frames-0.7.0@sha256:a7f68646ab369e6940143f2ed233e61c910158fc4018bac65580534dbd19e99e,8898
-- completed:
-    hackage: discrimination-0.4.1@sha256:2870c50b9582610a7f20b8b9a7f3b8dc5d37e5ba0082dee22107c6aeb2405a6a,3482
-    pantry-tree:
-      size: 1050
-      sha256: 1636800cd5e9f38dd2cf47ee2f8904831b21fd3f03b502f3056cc2f2e1fe436e
-  original:
-    hackage: discrimination-0.4.1@sha256:2870c50b9582610a7f20b8b9a7f3b8dc5d37e5ba0082dee22107c6aeb2405a6a,3482
-- completed:
     hackage: Euterpea-2.0.7@sha256:81d583a47d483bf83ac07df7b764138f1aa52a56db4e7c7f685d070dbac4b388,2661
     pantry-tree:
-      size: 1603
       sha256: a1347f151792305d59844270d6e4e9ec0958873a9bf17430aee57c8940d6f902
+      size: 1603
   original:
     hackage: Euterpea-2.0.7@sha256:81d583a47d483bf83ac07df7b764138f1aa52a56db4e7c7f685d070dbac4b388,2661
 - completed:
     hackage: PortMidi-0.2.0.0@sha256:0671e36ec72e95138bf396234b205864a8a6d0ee353e09e01cbfd57004c56f40,2383
     pantry-tree:
-      size: 1818
       sha256: c9936666afc390560319024c25ecb184e2518ae4d3be5ae14081231091c1f073
+      size: 1818
   original:
     hackage: PortMidi-0.2.0.0@sha256:0671e36ec72e95138bf396234b205864a8a6d0ee353e09e01cbfd57004c56f40,2383
-- completed:
-    hackage: arrows-0.4.4.2@sha256:a260222b766da922657e302aa7c0409451913e1e503798a47a213a61ba382460,1235
-    pantry-tree:
-      size: 1035
-      sha256: 153eac3a26d5922d3be968368125e5a31cc4347049732ef3a75920c4b9fda417
-  original:
-    hackage: arrows-0.4.4.2@sha256:a260222b766da922657e302aa7c0409451913e1e503798a47a213a61ba382460,1235
-- completed:
-    hackage: Stream-0.4.7.2@sha256:ed78165aa34c4e23dc53c9072f8715d414a585037f2145ea0eb2b38300354c53,1009
-    pantry-tree:
-      size: 207
-      sha256: 009fe33c4779bd1705a26f9b036f0996e9fc85df06418aec3dda967554e6ef83
-  original:
-    hackage: Stream-0.4.7.2@sha256:ed78165aa34c4e23dc53c9072f8715d414a585037f2145ea0eb2b38300354c53,1009
-- completed:
-    hackage: lazysmallcheck-0.6@sha256:dac7a1e4877681f1260309e863e896674dd6efc1159897b7945893e693f2a6bc,1696
-    pantry-tree:
-      size: 2008
-      sha256: aea6b83dd91703fd130d98ecfed88b8f16841b22990c837c8fde89f9f6cca809
-  original:
-    hackage: lazysmallcheck-0.6@sha256:dac7a1e4877681f1260309e863e896674dd6efc1159897b7945893e693f2a6bc,1696
 snapshots:
 - completed:
-    size: 590100
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/28.yaml
-    sha256: 428ec8d5ce932190d3cbe266b9eb3c175cd81e984babf876b64019e2cbe4ea68
-  original: lts-18.28
+    sha256: 4be1ca5d31689b524a7f0f17a439bbe9136465213edc498e9a395899a670f2aa
+    size: 718486
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/22/22.yaml
+  original: lts-22.22

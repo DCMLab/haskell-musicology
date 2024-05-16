@@ -33,7 +33,7 @@ import qualified Data.Text as T
 import qualified Data.Text.Lazy as LT
 import Control.Applicative ((<|>))
 import Control.Monad.State
-import Control.Monad (mapM_)
+import Control.Monad (mapM_, when, unless, forM_)
 import Text.Read (readMaybe)
 import Lens.Micro
 
