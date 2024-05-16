@@ -6,10 +6,11 @@ import           Musicology.Core
 import           Graphics.Vega.VegaLite
 import           Data.Aeson                    as J
 import           Data.Aeson.Encode.Pretty       ( encodePretty )
+import qualified Data.Aeson.KeyMap             as KM
 import qualified Data.ByteString.Lazy.Char8    as BS8
-import qualified Data.HashMap.Strict           as HM
-import qualified Data.Vector                   as V
+import qualified Data.Functor.Identity         as ID
 import qualified Data.Text                     as T
+import qualified Data.Vector                   as V
 import           Data.Monoid                    ( (<>) )
 
 import           System.IO.Temp                 ( emptySystemTempFile )
@@ -34,12 +35,16 @@ viewPlot plot = do
 fixRatios :: Value -> Value
 fixRatios (J.Object o) = J.Object $ fixRatio "onset" $ fixRatio "offset" o
  where
-  fixRatio name o = HM.adjust fix name o
+  fixRatio name o = adjust fix name o
   fix (J.Object rat) =
-    let (J.Number num) = HM.lookupDefault (J.Number 0) "numerator" rat
-        (J.Number den) = HM.lookupDefault (J.Number 1) "denominator" rat
+    let (J.Number num) = maybe (J.Number 0) id $ KM.lookup "numerator" rat
+        (J.Number den) = maybe (J.Number 1) id $ KM.lookup "denominator" rat
     in  toJSON $ num / den
   fix v = v
+  adjust f k map = ID.runIdentity $ KM.alterF apply k map
+   where
+    apply Nothing = ID.Identity Nothing
+    apply (Just v) = ID.Identity (Just $ f v)
 fixRatios v = v
 
 pianorollView
@@ -90,7 +95,7 @@ plotpolysView notes polys = [layer [background, foreground]]
   polyJson name ns = fmap (extend . fixRatios) jNotes
    where
     (Array jNotes) = toJSON ns
-    extend (J.Object note) = J.Object $ HM.insert "name" (String name) note
+    extend (J.Object note) = J.Object $ KM.insert "name" (String name) note
   notedat = polyJson "notes" notes
   polydat = V.concat $ zipWith (polyJson . mkn "poly ") [1 ..] polys
   mkn pfx = (pfx <>) . T.pack . show
