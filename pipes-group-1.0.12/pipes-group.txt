@@ -79,7 +79,7 @@ groups :: (Monad m, Eq a') => Lens (Producer a' m x) (Producer a m x) (FreeT (Pr
 --   </pre>
 groupsBy :: Monad m => (a' -> a' -> Bool) -> Lens (Producer a' m x) (Producer a m x) (FreeT (Producer a' m) m x) (FreeT (Producer a m) m x)
 
--- | <a>groupsBy</a>` splits a <a>Producer</a> into a <a>FreeT</a> of
+-- | <a>groupsBy'</a> splits a <a>Producer</a> into a <a>FreeT</a> of
 --   <a>Producer</a>s grouped using the given equality predicate
 --   
 --   This differs from <a>groupsBy</a> by comparing successive elements for
@@ -243,22 +243,18 @@ foldsM :: Monad m => (x -> a -> m x) -> m x -> (x -> m b) -> FreeT (Producer a m
 -- | Lift a computation from the argument monad to the constructed monad.
 lift :: (MonadTrans t, Monad m) => m a -> t m a
 
--- | The base functor for a free monad.
-data FreeF (f :: Type -> Type) a b
-Pure :: a -> FreeF (f :: Type -> Type) a b
-Free :: f b -> FreeF (f :: Type -> Type) a b
-
 -- | The "free monad transformer" for a functor <tt>f</tt>
-newtype FreeT (f :: Type -> Type) (m :: Type -> Type) a
+newtype () => FreeT (f :: Type -> Type) (m :: Type -> Type) a
 FreeT :: m (FreeF f a (FreeT f m a)) -> FreeT (f :: Type -> Type) (m :: Type -> Type) a
 [runFreeT] :: FreeT (f :: Type -> Type) (m :: Type -> Type) a -> m (FreeF f a (FreeT f m a))
 
--- | Consume the first value from a <a>Producer</a>
---   
---   <a>next</a> either fails with a <a>Left</a> if the <a>Producer</a>
---   terminates or succeeds with a <a>Right</a> providing the next value
---   and the remainder of the <a>Producer</a>.
-next :: Monad m => Producer a m r -> m (Either r (a, Producer a m r))
+-- | The base functor for a free monad.
+data () => FreeF (f :: Type -> Type) a b
+Pure :: a -> FreeF (f :: Type -> Type) a b
+Free :: f b -> FreeF (f :: Type -> Type) a b
+
+-- | <a>Producer</a>s can only <a>yield</a>
+type Producer b = Proxy X () () b
 
 -- | Produce a value
 --   
@@ -268,8 +264,12 @@ next :: Monad m => Producer a m r -> m (Either r (a, Producer a m r))
 --   </pre>
 yield :: forall (m :: Type -> Type) a x' x. Functor m => a -> Proxy x' x () a m ()
 
--- | <a>Producer</a>s can only <a>yield</a>
-type Producer b = Proxy X () () b
+-- | Consume the first value from a <a>Producer</a>
+--   
+--   <a>next</a> either fails with a <a>Left</a> if the <a>Producer</a>
+--   terminates or succeeds with a <a>Right</a> providing the next value
+--   and the remainder of the <a>Producer</a>.
+next :: Monad m => Producer a m r -> m (Either r (a, Producer a m r))
 
 
 -- | <tt>pipes-group</tt> builds upon <tt>pipes</tt> to establish idioms

@@ -377,15 +377,34 @@ asGenST :: (GenST s -> ST s a) -> GenST s -> ST s a
 
 -- | The class of types for which a uniformly distributed value can be
 --   drawn from all possible values of the type.
-class Uniform a
+class () => Uniform a
 
 -- | Generates a value uniformly distributed over all possible values of
 --   that type.
+--   
+--   There is a default implementation via <a>Generic</a>:
+--   
+--   <pre>
+--   &gt;&gt;&gt; :set -XDeriveGeneric -XDeriveAnyClass
+--   
+--   &gt;&gt;&gt; import GHC.Generics (Generic)
+--   
+--   &gt;&gt;&gt; import System.Random.Stateful
+--   
+--   &gt;&gt;&gt; data MyBool = MyTrue | MyFalse deriving (Show, Generic, Finite, Uniform)
+--   
+--   &gt;&gt;&gt; data Action = Code MyBool | Eat (Maybe Bool) | Sleep deriving (Show, Generic, Finite, Uniform)
+--   
+--   &gt;&gt;&gt; gen &lt;- newIOGenM (mkStdGen 42)
+--   
+--   &gt;&gt;&gt; uniformListM 10 gen :: IO [Action]
+--   [Code MyTrue,Code MyTrue,Eat Nothing,Code MyFalse,Eat (Just False),Eat (Just True),Eat Nothing,Eat (Just False),Sleep,Code MyFalse]
+--   </pre>
 uniformM :: (Uniform a, StatefulGen g m) => g -> m a
 
 -- | The class of types for which a uniformly distributed value can be
 --   drawn from a range.
-class UniformRange a
+class () => UniformRange a
 
 -- | Generates a value uniformly distributed over the provided range, which
 --   is interpreted as inclusive in the lower and upper bound.

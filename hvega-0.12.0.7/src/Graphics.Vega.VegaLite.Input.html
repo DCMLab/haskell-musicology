@@ -1,0 +1,1096 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE TupleSections #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="annot"><span class="hs-comment">{-|
+Module      : Graphics.Vega.VegaLite.Input
+Copyright   : (c) Douglas Burke, 2018-2021
+License     : BSD3
+
+Maintainer  : dburke.gw@gmail.com
+Stability   : unstable
+Portability : CPP, OverloadedStrings, TupleSections
+
+Data input (from file or created inline).
+
+-}</span></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Graphics.Vega.VegaLite.Input</span><span>
+</span><span id="line-19"></span><span>       </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier">Data</span></a></span><span>
+</span><span id="line-20"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataColumn"><span class="hs-identifier">DataColumn</span></a></span><span>
+</span><span id="line-21"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataRow"><span class="hs-identifier">DataRow</span></a></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Format"><span class="hs-identifier">Format</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataType"><span class="hs-identifier">DataType</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataFromUrl"><span class="hs-identifier">dataFromUrl</span></a></span><span>
+</span><span id="line-27"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataFromColumns"><span class="hs-identifier">dataFromColumns</span></a></span><span>
+</span><span id="line-28"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataFromRows"><span class="hs-identifier">dataFromRows</span></a></span><span>
+</span><span id="line-29"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataFromJson"><span class="hs-identifier">dataFromJson</span></a></span><span>
+</span><span id="line-30"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataFromSource"><span class="hs-identifier">dataFromSource</span></a></span><span>
+</span><span id="line-31"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataName"><span class="hs-identifier">dataName</span></a></span><span>
+</span><span id="line-32"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#datasets"><span class="hs-identifier">datasets</span></a></span><span>
+</span><span id="line-33"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataColumn"><span class="hs-identifier">dataColumn</span></a></span><span>
+</span><span id="line-34"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataRow"><span class="hs-identifier">dataRow</span></a></span><span>
+</span><span id="line-35"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#noData"><span class="hs-identifier">noData</span></a></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataSequence"><span class="hs-identifier">dataSequence</span></a></span><span>
+</span><span id="line-38"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataSequenceAs"><span class="hs-identifier">dataSequenceAs</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span>       </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">A</span></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.HashMap.Strict</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">HM</span></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Arrow</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">second</span></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(.=)</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">Value</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">decode</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">encode</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">object</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">toJSON</span></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson.Types</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Pair</span></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">fromMaybe</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">mapMaybe</span></span><span class="hs-special">)</span><span class="hs-cpp">
+
+#if !(MIN_VERSION_base(4, 12, 0))
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Monoid</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-operator">&lt;&gt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-57"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html"><span class="hs-identifier">Graphics.Vega.VegaLite.Data</span></a></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DataValue"><span class="hs-identifier">DataValue</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DataValues"><span class="hs-identifier">DataValues</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#dataValueSpec"><span class="hs-identifier">dataValueSpec</span></a></span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html"><span class="hs-identifier">Graphics.Vega.VegaLite.Foundation</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#FieldName"><span class="hs-identifier">FieldName</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#toObject"><span class="hs-identifier">toObject</span></a></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html"><span class="hs-identifier">Graphics.Vega.VegaLite.Specification</span></a></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLProperty"><span class="hs-identifier">VLProperty</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLData"><span class="hs-identifier">VLData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLDatasets"><span class="hs-identifier">VLDatasets</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier">VLSpec</span></a></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#LabelledSpec"><span class="hs-identifier">LabelledSpec</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html"><span class="hs-identifier">Graphics.Vega.VegaLite.Time</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeSpec"><span class="hs-identifier">dateTimeSpec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="annot"><span class="hs-comment">{-|
+
+Indicates the type of data to be parsed when reading input data. For @FoDate@
+and @FoUtc@, the formatting specification can be specified using
+&lt;https://vega.github.io/vega-lite/docs/data.html#format D3's formatting specifiers&gt;
+or left as an empty string if default date formatting is to be applied. Care should
+be taken when assuming default parsing of dates because different browsers can
+parse dates differently. Being explicit about the date format is usually safer.
+
+-}</span></span><span>
+</span><span id="line-84"></span><span class="hs-keyword">data</span><span> </span><span id="DataType"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataType"><span class="hs-identifier hs-var">DataType</span></a></span></span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="FoNumber"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#FoNumber"><span class="hs-identifier hs-var">FoNumber</span></a></span></span><span>
+</span><span id="line-86"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Indicate numeric data type to be parsed when reading input data.</span></span><span>
+</span><span id="line-87"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="FoBoolean"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#FoBoolean"><span class="hs-identifier hs-var">FoBoolean</span></a></span></span><span>
+</span><span id="line-88"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Indicate Boolean data type to be parsed when reading input data.</span></span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="FoDate"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#FoDate"><span class="hs-identifier hs-var">FoDate</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-90"></span><span>      </span><span class="hs-comment">-- ^ Date format for parsing input data using</span><span>
+</span><span id="line-91"></span><span>      </span><span class="hs-comment">--   [D3's formatting specifiers](https://vega.github.io/vega-lite/docs/data.html#format)</span><span>
+</span><span id="line-92"></span><span>      </span><span class="hs-comment">--   or left as an empty string for default formatting.</span><span>
+</span><span id="line-93"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="FoUtc"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#FoUtc"><span class="hs-identifier hs-var">FoUtc</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-94"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Similar to 'FoDate' but for UTC format dates.</span></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="annot"><span class="hs-comment">{-|
+
+Specifies the type of format a data source uses. If the format is indicated by
+the file name extension (@&quot;.tsv&quot;@, @&quot;.csv&quot;@, @&quot;.json&quot;@) there is no need to indicate the
+format explicitly. However this can be useful if the filename extension does not
+indicate type (e.g. @&quot;.txt&quot;@) or you wish to customise the parsing of a file. For
+example, when specifying the @JSON@ format, its parameter indicates the name of
+property field containing the attribute data to extract. For details see the
+&lt;https://vega.github.io/vega-lite/docs/data.html#format Vega-Lite documentation&gt;.
+-}</span></span><span>
+</span><span id="line-107"></span><span class="hs-keyword">data</span><span> </span><span id="Format"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Format"><span class="hs-identifier hs-var">Format</span></a></span></span><span>
+</span><span id="line-108"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="JSON"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#JSON"><span class="hs-identifier hs-var">JSON</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-109"></span><span>      </span><span class="hs-comment">-- ^ Property to be extracted from some JSON when it has some surrounding structure.</span><span>
+</span><span id="line-110"></span><span>      </span><span class="hs-comment">--   e.g., specifying the property @values.features@ is equivalent to retrieving</span><span>
+</span><span id="line-111"></span><span>      </span><span class="hs-comment">--   @json.values.features@ from a JSON object with a custom delimiter.</span><span>
+</span><span id="line-112"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="CSV"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#CSV"><span class="hs-identifier hs-var">CSV</span></a></span></span><span>
+</span><span id="line-113"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Comma-separated (CSV) data file format.</span></span><span>
+</span><span id="line-114"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="TSV"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#TSV"><span class="hs-identifier hs-var">TSV</span></a></span></span><span>
+</span><span id="line-115"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Tab-separated (TSV) data file format</span></span><span>
+</span><span id="line-116"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DSV"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DSV"><span class="hs-identifier hs-var">DSV</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span>
+</span><span id="line-117"></span><span>      </span><span class="hs-comment">-- ^ The fields are separated by the given character (which must be a</span><span>
+</span><span id="line-118"></span><span>      </span><span class="hs-comment">--   single 16-bit code unit).</span><span>
+</span><span id="line-119"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-120"></span><span>      </span><span class="hs-comment">--   @since 0.4.0.0</span><span>
+</span><span id="line-121"></span><span>      </span><span class="hs-comment">{- This isn't in the current vega-lite v3 schema as far as I can see
+    | Arrow
+      -- ^ &lt;https://observablehq.com/@theneuralbit/introduction-to-apache-arrow Apache Arrow&gt; format.
+      --
+      -- @since 0.4.0.0
+      -}</span><span>
+</span><span id="line-127"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="TopojsonFeature"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#TopojsonFeature"><span class="hs-identifier hs-var">TopojsonFeature</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-128"></span><span>      </span><span class="hs-comment">-- ^ A topoJSON feature format containing an object with the given name. For example:</span><span>
+</span><span id="line-129"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-130"></span><span>      </span><span class="hs-comment">-- @</span><span>
+</span><span id="line-131"></span><span>      </span><span class="hs-comment">-- 'dataFromUrl' \&quot;londonBoroughs.json\&quot; ['TopojsonFeature' \&quot;boroughs\&quot;]</span><span>
+</span><span id="line-132"></span><span>      </span><span class="hs-comment">-- @</span><span>
+</span><span id="line-133"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="TopojsonMesh"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#TopojsonMesh"><span class="hs-identifier hs-var">TopojsonMesh</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-134"></span><span>      </span><span class="hs-comment">-- ^ A topoJSON mesh format containing an object with the given name. Unlike</span><span>
+</span><span id="line-135"></span><span>      </span><span class="hs-comment">--   'TopojsonFeature', the corresponding geo data are returned as a single unified mesh,</span><span>
+</span><span id="line-136"></span><span>      </span><span class="hs-comment">--   not as individual GeoJSON features.</span><span>
+</span><span id="line-137"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Parse"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Parse"><span class="hs-identifier hs-var">Parse</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#FieldName"><span class="hs-identifier hs-type">FieldName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataType"><span class="hs-identifier hs-type">DataType</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-138"></span><span>      </span><span class="hs-comment">-- ^ Parsing rules when processing some data text, specified as</span><span>
+</span><span id="line-139"></span><span>      </span><span class="hs-comment">--   a list of tuples in the form @(fieldname,</span><span>
+</span><span id="line-140"></span><span>      </span><span class="hs-comment">--   datatype)@. Useful when automatic type inference needs to</span><span>
+</span><span id="line-141"></span><span>      </span><span class="hs-comment">--   be overridden, for example when converting integers representing</span><span>
+</span><span id="line-142"></span><span>      </span><span class="hs-comment">--   years into dates and strings into numbers:</span><span>
+</span><span id="line-143"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-144"></span><span>      </span><span class="hs-comment">-- @</span><span>
+</span><span id="line-145"></span><span>      </span><span class="hs-comment">-- 'dataFromUrl' \&quot;myDataFile.csv\&quot;</span><span>
+</span><span id="line-146"></span><span>      </span><span class="hs-comment">--    [ 'Parse' [ ( \&quot;year\&quot;, 'FoDate' \&quot;%Y\&quot; ), ( &quot;\y\&quot;, 'FoNumber' ) ] ]</span><span>
+</span><span id="line-147"></span><span>      </span><span class="hs-comment">-- @</span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span class="annot"><span class="hs-comment">{-|
+
+Represents a single column of data. Used when generating inline data with
+'dataColumn' and 'dataFromColumns'.
+-}</span></span><span>
+</span><span id="line-155"></span><span class="hs-keyword">type</span><span> </span><span id="DataColumn"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataColumn"><span class="hs-identifier hs-var">DataColumn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#LabelledSpec"><span class="hs-identifier hs-type">LabelledSpec</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-156"></span><span>
+</span><span id="line-157"></span><span class="annot"><span class="hs-comment">{-|
+
+Represents a single row of data. Used when generating inline data with
+'dataRow' and 'dataFromRows'.
+-}</span></span><span>
+</span><span id="line-162"></span><span class="hs-keyword">type</span><span> </span><span id="DataRow"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataRow"><span class="hs-identifier hs-var">DataRow</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier hs-type">VLSpec</span></a></span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span class="annot"><span class="hs-comment">{-|
+
+Convenience type-annotation label for use with data generation functions.
+
+@
+myRegion : ['DataColumn'] -&gt; 'Data'
+myRegion =
+    'dataFromColumns' []
+        . 'dataColumn' &quot;easting&quot; ('Graphics.Vega.VegaLite.Numbers' [ -3, 4, 4, -3, -3 ])
+        . 'dataColumn' &quot;northing&quot; ('Graphics.Vega.VegaLite.Numbers' [ 52, 52, 45, 45, 52 ])
+@
+
+It is the same as 'Graphics.Vega.VegaLite.PropertySpec' (which was added in @0.4.0.0@),
+but kept separate to help better-document code.
+
+-}</span></span><span>
+</span><span id="line-180"></span><span class="hs-keyword">type</span><span> </span><span id="Data"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-var">Data</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLProperty"><span class="hs-identifier hs-type">VLProperty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier hs-type">VLSpec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-181"></span><span>
+</span><span id="line-182"></span><span>
+</span><span id="line-183"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-type">formatProperty</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Format"><span class="hs-identifier hs-type">Format</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Pair</span></span><span class="hs-special">]</span><span>
+</span><span id="line-184"></span><span id="formatProperty"><span class="annot"><span class="annottext">formatProperty :: Format -&gt; [Pair]
+</span><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-var hs-var">formatProperty</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#JSON"><span class="hs-identifier hs-type">JSON</span></a></span><span> </span><span id="local-6989586621679118926"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118926"><span class="hs-identifier hs-var">js</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-185"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679118933"><span class="annot"><span class="annottext">ps :: [(Key, Text)]
+</span><a href="#local-6989586621679118933"><span class="hs-identifier hs-var hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;type&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;json&quot;</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-186"></span><span>           </span><span class="annot"><span class="annottext">[(Key, Text)] -&gt; [(Key, Text)] -&gt; [(Key, Text)]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Bool
+</span><span class="hs-identifier hs-var">T.null</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text -&gt; Text
+</span><span class="hs-identifier hs-var">T.strip</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118926"><span class="hs-identifier hs-var">js</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">then</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-keyword">else</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;property&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118926"><span class="hs-identifier hs-var">js</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-187"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">((Key, Text) -&gt; Pair) -&gt; [(Key, Text)] -&gt; [Pair]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Text -&gt; Value) -&gt; (Key, Text) -&gt; Pair
+forall b c d. (b -&gt; c) -&gt; (d, b) -&gt; (d, c)
+forall (a :: * -&gt; * -&gt; *) b c d.
+Arrow a =&gt;
+a b c -&gt; a (d, b) (d, c)
+</span><span class="hs-identifier hs-var">second</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">toJSON</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Key, Text)]
+</span><a href="#local-6989586621679118933"><span class="hs-identifier hs-var">ps</span></a></span><span>
+</span><span id="line-188"></span><span>
+</span><span id="line-189"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-var">formatProperty</span></a></span><span> </span><span class="annot"><span class="annottext">Format
+</span><a href="Graphics.Vega.VegaLite.Input.html#CSV"><span class="hs-identifier hs-var">CSV</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;type&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Value
+</span><span class="hs-string">&quot;csv&quot;</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-190"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-var">formatProperty</span></a></span><span> </span><span class="annot"><span class="annottext">Format
+</span><a href="Graphics.Vega.VegaLite.Input.html#TSV"><span class="hs-identifier hs-var">TSV</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;type&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Value
+</span><span class="hs-string">&quot;tsv&quot;</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-191"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-var">formatProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DSV"><span class="hs-identifier hs-type">DSV</span></a></span><span> </span><span id="local-6989586621679118936"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679118936"><span class="hs-identifier hs-var">delim</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;type&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Value
+</span><span class="hs-string">&quot;dsv&quot;</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;delimiter&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Char -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679118936"><span class="hs-identifier hs-var">delim</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-192"></span><span class="hs-comment">-- formatProperty Arrow = [(&quot;type&quot;, &quot;arrow&quot;)]</span><span>
+</span><span id="line-193"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-var">formatProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#TopojsonFeature"><span class="hs-identifier hs-type">TopojsonFeature</span></a></span><span> </span><span id="local-6989586621679118937"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118937"><span class="hs-identifier hs-var">os</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;type&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Value
+</span><span class="hs-string">&quot;topojson&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-194"></span><span>                                      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;feature&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118937"><span class="hs-identifier hs-var">os</span></a></span><span>
+</span><span id="line-195"></span><span>                                      </span><span class="hs-special">]</span><span>
+</span><span id="line-196"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-var">formatProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#TopojsonMesh"><span class="hs-identifier hs-type">TopojsonMesh</span></a></span><span> </span><span id="local-6989586621679118938"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118938"><span class="hs-identifier hs-var">os</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;type&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Value
+</span><span class="hs-string">&quot;topojson&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-197"></span><span>                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;mesh&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118938"><span class="hs-identifier hs-var">os</span></a></span><span>
+</span><span id="line-198"></span><span>                                   </span><span class="hs-special">]</span><span>
+</span><span id="line-199"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-var">formatProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Parse"><span class="hs-identifier hs-type">Parse</span></a></span><span> </span><span id="local-6989586621679118939"><span class="annot"><span class="annottext">[(Text, DataType)]
+</span><a href="#local-6989586621679118939"><span class="hs-identifier hs-var">fmts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-200"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679118941"><span class="annot"><span class="annottext">pObj :: Value
+</span><a href="#local-6989586621679118941"><span class="hs-identifier hs-var hs-var">pObj</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[LabelledSpec] -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#toObject"><span class="hs-identifier hs-var">toObject</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Text, DataType) -&gt; LabelledSpec)
+-&gt; [(Text, DataType)] -&gt; [LabelledSpec]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(DataType -&gt; Value) -&gt; (Text, DataType) -&gt; LabelledSpec
+forall b c d. (b -&gt; c) -&gt; (d, b) -&gt; (d, c)
+forall (a :: * -&gt; * -&gt; *) b c d.
+Arrow a =&gt;
+a b c -&gt; a (d, b) (d, c)
+</span><span class="hs-identifier hs-var">second</span></span><span> </span><span class="annot"><span class="annottext">DataType -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Input.html#dataTypeSpec"><span class="hs-identifier hs-var">dataTypeSpec</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Text, DataType)]
+</span><a href="#local-6989586621679118939"><span class="hs-identifier hs-var">fmts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-201"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;parse&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679118941"><span class="hs-identifier hs-var">pObj</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-202"></span><span>
+</span><span id="line-203"></span><span>
+</span><span id="line-204"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataTypeSpec"><span class="hs-identifier hs-type">dataTypeSpec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataType"><span class="hs-identifier hs-type">DataType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier hs-type">VLSpec</span></a></span><span>
+</span><span id="line-205"></span><span id="dataTypeSpec"><span class="annot"><span class="annottext">dataTypeSpec :: DataType -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Input.html#dataTypeSpec"><span class="hs-identifier hs-var hs-var">dataTypeSpec</span></a></span></span><span> </span><span id="local-6989586621679118943"><span class="annot"><span class="annottext">DataType
+</span><a href="#local-6989586621679118943"><span class="hs-identifier hs-var">dType</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-206"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679118957"><span class="annot"><span class="annottext">s :: Text
+</span><a href="#local-6989586621679118957"><span class="hs-identifier hs-var hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DataType
+</span><a href="#local-6989586621679118943"><span class="hs-identifier hs-var">dType</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-207"></span><span>        </span><span class="annot"><span class="annottext">DataType
+</span><a href="Graphics.Vega.VegaLite.Input.html#FoNumber"><span class="hs-identifier hs-var">FoNumber</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;number&quot;</span></span><span>
+</span><span id="line-208"></span><span>        </span><span class="annot"><span class="annottext">DataType
+</span><a href="Graphics.Vega.VegaLite.Input.html#FoBoolean"><span class="hs-identifier hs-var">FoBoolean</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;boolean&quot;</span></span><span>
+</span><span id="line-209"></span><span>        </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#FoDate"><span class="hs-identifier hs-type">FoDate</span></a></span><span> </span><span id="local-6989586621679118958"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118958"><span class="hs-identifier hs-var">fmt</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Bool
+</span><span class="hs-identifier hs-var">T.null</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118958"><span class="hs-identifier hs-var">fmt</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;date&quot;</span></span><span>
+</span><span id="line-210"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;date:'&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118958"><span class="hs-identifier hs-var">fmt</span></a></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;'&quot;</span></span><span>
+</span><span id="line-211"></span><span>        </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#FoUtc"><span class="hs-identifier hs-type">FoUtc</span></a></span><span> </span><span id="local-6989586621679118959"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118959"><span class="hs-identifier hs-var">fmt</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Bool
+</span><span class="hs-identifier hs-var">T.null</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118959"><span class="hs-identifier hs-var">fmt</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;utc&quot;</span></span><span>
+</span><span id="line-212"></span><span>                  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;utc:'&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118959"><span class="hs-identifier hs-var">fmt</span></a></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;'&quot;</span></span><span>
+</span><span id="line-213"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118957"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-214"></span><span>
+</span><span id="line-215"></span><span>
+</span><span id="line-216"></span><span class="annot"><span class="hs-comment">{-|
+
+Create a row of data. A row comprises a list of (columnName, value) pairs.
+The final parameter is the list of any other rows to which this is added.
+
+This is expected to be used with 'dataFromRows'.
+
+@
+'dataRow' [(\&quot;Animal\&quot;, 'Graphics.Vega.VegaLite.Str' \&quot;Fish\&quot;), (\&quot;Age\&quot;, 'Graphics.Vega.VegaLite.Number' 28), (\&quot;Year\&quot;, 'Graphics.Vega.VegaLite.Str' &quot;2010&quot;)] []
+@
+-}</span></span><span>
+</span><span id="line-227"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataRow"><span class="hs-identifier hs-type">dataRow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#FieldName"><span class="hs-identifier hs-type">FieldName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DataValue"><span class="hs-identifier hs-type">DataValue</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataRow"><span class="hs-identifier hs-type">DataRow</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataRow"><span class="hs-identifier hs-type">DataRow</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-228"></span><span id="dataRow"><span class="annot"><span class="annottext">dataRow :: [(Text, DataValue)] -&gt; [Value] -&gt; [Value]
+</span><a href="Graphics.Vega.VegaLite.Input.html#dataRow"><span class="hs-identifier hs-var hs-var">dataRow</span></a></span></span><span> </span><span id="local-6989586621679118960"><span class="annot"><span class="annottext">[(Text, DataValue)]
+</span><a href="#local-6989586621679118960"><span class="hs-identifier hs-var">rw</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[LabelledSpec] -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#toObject"><span class="hs-identifier hs-var">toObject</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Text, DataValue) -&gt; LabelledSpec)
+-&gt; [(Text, DataValue)] -&gt; [LabelledSpec]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(DataValue -&gt; Value) -&gt; (Text, DataValue) -&gt; LabelledSpec
+forall b c d. (b -&gt; c) -&gt; (d, b) -&gt; (d, c)
+forall (a :: * -&gt; * -&gt; *) b c d.
+Arrow a =&gt;
+a b c -&gt; a (d, b) (d, c)
+</span><span class="hs-identifier hs-var">second</span></span><span> </span><span class="annot"><span class="annottext">DataValue -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Data.html#dataValueSpec"><span class="hs-identifier hs-var">dataValueSpec</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Text, DataValue)]
+</span><a href="#local-6989586621679118960"><span class="hs-identifier hs-var">rw</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Value -&gt; [Value] -&gt; [Value]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">)</span><span>
+</span><span id="line-229"></span><span>
+</span><span id="line-230"></span><span>
+</span><span id="line-231"></span><span class="annot"><span class="hs-comment">{-|
+
+Create a dataset comprising a collection of named 'Data' items. Each data item
+can be created with normal data generating functions such as 'dataFromRows' or
+'dataFromJson'. These can be later referred to using 'dataFromSource'.
+
+@
+let toJS = Data.Aeson.toJSON
+    obj = Data.Aeson.object
+
+    dvals = 'dataFromRows' []
+            . 'dataRow' [ ( &quot;cat&quot;, 'Graphics.Vega.VegaLite.Str' &quot;a&quot; ), ( &quot;val&quot;, 'Graphics.Vega.VegaLite.Number' 10 ) ]
+            . 'dataRow' [ ( &quot;cat&quot;, 'Graphics.Vega.VegaLite.Str' &quot;b&quot; ), ( &quot;val&quot;, 'Graphics.Vega.VegaLite.Number' 18 ) ]
+    json = toJS
+            [ obj [ ( &quot;cat&quot;, toJS &quot;a&quot; ), ( &quot;val&quot;, toJS 120 ) ]
+            , obj [ ( &quot;cat&quot;, toJS &quot;b&quot; ), ( &quot;val&quot;, toJS 180 ) ]
+            ]
+
+    enc = ...
+
+in 'Graphics.Vega.VegaLite.toVegaLite'
+    [ 'datasets' [ ( \&quot;myData\&quot;, dvals [] ),  ( \&quot;myJson\&quot;, 'dataFromJson' json [] ) ]
+    , 'dataFromSource' \&quot;myData\&quot; []
+    , 'Graphics.Vega.VegaLite.mark' 'Graphics.Vega.VegaLite.Bar' []
+    , enc []
+    ]
+@
+-}</span></span><span>
+</span><span id="line-259"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#datasets"><span class="hs-identifier hs-type">datasets</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-type">Data</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-type">Data</span></a></span><span>
+</span><span id="line-260"></span><span id="datasets"><span class="annot"><span class="annottext">datasets :: [(Text, Data)] -&gt; Data
+</span><a href="Graphics.Vega.VegaLite.Input.html#datasets"><span class="hs-identifier hs-var hs-var">datasets</span></a></span></span><span> </span><span id="local-6989586621679118961"><span class="annot"><span class="annottext">[(Text, Data)]
+</span><a href="#local-6989586621679118961"><span class="hs-identifier hs-var">namedData</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-261"></span><span>  </span><span class="hs-comment">-- Follow Elm in parsing the structure to get what we want, but the code is</span><span>
+</span><span id="line-262"></span><span>  </span><span class="hs-comment">-- written rather differently.</span><span>
+</span><span id="line-263"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-264"></span><span>  </span><span class="hs-comment">-- The input is expected to be a singleton list containing a pair.</span><span>
+</span><span id="line-265"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679118962"><span class="annot"><span class="annottext">converted :: (a, Value) -&gt; Value
+</span><a href="#local-6989586621679118962"><span class="hs-identifier hs-var hs-var">converted</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Value -&gt; Value
+</span><a href="#local-6989586621679118963"><span class="hs-identifier hs-var">extract</span></a></span><span> </span><span class="annot"><span class="annottext">(Value -&gt; Value) -&gt; ((a, Value) -&gt; Value) -&gt; (a, Value) -&gt; Value
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(a, Value) -&gt; Value
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span>
+</span><span id="line-266"></span><span>      </span><span id="local-6989586621679118967"><span class="annot"><span class="annottext">specs :: [LabelledSpec]
+</span><a href="#local-6989586621679118967"><span class="hs-identifier hs-var hs-var">specs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Text, Data) -&gt; LabelledSpec) -&gt; [(Text, Data)] -&gt; [LabelledSpec]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Data -&gt; Value) -&gt; (Text, Data) -&gt; LabelledSpec
+forall b c d. (b -&gt; c) -&gt; (d, b) -&gt; (d, c)
+forall (a :: * -&gt; * -&gt; *) b c d.
+Arrow a =&gt;
+a b c -&gt; a (d, b) (d, c)
+</span><span class="hs-identifier hs-var">second</span></span><span> </span><span class="annot"><span class="annottext">Data -&gt; Value
+forall {a}. (a, Value) -&gt; Value
+</span><a href="#local-6989586621679118962"><span class="hs-identifier hs-var">converted</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Text, Data)]
+</span><a href="#local-6989586621679118961"><span class="hs-identifier hs-var">namedData</span></a></span><span>
+</span><span id="line-267"></span><span>
+</span><span id="line-268"></span><span>      </span><span class="annot"><a href="#local-6989586621679118968"><span class="hs-identifier hs-type">convert</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Value</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Value</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-269"></span><span>      </span><span id="local-6989586621679118968"><span class="annot"><span class="annottext">convert :: Value -&gt; Maybe [LabelledSpec]
+</span><a href="#local-6989586621679118968"><span class="hs-identifier hs-var hs-var">convert</span></a></span></span><span> </span><span id="local-6989586621679118969"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679118969"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HashMap Text Value -&gt; [LabelledSpec]
+forall k v. HashMap k v -&gt; [(k, v)]
+</span><span class="hs-identifier hs-var">HM.toList</span></span><span> </span><span class="annot"><span class="annottext">(HashMap Text Value -&gt; [LabelledSpec])
+-&gt; Maybe (HashMap Text Value) -&gt; Maybe [LabelledSpec]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Maybe (HashMap Text Value)
+forall a. FromJSON a =&gt; ByteString -&gt; Maybe a
+</span><span class="hs-identifier hs-var">decode</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Value -&gt; ByteString
+forall a. ToJSON a =&gt; a -&gt; ByteString
+</span><span class="hs-identifier hs-var">encode</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679118969"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-270"></span><span>
+</span><span id="line-271"></span><span>      </span><span id="local-6989586621679118963"><span class="annot"><span class="annottext">extract :: Value -&gt; Value
+</span><a href="#local-6989586621679118963"><span class="hs-identifier hs-var hs-var">extract</span></a></span></span><span> </span><span id="local-6989586621679118974"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679118974"><span class="hs-identifier hs-var">din</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-272"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679118975"><span class="annot"><span class="annottext">extract' :: [(a, a)] -&gt; Maybe a
+</span><a href="#local-6989586621679118975"><span class="hs-identifier hs-var hs-var">extract'</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679118976"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679118976"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe a
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679118976"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-273"></span><span>            </span><span class="annot"><a href="#local-6989586621679118975"><span class="hs-identifier hs-var">extract'</span></a></span><span> </span><span class="annot"><span class="annottext">[(a, a)]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe a
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-274"></span><span>
+</span><span id="line-275"></span><span>        </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Value -&gt; Maybe Value -&gt; Value
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679118974"><span class="hs-identifier hs-var">din</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Value -&gt; Maybe [LabelledSpec]
+</span><a href="#local-6989586621679118968"><span class="hs-identifier hs-var">convert</span></a></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679118974"><span class="hs-identifier hs-var">din</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe [LabelledSpec]
+-&gt; ([LabelledSpec] -&gt; Maybe Value) -&gt; Maybe Value
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">[LabelledSpec] -&gt; Maybe Value
+forall {a} {a}. [(a, a)] -&gt; Maybe a
+</span><a href="#local-6989586621679118975"><span class="hs-identifier hs-var">extract'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-276"></span><span>
+</span><span id="line-277"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VLProperty
+</span><a href="Graphics.Vega.VegaLite.Specification.html#VLDatasets"><span class="hs-identifier hs-var">VLDatasets</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[LabelledSpec] -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#toObject"><span class="hs-identifier hs-var">toObject</span></a></span><span> </span><span class="annot"><span class="annottext">[LabelledSpec]
+</span><a href="#local-6989586621679118967"><span class="hs-identifier hs-var">specs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-278"></span><span>
+</span><span id="line-279"></span><span>
+</span><span id="line-280"></span><span class="hs-comment">-- | This is for composed specifications, and it tells the visualization to</span><span>
+</span><span id="line-281"></span><span class="hs-comment">--   ignore the data from the parent.</span><span>
+</span><span id="line-282"></span><span class="hs-comment">--</span><span>
+</span><span id="line-283"></span><span class="hs-comment">--   @since 0.4.0.0</span><span>
+</span><span id="line-284"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#noData"><span class="hs-identifier hs-type">noData</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-type">Data</span></a></span><span>
+</span><span id="line-285"></span><span id="noData"><span class="annot"><span class="annottext">noData :: Data
+</span><a href="Graphics.Vega.VegaLite.Input.html#noData"><span class="hs-identifier hs-var hs-var">noData</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VLProperty
+</span><a href="Graphics.Vega.VegaLite.Specification.html#VLData"><span class="hs-identifier hs-var">VLData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Value
+</span><span class="hs-identifier hs-var">A.Null</span></span><span class="hs-special">)</span><span>
+</span><span id="line-286"></span><span>
+</span><span id="line-287"></span><span>
+</span><span id="line-288"></span><span class="annot"><span class="hs-comment">{-|
+
+Name to give a data source. Useful when a specification needs to reference a
+data source, such as one generated via an API call.
+
+@
+dvals = 'dataName' \&quot;myName\&quot; ('dataFromUrl' \&quot;myData.json\&quot; [])
+@
+
+@since 0.4.0.0
+
+-}</span></span><span>
+</span><span id="line-300"></span><span>
+</span><span id="line-301"></span><span class="hs-comment">-- TODO: can we restrict this to only those with a VLProperty of VLData?</span><span>
+</span><span id="line-302"></span><span>
+</span><span id="line-303"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataName"><span class="hs-identifier hs-type">dataName</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-304"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-305"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The name to give the data source</span></span><span>
+</span><span id="line-306"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-type">Data</span></a></span><span>
+</span><span id="line-307"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The data source to be named.</span></span><span>
+</span><span id="line-308"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-type">Data</span></a></span><span>
+</span><span id="line-309"></span><span>  </span><span class="hs-comment">-- ^ If the input @Data@ argument is not a data source then</span><span>
+</span><span id="line-310"></span><span>  </span><span class="hs-comment">--   this is just the input value.</span><span>
+</span><span id="line-311"></span><span id="dataName"><span class="annot"><span class="annottext">dataName :: Text -&gt; Data -&gt; Data
+</span><a href="Graphics.Vega.VegaLite.Input.html#dataName"><span class="hs-identifier hs-var hs-var">dataName</span></a></span></span><span> </span><span id="local-6989586621679118978"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118978"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679118979"><span class="annot"><span class="annottext">odata :: Data
+</span><a href="#local-6989586621679118979"><span class="hs-identifier hs-var">odata</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="annottext">VLProperty
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679118980"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679118980"><span class="hs-identifier hs-var">dataSpec</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-312"></span><span>  </span><span class="hs-comment">-- follow Elm in parsing the structure to get what we want, but the code is</span><span>
+</span><span id="line-313"></span><span>  </span><span class="hs-comment">-- written rather differently. This is based on the code used in datasets.</span><span>
+</span><span id="line-314"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-315"></span><span>  </span><span class="hs-comment">-- The input is expected to be a singleton list containing a pair.</span><span>
+</span><span id="line-316"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-317"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679118982"><span class="annot"><span class="annottext">converted :: Maybe Pair
+</span><a href="#local-6989586621679118982"><span class="hs-identifier hs-var hs-var">converted</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe [Pair]
+</span><a href="#local-6989586621679118983"><span class="hs-identifier hs-var">convert</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe [Pair] -&gt; ([Pair] -&gt; Maybe Pair) -&gt; Maybe Pair
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Maybe Pair
+forall {a}. [a] -&gt; Maybe a
+</span><a href="#local-6989586621679118984"><span class="hs-identifier hs-var">extract</span></a></span><span>
+</span><span id="line-318"></span><span>
+</span><span id="line-319"></span><span>      </span><span class="hs-comment">-- Aeson's objects are wrappers around a hash map, so this should be</span><span>
+</span><span id="line-320"></span><span>      </span><span class="hs-comment">-- a relatively easy conversion. The type annotation isn't needed</span><span>
+</span><span id="line-321"></span><span>      </span><span class="hs-comment">-- but left in for reference.</span><span>
+</span><span id="line-322"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-323"></span><span>      </span><span class="annot"><a href="#local-6989586621679118983"><span class="hs-identifier hs-type">convert</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Pair</span></span><span class="hs-special">]</span><span>
+</span><span id="line-324"></span><span>      </span><span id="local-6989586621679118983"><span class="annot"><span class="annottext">convert :: Maybe [Pair]
+</span><a href="#local-6989586621679118983"><span class="hs-identifier hs-var hs-var">convert</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HashMap Key Value -&gt; [Pair]
+forall k v. HashMap k v -&gt; [(k, v)]
+</span><span class="hs-identifier hs-var">HM.toList</span></span><span> </span><span class="annot"><span class="annottext">(HashMap Key Value -&gt; [Pair])
+-&gt; Maybe (HashMap Key Value) -&gt; Maybe [Pair]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; Maybe (HashMap Key Value)
+forall a. FromJSON a =&gt; ByteString -&gt; Maybe a
+</span><span class="hs-identifier hs-var">decode</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Value -&gt; ByteString
+forall a. ToJSON a =&gt; a -&gt; ByteString
+</span><span class="hs-identifier hs-var">encode</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679118980"><span class="hs-identifier hs-var">dataSpec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-325"></span><span>
+</span><span id="line-326"></span><span>      </span><span id="local-6989586621679118984"><span class="annot"><span class="annottext">extract :: [a] -&gt; Maybe a
+</span><a href="#local-6989586621679118984"><span class="hs-identifier hs-var hs-var">extract</span></a></span></span><span> </span><span class="hs-special">[</span><span id="local-6989586621679118985"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679118985"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe a
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679118985"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-327"></span><span>      </span><span class="annot"><a href="#local-6989586621679118984"><span class="hs-identifier hs-var">extract</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe a
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-328"></span><span>
+</span><span id="line-329"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Pair
+</span><a href="#local-6989586621679118982"><span class="hs-identifier hs-var">converted</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-330"></span><span>       </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679118986"><span class="annot"><span class="annottext">Pair
+</span><a href="#local-6989586621679118986"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VLProperty
+</span><a href="Graphics.Vega.VegaLite.Specification.html#VLData"><span class="hs-identifier hs-var">VLData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;name&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679118978"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Pair
+</span><a href="#local-6989586621679118986"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-331"></span><span>       </span><span class="annot"><span class="annottext">Maybe Pair
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Data
+</span><a href="#local-6989586621679118979"><span class="hs-identifier hs-var">odata</span></a></span><span>
+</span><span id="line-332"></span><span>
+</span><span id="line-333"></span><span>
+</span><span id="line-334"></span><span class="annot"><span class="hs-comment">{-|
+
+Declare a data source from a list of column values. Each column has a
+specific type (e.g. 'Number' or 'String'), but different columns can have
+different types.
+
+Note that the columns are truncated to match the length of the shortest column.
+
+@
+'dataFromColumns' [ 'Parse' [ ( \&quot;Year\&quot;, 'FoDate' &quot;%Y&quot; ) ] ]
+  . 'dataColumn' \&quot;Animal\&quot; ('Strings' [ \&quot;Fish\&quot;, \&quot;Dog\&quot;, \&quot;Cat\&quot; ])
+  . 'dataColumn' \&quot;Age\&quot; ('Numbers' [ 28, 12, 6 ])
+  . 'dataColumn' \&quot;Year\&quot; ('Strings' [ &quot;2010&quot;, &quot;2014&quot;, &quot;2015&quot; ])
+@
+-}</span></span><span>
+</span><span id="line-349"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataFromColumns"><span class="hs-identifier hs-type">dataFromColumns</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-350"></span><span>  </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Format"><span class="hs-identifier hs-type">Format</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-351"></span><span>  </span><span class="hs-comment">-- ^ An optional list of formatting instructions for the columns.</span><span>
+</span><span id="line-352"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-353"></span><span>  </span><span class="hs-comment">--   Simple numbers and strings do not normally need formatting, but it is</span><span>
+</span><span id="line-354"></span><span>  </span><span class="hs-comment">--   good practice to explicitly declare date-time formats as handling of</span><span>
+</span><span id="line-355"></span><span>  </span><span class="hs-comment">--   these values can vary between different viewers (e.g. browsers).</span><span>
+</span><span id="line-356"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-357"></span><span>  </span><span class="hs-comment">--   See the</span><span>
+</span><span id="line-358"></span><span>  </span><span class="hs-comment">--   &lt;https://vega.github.io/vega-lite/docs/data.html#format Vega-Lite documentation&gt;</span><span>
+</span><span id="line-359"></span><span>  </span><span class="hs-comment">--   for more details.</span><span>
+</span><span id="line-360"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataColumn"><span class="hs-identifier hs-type">DataColumn</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-361"></span><span>  </span><span class="hs-comment">-- ^ The columns to add. This is expected to be created with one or more</span><span>
+</span><span id="line-362"></span><span>  </span><span class="hs-comment">--   calls to 'dataColumn'.</span><span>
+</span><span id="line-363"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-type">Data</span></a></span><span>
+</span><span id="line-364"></span><span id="dataFromColumns"><span class="annot"><span class="annottext">dataFromColumns :: [Format] -&gt; [[LabelledSpec]] -&gt; Data
+</span><a href="Graphics.Vega.VegaLite.Input.html#dataFromColumns"><span class="hs-identifier hs-var hs-var">dataFromColumns</span></a></span></span><span> </span><span id="local-6989586621679118990"><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679118990"><span class="hs-identifier hs-var">fmts</span></a></span></span><span> </span><span id="local-6989586621679118991"><span class="annot"><span class="annottext">[[LabelledSpec]]
+</span><a href="#local-6989586621679118991"><span class="hs-identifier hs-var">cols</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-365"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679118992"><span class="annot"><span class="annottext">dataArray :: [Value]
+</span><a href="#local-6989586621679118992"><span class="hs-identifier hs-var hs-var">dataArray</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([LabelledSpec] -&gt; Value) -&gt; [[LabelledSpec]] -&gt; [Value]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">[LabelledSpec] -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#toObject"><span class="hs-identifier hs-var">toObject</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[[LabelledSpec]] -&gt; [[LabelledSpec]]
+forall a. [[a]] -&gt; [[a]]
+</span><a href="Graphics.Vega.VegaLite.Input.html#transpose"><span class="hs-identifier hs-var">transpose</span></a></span><span> </span><span class="annot"><span class="annottext">[[LabelledSpec]]
+</span><a href="#local-6989586621679118991"><span class="hs-identifier hs-var">cols</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-366"></span><span>
+</span><span id="line-367"></span><span>      </span><span id="local-6989586621679119003"><span class="annot"><span class="annottext">vals :: [Pair]
+</span><a href="#local-6989586621679119003"><span class="hs-identifier hs-var hs-var">vals</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;values&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Value] -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">[Value]
+</span><a href="#local-6989586621679118992"><span class="hs-identifier hs-var">dataArray</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-368"></span><span>             </span><span class="annot"><span class="annottext">[Pair] -&gt; [Pair] -&gt; [Pair]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[Format] -&gt; Bool
+forall a. [a] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679118990"><span class="hs-identifier hs-var">fmts</span></a></span><span>
+</span><span id="line-369"></span><span>                </span><span class="hs-keyword">then</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-370"></span><span>                </span><span class="hs-keyword">else</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;format&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Value -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679119005"><span class="hs-identifier hs-var">fmtObject</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-371"></span><span>
+</span><span id="line-372"></span><span>      </span><span id="local-6989586621679119005"><span class="annot"><span class="annottext">fmtObject :: Value
+</span><a href="#local-6989586621679119005"><span class="hs-identifier hs-var hs-var">fmtObject</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Format -&gt; [Pair]) -&gt; [Format] -&gt; [Pair]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">Format -&gt; [Pair]
+</span><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-var">formatProperty</span></a></span><span> </span><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679118990"><span class="hs-identifier hs-var">fmts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-373"></span><span>
+</span><span id="line-374"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VLProperty
+</span><a href="Graphics.Vega.VegaLite.Specification.html#VLData"><span class="hs-identifier hs-var">VLData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="annot"><span class="annottext">[Pair]
+</span><a href="#local-6989586621679119003"><span class="hs-identifier hs-var">vals</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-375"></span><span>
+</span><span id="line-376"></span><span>
+</span><span id="line-377"></span><span id="local-6989586621679118813"><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#transpose"><span class="hs-identifier hs-type">transpose</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679118813"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679118813"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span></span><span>
+</span><span id="line-378"></span><span id="transpose"><span class="annot"><span class="annottext">transpose :: forall a. [[a]] -&gt; [[a]]
+</span><a href="Graphics.Vega.VegaLite.Input.html#transpose"><span class="hs-identifier hs-var hs-var">transpose</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-379"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#transpose"><span class="hs-identifier hs-var">transpose</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679119008"><span class="annot"><span class="annottext">[[a]]
+</span><a href="#local-6989586621679119008"><span class="hs-identifier hs-var">xss</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[[a]] -&gt; [[a]]
+forall a. [[a]] -&gt; [[a]]
+</span><a href="Graphics.Vega.VegaLite.Input.html#transpose"><span class="hs-identifier hs-var">transpose</span></a></span><span> </span><span class="annot"><span class="annottext">[[a]]
+</span><a href="#local-6989586621679119008"><span class="hs-identifier hs-var">xss</span></a></span><span>
+</span><span id="line-380"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#transpose"><span class="hs-identifier hs-var">transpose</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679119009"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679119009"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679119010"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679119010"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679119011"><span class="annot"><span class="annottext">[[a]]
+</span><a href="#local-6989586621679119011"><span class="hs-identifier hs-var">xss</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-381"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679119012"><span class="annot"><span class="annottext">heads :: [a]
+</span><a href="#local-6989586621679119012"><span class="hs-identifier hs-var hs-var">heads</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Maybe a) -&gt; [[a]] -&gt; [a]
+forall {a} {b}. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><a href="#local-6989586621679119013"><span class="hs-identifier hs-var">filterMap</span></a></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Maybe a
+forall {a}. [a] -&gt; Maybe a
+</span><a href="#local-6989586621679119014"><span class="hs-identifier hs-var">elmHead</span></a></span><span> </span><span class="annot"><span class="annottext">[[a]]
+</span><a href="#local-6989586621679119011"><span class="hs-identifier hs-var">xss</span></a></span><span> </span><span class="hs-comment">--</span><span>
+</span><span id="line-382"></span><span>      </span><span id="local-6989586621679119015"><span class="annot"><span class="annottext">tails :: [[a]]
+</span><a href="#local-6989586621679119015"><span class="hs-identifier hs-var hs-var">tails</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Maybe [a]) -&gt; [[a]] -&gt; [[a]]
+forall {a} {b}. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><a href="#local-6989586621679119013"><span class="hs-identifier hs-var">filterMap</span></a></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Maybe [a]
+forall {a}. [a] -&gt; Maybe [a]
+</span><a href="#local-6989586621679119016"><span class="hs-identifier hs-var">elmTail</span></a></span><span> </span><span class="annot"><span class="annottext">[[a]]
+</span><a href="#local-6989586621679119011"><span class="hs-identifier hs-var">xss</span></a></span><span>
+</span><span id="line-383"></span><span>
+</span><span id="line-384"></span><span>      </span><span id="local-6989586621679119014"><span class="annot"><span class="annottext">elmHead :: [a] -&gt; Maybe a
+</span><a href="#local-6989586621679119014"><span class="hs-identifier hs-var hs-var">elmHead</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679119017"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679119017"><span class="hs-identifier hs-var">h</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[a]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Maybe a
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679119017"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-385"></span><span>      </span><span class="annot"><a href="#local-6989586621679119014"><span class="hs-identifier hs-var">elmHead</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe a
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-386"></span><span>
+</span><span id="line-387"></span><span>      </span><span id="local-6989586621679119016"><span class="annot"><span class="annottext">elmTail :: [a] -&gt; Maybe [a]
+</span><a href="#local-6989586621679119016"><span class="hs-identifier hs-var hs-var">elmTail</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe [a]
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-388"></span><span>      </span><span class="annot"><a href="#local-6989586621679119016"><span class="hs-identifier hs-var">elmTail</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679119018"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679119018"><span class="hs-identifier hs-var">ts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Maybe [a]
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679119018"><span class="hs-identifier hs-var">ts</span></a></span><span>
+</span><span id="line-389"></span><span>
+</span><span id="line-390"></span><span>      </span><span id="local-6989586621679119013"><span class="annot"><span class="annottext">filterMap :: (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><a href="#local-6989586621679119013"><span class="hs-identifier hs-var hs-var">filterMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+forall {a} {b}. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span>
+</span><span id="line-391"></span><span>
+</span><span id="line-392"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679119009"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679119012"><span class="hs-identifier hs-var">heads</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [[a]] -&gt; [[a]]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[[a]] -&gt; [[a]]
+forall a. [[a]] -&gt; [[a]]
+</span><a href="Graphics.Vega.VegaLite.Input.html#transpose"><span class="hs-identifier hs-var">transpose</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679119010"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [[a]] -&gt; [[a]]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[[a]]
+</span><a href="#local-6989586621679119015"><span class="hs-identifier hs-var">tails</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-393"></span><span>
+</span><span id="line-394"></span><span>
+</span><span id="line-395"></span><span class="annot"><span class="hs-comment">{-|
+
+Declare a data source from a provided json specification. The most likely use-case
+for specifying json inline is when creating &lt;http://geojson.org geojson&gt; objects,
+when 'Graphics.Vega.VegaLite.geometry', 'Graphics.Vega.VegaLite.geometryCollection', and 'Graphics.Vega.VegaLite.geoFeatureCollection' functions
+may be used. For more general cases of json creation, consider 'Data.Aeson.encode'.
+
+@
+let geojson =
+        'Graphics.Vega.VegaLite.geometry' ('Graphics.Vega.VegaLite.GeoPolygon' [ [ ( -3, 59 ), ( 4, 59 ), ( 4, 52 ), ( -3, 59 ) ] ]) []
+in 'Graphics.Vega.VegaLite.toVegaLite'
+    [ 'Graphics.Vega.VegaLite.width' 200
+    , 'Graphics.Vega.VegaLite.height' 200
+    , 'dataFromJson' geojson []
+    , 'Graphics.Vega.VegaLite.projection' [ 'Graphics.Vega.VegaLite.PrType' 'Graphics.Vega.VegaLite.Orthographic' ]
+    , 'Graphics.Vega.VegaLite.mark' 'Graphics.Vega.VegaLite.Geoshape' []
+    ]
+@
+-}</span></span><span>
+</span><span id="line-414"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataFromJson"><span class="hs-identifier hs-type">dataFromJson</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier hs-type">VLSpec</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Format"><span class="hs-identifier hs-type">Format</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-type">Data</span></a></span><span>
+</span><span id="line-415"></span><span id="dataFromJson"><span class="annot"><span class="annottext">dataFromJson :: Value -&gt; [Format] -&gt; Data
+</span><a href="Graphics.Vega.VegaLite.Input.html#dataFromJson"><span class="hs-identifier hs-var hs-var">dataFromJson</span></a></span></span><span> </span><span id="local-6989586621679119019"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679119019"><span class="hs-identifier hs-var">vlspec</span></a></span></span><span> </span><span id="local-6989586621679119020"><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679119020"><span class="hs-identifier hs-var">fmts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-416"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679119026"><span class="annot"><span class="annottext">js :: Value
+</span><a href="#local-6989586621679119026"><span class="hs-identifier hs-var hs-var">js</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[Format] -&gt; Bool
+forall a. [a] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679119020"><span class="hs-identifier hs-var">fmts</span></a></span><span>
+</span><span id="line-417"></span><span>           </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;values&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679119019"><span class="hs-identifier hs-var">vlspec</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-418"></span><span>           </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;values&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679119019"><span class="hs-identifier hs-var">vlspec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-419"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;format&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-420"></span><span>                          </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Format -&gt; [Pair]) -&gt; [Format] -&gt; [Pair]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">Format -&gt; [Pair]
+</span><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-var">formatProperty</span></a></span><span> </span><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679119020"><span class="hs-identifier hs-var">fmts</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-421"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VLProperty
+</span><a href="Graphics.Vega.VegaLite.Specification.html#VLData"><span class="hs-identifier hs-var">VLData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679119026"><span class="hs-identifier hs-var">js</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-422"></span><span>
+</span><span id="line-423"></span><span>
+</span><span id="line-424"></span><span class="annot"><span class="hs-comment">{-|
+
+Create a column of data. A column has a name and a list of values. The final
+parameter is the list of any other columns to which this is added.
+
+This is expected to be used with 'dataFromColumns'.
+
+@
+'dataColumn' \&quot;Animal\&quot; ('Strings' [ \&quot;Cat\&quot;, \&quot;Dog\&quot;, \&quot;Mouse\&quot;]) []
+@
+-}</span></span><span>
+</span><span id="line-435"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataColumn"><span class="hs-identifier hs-type">dataColumn</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#FieldName"><span class="hs-identifier hs-type">FieldName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DataValues"><span class="hs-identifier hs-type">DataValues</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataColumn"><span class="hs-identifier hs-type">DataColumn</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataColumn"><span class="hs-identifier hs-type">DataColumn</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-436"></span><span id="dataColumn"><span class="annot"><span class="annottext">dataColumn :: Text -&gt; DataValues -&gt; [[LabelledSpec]] -&gt; [[LabelledSpec]]
+</span><a href="Graphics.Vega.VegaLite.Input.html#dataColumn"><span class="hs-identifier hs-var hs-var">dataColumn</span></a></span></span><span> </span><span id="local-6989586621679119027"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679119027"><span class="hs-identifier hs-var">colName</span></a></span></span><span> </span><span id="local-6989586621679119028"><span class="annot"><span class="annottext">DataValues
+</span><a href="#local-6989586621679119028"><span class="hs-identifier hs-var">dVals</span></a></span></span><span> </span><span id="local-6989586621679119029"><span class="annot"><span class="annottext">[[LabelledSpec]]
+</span><a href="#local-6989586621679119029"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-437"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679119035"><span class="annot"><span class="annottext">col :: [Value]
+</span><a href="#local-6989586621679119035"><span class="hs-identifier hs-var hs-var">col</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DataValues
+</span><a href="#local-6989586621679119028"><span class="hs-identifier hs-var">dVals</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-438"></span><span>        </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Booleans"><span class="hs-identifier hs-type">Booleans</span></a></span><span> </span><span id="local-6989586621679119037"><span class="annot"><span class="annottext">[Bool]
+</span><a href="#local-6989586621679119037"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Value) -&gt; [Bool] -&gt; [Value]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">[Bool]
+</span><a href="#local-6989586621679119037"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><span id="line-439"></span><span>        </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#DateTimes"><span class="hs-identifier hs-type">DateTimes</span></a></span><span> </span><span id="local-6989586621679119039"><span class="annot"><span class="annottext">[[DateTime]]
+</span><a href="#local-6989586621679119039"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">([DateTime] -&gt; Value) -&gt; [[DateTime]] -&gt; [Value]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">[DateTime] -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Time.html#dateTimeSpec"><span class="hs-identifier hs-var">dateTimeSpec</span></a></span><span> </span><span class="annot"><span class="annottext">[[DateTime]]
+</span><a href="#local-6989586621679119039"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><span id="line-440"></span><span>        </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Numbers"><span class="hs-identifier hs-type">Numbers</span></a></span><span> </span><span id="local-6989586621679119040"><span class="annot"><span class="annottext">[Double]
+</span><a href="#local-6989586621679119040"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Value) -&gt; [Double] -&gt; [Value]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">[Double]
+</span><a href="#local-6989586621679119040"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><span id="line-441"></span><span>        </span><span class="annot"><a href="Graphics.Vega.VegaLite.Data.html#Strings"><span class="hs-identifier hs-type">Strings</span></a></span><span> </span><span id="local-6989586621679119041"><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679119041"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Text -&gt; Value) -&gt; [Text] -&gt; [Value]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679119041"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><span id="line-442"></span><span>
+</span><span id="line-443"></span><span>      </span><span id="local-6989586621679119042"><span class="annot"><span class="annottext">x :: [LabelledSpec]
+</span><a href="#local-6989586621679119042"><span class="hs-identifier hs-var hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Value -&gt; LabelledSpec) -&gt; [Value] -&gt; [LabelledSpec]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679119027"><span class="hs-identifier hs-var">colName</span></a></span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Value]
+</span><a href="#local-6989586621679119035"><span class="hs-identifier hs-var">col</span></a></span><span>
+</span><span id="line-444"></span><span>
+</span><span id="line-445"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">[LabelledSpec]
+</span><a href="#local-6989586621679119042"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">[LabelledSpec] -&gt; [[LabelledSpec]] -&gt; [[LabelledSpec]]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[[LabelledSpec]]
+</span><a href="#local-6989586621679119029"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-446"></span><span>
+</span><span id="line-447"></span><span>
+</span><span id="line-448"></span><span class="annot"><span class="hs-comment">{-|
+
+Declare a data source from a provided list of row values. Each row
+contains a list of tuples where the first value is a string
+representing the column name, and the second the column value for that
+row. Each column can have a value of a different type but
+__you must ensure__
+that when subsequent rows are added, they match the types of
+previous values with shared column names.
+
+Note though that generally if you are creating data inline (as opposed
+to reading from a file), adding data by column is more efficient and
+less error-prone.
+
+@
+dataFromRows [ 'Parse' [ ( \&quot;Year\&quot;, 'FoDate' &quot;%Y&quot; ) ] ]
+  . 'dataRow' [ ( \&quot;Animal\&quot;, 'Str' \&quot;Fish\&quot; ), ( \&quot;Age\&quot;, 'Number' 28 ), ( \&quot;Year\&quot;, 'Str' &quot;2010&quot; ) ]
+  . 'dataRow' [ ( \&quot;Animal\&quot;, 'Str' \&quot;Dog\&quot; ), ( \&quot;Age\&quot;, 'Number' 12 ), ( \&quot;Year\&quot;, 'Str' &quot;2014&quot; ) ]
+  . 'dataRow' [ ( \&quot;Animal\&quot;, 'Str' \&quot;Cat\&quot; ), ( \&quot;Age\&quot;, 'Number' 6 ), ( \&quot;Year\&quot;, 'Str' &quot;2015&quot; ) ]
+@
+-}</span></span><span>
+</span><span id="line-469"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataFromRows"><span class="hs-identifier hs-type">dataFromRows</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-470"></span><span>  </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Format"><span class="hs-identifier hs-type">Format</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-471"></span><span>  </span><span class="hs-comment">-- ^ An optional list of formatting instructions for the rows.</span><span>
+</span><span id="line-472"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-473"></span><span>  </span><span class="hs-comment">--   Simple numbers and strings do not normally need formatting, but it is</span><span>
+</span><span id="line-474"></span><span>  </span><span class="hs-comment">--   good practice to explicitly declare date-time formats as handling of</span><span>
+</span><span id="line-475"></span><span>  </span><span class="hs-comment">--   these values can vary between different viewers (e.g. browsers).</span><span>
+</span><span id="line-476"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-477"></span><span>  </span><span class="hs-comment">--   See the</span><span>
+</span><span id="line-478"></span><span>  </span><span class="hs-comment">--   &lt;https://vega.github.io/vega-lite/docs/data.html#format Vega-Lite documentation&gt;</span><span>
+</span><span id="line-479"></span><span>  </span><span class="hs-comment">--   for more details.</span><span>
+</span><span id="line-480"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#DataRow"><span class="hs-identifier hs-type">DataRow</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-481"></span><span>  </span><span class="hs-comment">-- ^ The rows to add. This is expected to be created with one or more</span><span>
+</span><span id="line-482"></span><span>  </span><span class="hs-comment">--   calls to 'dataRow'.</span><span>
+</span><span id="line-483"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-type">Data</span></a></span><span>
+</span><span id="line-484"></span><span id="dataFromRows"><span class="annot"><span class="annottext">dataFromRows :: [Format] -&gt; [Value] -&gt; Data
+</span><a href="Graphics.Vega.VegaLite.Input.html#dataFromRows"><span class="hs-identifier hs-var hs-var">dataFromRows</span></a></span></span><span> </span><span id="local-6989586621679119044"><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679119044"><span class="hs-identifier hs-var">fmts</span></a></span></span><span> </span><span id="local-6989586621679119045"><span class="annot"><span class="annottext">[Value]
+</span><a href="#local-6989586621679119045"><span class="hs-identifier hs-var">rows</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-485"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679119052"><span class="annot"><span class="annottext">kvs :: [Pair]
+</span><a href="#local-6989586621679119052"><span class="hs-identifier hs-var hs-var">kvs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;values&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Value] -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">[Value]
+</span><a href="#local-6989586621679119045"><span class="hs-identifier hs-var">rows</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-486"></span><span>            </span><span class="annot"><span class="annottext">Pair -&gt; [Pair] -&gt; [Pair]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[Format] -&gt; Bool
+forall a. [a] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679119044"><span class="hs-identifier hs-var">fmts</span></a></span><span>
+</span><span id="line-487"></span><span>              </span><span class="hs-keyword">then</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-488"></span><span>              </span><span class="hs-keyword">else</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;format&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Format -&gt; [Pair]) -&gt; [Format] -&gt; [Pair]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">Format -&gt; [Pair]
+</span><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-var">formatProperty</span></a></span><span> </span><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679119044"><span class="hs-identifier hs-var">fmts</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-489"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VLProperty
+</span><a href="Graphics.Vega.VegaLite.Specification.html#VLData"><span class="hs-identifier hs-var">VLData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="annot"><span class="annottext">[Pair]
+</span><a href="#local-6989586621679119052"><span class="hs-identifier hs-var">kvs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-490"></span><span>
+</span><span id="line-491"></span><span>
+</span><span id="line-492"></span><span class="annot"><span class="hs-comment">{-|
+
+Declare data from a named source. The source may be from named 'datasets' within
+a specification or a named data source created via the
+&lt;https://vega.github.io/vega/docs/api/view/#data Vega View API&gt;.
+An optional list of field formatting instructions can be provided as the second
+parameter or an empty list to use the default formatting. See the
+&lt;https://vega.github.io/vega-lite/docs/data.html#named Vega-Lite documentation&gt;
+for details.
+
+@
+'Graphics.Vega.VegaLite.toVegaLite'
+    [ 'datasets' [ ( &quot;myData&quot;, dvals [] ),  ( &quot;myJson&quot;, 'dataFromJson' json [] ) ]
+    , 'dataFromSource' &quot;myData&quot; []
+    , 'Graphics.Vega.VegaLite.mark' 'Graphics.Vega.VegaLite.Bar' []
+    , ...
+    ]
+@
+-}</span></span><span>
+</span><span id="line-511"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataFromSource"><span class="hs-identifier hs-type">dataFromSource</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Format"><span class="hs-identifier hs-type">Format</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-type">Data</span></a></span><span>
+</span><span id="line-512"></span><span id="dataFromSource"><span class="annot"><span class="annottext">dataFromSource :: Text -&gt; [Format] -&gt; Data
+</span><a href="Graphics.Vega.VegaLite.Input.html#dataFromSource"><span class="hs-identifier hs-var hs-var">dataFromSource</span></a></span></span><span> </span><span id="local-6989586621679119053"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679119053"><span class="hs-identifier hs-var">sourceName</span></a></span></span><span> </span><span id="local-6989586621679119054"><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679119054"><span class="hs-identifier hs-var">fmts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-513"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679119063"><span class="annot"><span class="annottext">kvs :: [Pair]
+</span><a href="#local-6989586621679119063"><span class="hs-identifier hs-var hs-var">kvs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;name&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679119053"><span class="hs-identifier hs-var">sourceName</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-514"></span><span>            </span><span class="annot"><span class="annottext">Pair -&gt; [Pair] -&gt; [Pair]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[Format] -&gt; Bool
+forall a. [a] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679119054"><span class="hs-identifier hs-var">fmts</span></a></span><span>
+</span><span id="line-515"></span><span>              </span><span class="hs-keyword">then</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-516"></span><span>              </span><span class="hs-keyword">else</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;format&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Format -&gt; [Pair]) -&gt; [Format] -&gt; [Pair]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">Format -&gt; [Pair]
+</span><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-var">formatProperty</span></a></span><span> </span><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679119054"><span class="hs-identifier hs-var">fmts</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-517"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VLProperty
+</span><a href="Graphics.Vega.VegaLite.Specification.html#VLData"><span class="hs-identifier hs-var">VLData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="annot"><span class="annottext">[Pair]
+</span><a href="#local-6989586621679119063"><span class="hs-identifier hs-var">kvs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-518"></span><span>
+</span><span id="line-519"></span><span>
+</span><span id="line-520"></span><span class="annot"><span class="hs-comment">{-|
+
+Declare data source from a url. The url can be a local path on a web server
+or an external http(s) url. Used to create a data ( property, specification ) pair.
+An optional list of field formatting instructions can be provided as the second
+parameter or an empty list to use the default formatting. See the
+&lt;https://vega.github.io/vega-lite/docs/data.html#format Vega-Lite documentation&gt;
+for details.
+
+@
+'dataFromUrl' &quot;data/weather.csv&quot; [ 'Parse' [ ( &quot;date&quot;, 'FoDate' &quot;%Y-%m-%d %H:%M&quot; ) ] ]
+@
+-}</span></span><span>
+</span><span id="line-533"></span><span class="hs-comment">-- TODO: should this use a URL type?</span><span>
+</span><span id="line-534"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataFromUrl"><span class="hs-identifier hs-type">dataFromUrl</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Format"><span class="hs-identifier hs-type">Format</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-type">Data</span></a></span><span>
+</span><span id="line-535"></span><span id="dataFromUrl"><span class="annot"><span class="annottext">dataFromUrl :: Text -&gt; [Format] -&gt; Data
+</span><a href="Graphics.Vega.VegaLite.Input.html#dataFromUrl"><span class="hs-identifier hs-var hs-var">dataFromUrl</span></a></span></span><span> </span><span id="local-6989586621679119064"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679119064"><span class="hs-identifier hs-var">url</span></a></span></span><span> </span><span id="local-6989586621679119065"><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679119065"><span class="hs-identifier hs-var">fmts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-536"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679119074"><span class="annot"><span class="annottext">kvs :: [Pair]
+</span><a href="#local-6989586621679119074"><span class="hs-identifier hs-var hs-var">kvs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;url&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679119064"><span class="hs-identifier hs-var">url</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-537"></span><span>            </span><span class="annot"><span class="annottext">Pair -&gt; [Pair] -&gt; [Pair]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[Format] -&gt; Bool
+forall a. [a] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679119065"><span class="hs-identifier hs-var">fmts</span></a></span><span>
+</span><span id="line-538"></span><span>              </span><span class="hs-keyword">then</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-539"></span><span>              </span><span class="hs-keyword">else</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;format&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Format -&gt; [Pair]) -&gt; [Format] -&gt; [Pair]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="annot"><span class="annottext">Format -&gt; [Pair]
+</span><a href="Graphics.Vega.VegaLite.Input.html#formatProperty"><span class="hs-identifier hs-var">formatProperty</span></a></span><span> </span><span class="annot"><span class="annottext">[Format]
+</span><a href="#local-6989586621679119065"><span class="hs-identifier hs-var">fmts</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-540"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VLProperty
+</span><a href="Graphics.Vega.VegaLite.Specification.html#VLData"><span class="hs-identifier hs-var">VLData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="annot"><span class="annottext">[Pair]
+</span><a href="#local-6989586621679119074"><span class="hs-identifier hs-var">kvs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-541"></span><span>
+</span><span id="line-542"></span><span>
+</span><span id="line-543"></span><span class="annot"><span class="hs-comment">{-|
+
+Generate a sequence of numbers as a data source. The resulting
+sequence will have the name @\&quot;data\&quot;@. To give it an alternative name use
+'dataSequenceAs'.
+
+@
+myData = 'dataSequence' 0 6.28 0.1
+@
+
+@since 0.4.0.0
+
+-}</span></span><span>
+</span><span id="line-556"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataSequence"><span class="hs-identifier hs-type">dataSequence</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-557"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>     </span><span class="annot"><span class="hs-comment">-- ^ start of the sequence (inclusive)</span></span><span>
+</span><span id="line-558"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ end of the sequence (exclusive)</span></span><span>
+</span><span id="line-559"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ step size</span></span><span>
+</span><span id="line-560"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-type">Data</span></a></span><span>
+</span><span id="line-561"></span><span id="dataSequence"><span class="annot"><span class="annottext">dataSequence :: Double -&gt; Double -&gt; Double -&gt; Data
+</span><a href="Graphics.Vega.VegaLite.Input.html#dataSequence"><span class="hs-identifier hs-var hs-var">dataSequence</span></a></span></span><span> </span><span id="local-6989586621679119075"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679119075"><span class="hs-identifier hs-var">start</span></a></span></span><span> </span><span id="local-6989586621679119076"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679119076"><span class="hs-identifier hs-var">stop</span></a></span></span><span> </span><span id="local-6989586621679119077"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679119077"><span class="hs-identifier hs-var">step</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-562"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679119079"><span class="annot"><span class="annottext">vals :: [Pair]
+</span><a href="#local-6989586621679119079"><span class="hs-identifier hs-var hs-var">vals</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;sequence&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="annot"><span class="annottext">[Pair]
+</span><a href="#local-6989586621679119080"><span class="hs-identifier hs-var">svals</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-563"></span><span>      </span><span id="local-6989586621679119080"><span class="annot"><span class="annottext">svals :: [Pair]
+</span><a href="#local-6989586621679119080"><span class="hs-identifier hs-var hs-var">svals</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;start&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Double -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679119075"><span class="hs-identifier hs-var">start</span></a></span><span>
+</span><span id="line-564"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;stop&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Double -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679119076"><span class="hs-identifier hs-var">stop</span></a></span><span>
+</span><span id="line-565"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;step&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Double -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679119077"><span class="hs-identifier hs-var">step</span></a></span><span>
+</span><span id="line-566"></span><span>              </span><span class="hs-special">]</span><span>
+</span><span id="line-567"></span><span>
+</span><span id="line-568"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VLProperty
+</span><a href="Graphics.Vega.VegaLite.Specification.html#VLData"><span class="hs-identifier hs-var">VLData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="annot"><span class="annottext">[Pair]
+</span><a href="#local-6989586621679119079"><span class="hs-identifier hs-var">vals</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-569"></span><span>
+</span><span id="line-570"></span><span>
+</span><span id="line-571"></span><span class="annot"><span class="hs-comment">{-|
+
+Generate a sequence of numbers as a named data source. This extends
+'dataSequence' by allowing you to name the data source.
+
+@
+myTheta = 'dataSequenceAs' 0 6.28 0.1 \&quot;theta\&quot;
+@
+
+@since 0.4.0.0
+
+-}</span></span><span>
+</span><span id="line-583"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#dataSequenceAs"><span class="hs-identifier hs-type">dataSequenceAs</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-584"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>     </span><span class="annot"><span class="hs-comment">-- ^ start of the sequence (inclusive)</span></span><span>
+</span><span id="line-585"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ end of the sequence (exclusive)</span></span><span>
+</span><span id="line-586"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ step size</span></span><span>
+</span><span id="line-587"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#FieldName"><span class="hs-identifier hs-type">FieldName</span></a></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The name of the data source</span></span><span>
+</span><span id="line-588"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Input.html#Data"><span class="hs-identifier hs-type">Data</span></a></span><span>
+</span><span id="line-589"></span><span id="dataSequenceAs"><span class="annot"><span class="annottext">dataSequenceAs :: Double -&gt; Double -&gt; Double -&gt; Text -&gt; Data
+</span><a href="Graphics.Vega.VegaLite.Input.html#dataSequenceAs"><span class="hs-identifier hs-var hs-var">dataSequenceAs</span></a></span></span><span> </span><span id="local-6989586621679119090"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679119090"><span class="hs-identifier hs-var">start</span></a></span></span><span> </span><span id="local-6989586621679119091"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679119091"><span class="hs-identifier hs-var">stop</span></a></span></span><span> </span><span id="local-6989586621679119092"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679119092"><span class="hs-identifier hs-var">step</span></a></span></span><span> </span><span id="local-6989586621679119093"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679119093"><span class="hs-identifier hs-var">outName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-590"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679119097"><span class="annot"><span class="annottext">vals :: [Pair]
+</span><a href="#local-6989586621679119097"><span class="hs-identifier hs-var hs-var">vals</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;sequence&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Value -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="annot"><span class="annottext">[Pair]
+</span><a href="#local-6989586621679119098"><span class="hs-identifier hs-var">svals</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-591"></span><span>      </span><span id="local-6989586621679119098"><span class="annot"><span class="annottext">svals :: [Pair]
+</span><a href="#local-6989586621679119098"><span class="hs-identifier hs-var hs-var">svals</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;start&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Double -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679119090"><span class="hs-identifier hs-var">start</span></a></span><span>
+</span><span id="line-592"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;stop&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Double -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679119091"><span class="hs-identifier hs-var">stop</span></a></span><span>
+</span><span id="line-593"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;step&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Double -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679119092"><span class="hs-identifier hs-var">step</span></a></span><span>
+</span><span id="line-594"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;as&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679119093"><span class="hs-identifier hs-var">outName</span></a></span><span>
+</span><span id="line-595"></span><span>              </span><span class="hs-special">]</span><span>
+</span><span id="line-596"></span><span>
+</span><span id="line-597"></span><span>  </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VLProperty
+</span><a href="Graphics.Vega.VegaLite.Specification.html#VLData"><span class="hs-identifier hs-var">VLData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="annot"><span class="annottext">[Pair]
+</span><a href="#local-6989586621679119097"><span class="hs-identifier hs-var">vals</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-598"></span></pre></body></html>

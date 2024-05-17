@@ -92,7 +92,7 @@ data MidiMessage
 ANote :: !Channel -> !Key -> !Velocity -> !Time -> MidiMessage
 Std :: Message -> MidiMessage
 getTimeNow :: IO Time
-data DeviceInfo
+data () => DeviceInfo
 DeviceInfo :: String -> String -> Bool -> Bool -> Bool -> DeviceInfo
 [interface] :: DeviceInfo -> String
 [name] :: DeviceInfo -> String
@@ -101,7 +101,7 @@ DeviceInfo :: String -> String -> Bool -> Bool -> Bool -> DeviceInfo
 [opened] :: DeviceInfo -> Bool
 data InputDeviceID
 data OutputDeviceID
-data Message
+data () => Message
 NoteOff :: !Channel -> !Key -> !Velocity -> Message
 [channel] :: Message -> !Channel
 [key] :: Message -> !Key
@@ -205,8 +205,8 @@ Prim :: Primitive a -> Music a
 (:+:) :: Music a -> Music a -> Music a
 (:=:) :: Music a -> Music a -> Music a
 Modify :: Control -> Music a -> Music a
-infixr 5 :=:
 infixr 5 :+:
+infixr 5 :=:
 data Control
 Tempo :: Rational -> Control
 Transpose :: AbsPitch -> Control
@@ -781,7 +781,7 @@ playMidi :: OutputDeviceID -> Midi -> IO ()
 data MidiMessage
 ANote :: !Channel -> !Key -> !Velocity -> !Time -> MidiMessage
 Std :: Message -> MidiMessage
-data Message
+data () => Message
 NoteOff :: !Channel -> !Key -> !Velocity -> Message
 [channel] :: Message -> !Channel
 [key] :: Message -> !Key
@@ -825,7 +825,7 @@ TimeSignature :: !Int -> !Int -> !Int -> !Int -> Message
 KeySignature :: !Int -> !Int -> Message
 Reserved :: !Int -> !ByteString -> Message
 Sysex :: !Int -> !ByteString -> Message
-data DeviceInfo
+data () => DeviceInfo
 DeviceInfo :: String -> String -> Bool -> Bool -> Bool -> DeviceInfo
 [interface] :: DeviceInfo -> String
 [name] :: DeviceInfo -> String
@@ -931,11 +931,11 @@ butterhp :: Clock p => Signal p (Double, Double) Double
 butterbp :: Clock p => Signal p (Double, Double, Double) Double
 butterbr :: Clock p => Signal p (Double, Double, Double) Double
 comb :: Clock p => Double -> Signal p (Double, Double) Double
-oscil :: forall p (a :: Type -> Type -> Type). (Clock p, ArrowCircuit a) => Table -> Double -> ArrowP a p Double Double
-oscili :: forall p (a :: Type -> Type -> Type). (Clock p, ArrowCircuit a) => Table -> Double -> ArrowP a p Double Double
-oscils :: forall p (a :: Type -> Type -> Type). (Clock p, ArrowCircuit a) => Double -> ArrowP a p Double Double
-oscil1 :: forall p (a :: Type -> Type -> Type). (Clock p, ArrowChoice a, ArrowCircuit a) => Table -> Double -> Double -> ArrowP a p Double Double
-oscil1i :: forall p (a :: Type -> Type -> Type). (Clock p, ArrowChoice a, ArrowCircuit a) => Table -> Double -> Double -> ArrowP a p Double Double
+oscil :: forall {p} {a :: Type -> Type -> Type}. (Clock p, ArrowCircuit a) => Table -> Double -> ArrowP a p Double Double
+oscili :: forall {p} {a :: Type -> Type -> Type}. (Clock p, ArrowCircuit a) => Table -> Double -> ArrowP a p Double Double
+oscils :: forall {a :: Type -> Type -> Type} {p}. (Clock p, ArrowCircuit a) => Double -> ArrowP a p Double Double
+oscil1 :: forall {a :: Type -> Type -> Type} {p}. (Clock p, ArrowChoice a, ArrowCircuit a) => Table -> Double -> Double -> ArrowP a p Double Double
+oscil1i :: forall {a :: Type -> Type -> Type} {p}. (Clock p, ArrowChoice a, ArrowCircuit a) => Table -> Double -> Double -> ArrowP a p Double Double
 buzz :: Clock p => Table -> Double -> Signal p (Double, Int) Double
 line :: Clock p => Double -> Double -> Double -> ArrowP SF p Double Double
 expon :: Clock p => Double -> Double -> Double -> ArrowP SF p Double Double
@@ -952,8 +952,8 @@ delay1 :: Clock p => Double -> Signal p (Double, Double) Double
 delayT :: Clock p => Int -> Table -> Signal p Double Double
 
 module Euterpea.IO.Audio
-writeWav :: forall a1 p a2. (Clock p, ToMusic1 a2, AudioSample a1) => String -> [(InstrumentName, Instr (Signal p () a1))] -> Music a2 -> IO ()
-writeWavNorm :: forall a1 p a2. (Clock p, ToMusic1 a2, AudioSample a1) => String -> [(InstrumentName, Instr (Signal p () a1))] -> Music a2 -> IO ()
+writeWav :: (Clock p, ToMusic1 a, AudioSample a) => String -> [(InstrumentName, Instr (Signal p () a))] -> Music a -> IO ()
+writeWavNorm :: (Clock p, ToMusic1 a, AudioSample a) => String -> [(InstrumentName, Instr (Signal p () a))] -> Music a -> IO ()
 
 module Euterpea
 exportFile :: FilePath -> Midi -> IO ()

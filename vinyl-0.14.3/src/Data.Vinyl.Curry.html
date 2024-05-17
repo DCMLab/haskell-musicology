@@ -1,0 +1,342 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DataKinds             #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE PolyKinds             #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies          #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE TypeOperators         #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="annot"><span class="hs-comment">{-|
+
+Provides combinators for currying and uncurrying functions over arbitrary vinyl
+records.
+
+-}</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Vinyl.Curry</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Type</span></span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Vinyl.html"><span class="hs-identifier">Data.Vinyl</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Vinyl.Functor.html"><span class="hs-identifier">Data.Vinyl.Functor</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="Data.Vinyl.XRec.html"><span class="hs-identifier">Data.Vinyl.XRec</span></a></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="annot"><span class="hs-comment">-- * Currying</span></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">class</span><span> </span><span id="RecordCurry"><span class="annot"><a href="Data.Vinyl.Curry.html#RecordCurry"><span class="hs-identifier hs-var">RecordCurry</span></a></span></span><span> </span><span id="local-6989586621679082991"><span class="annot"><a href="#local-6989586621679082991"><span class="hs-identifier hs-type">ts</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-comment">{-|
+  N-ary version of 'curry' over functorial records.
+
+  Example specialized signatures:
+
+  @
+  rcurry :: (Rec Maybe '[Int, Double] -&gt; Bool) -&gt; Maybe Int -&gt; Maybe Double -&gt; Bool
+  rcurry :: (Rec (Either Int) '[Double, String, ()] -&gt; Int) -&gt; Either Int Double -&gt; Either Int String -&gt; Either Int () -&gt; Int
+  rcurry :: (Rec f '[] -&gt; Bool) -&gt; Bool
+  @
+
+  -}</span><span>
+</span><span id="line-34"></span><span>  </span><span id="rcurry"><span class="annot"><a href="Data.Vinyl.Curry.html#rcurry"><span class="hs-identifier hs-type">rcurry</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679082985"><span id="local-6989586621679082987"><span class="hs-special">(</span><span class="annot"><a href="Data.Vinyl.Core.html#Rec"><span class="hs-identifier hs-type">Rec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679082985"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679082991"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679082987"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedF"><span class="hs-identifier hs-type">CurriedF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679082985"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679082991"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679082987"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">class</span><span> </span><span id="RecordCurry%27"><span class="annot"><a href="Data.Vinyl.Curry.html#RecordCurry%27"><span class="hs-identifier hs-var">RecordCurry'</span></a></span></span><span> </span><span id="local-6989586621679083001"><span class="annot"><a href="#local-6989586621679083001"><span class="hs-identifier hs-type">ts</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-comment">{-|
+  N-ary version of 'curry' over pure records.
+
+  Example specialized signatures:
+
+  @
+  rcurry' :: (Rec Identity '[Int, Double] -&gt; Bool) -&gt; Int -&gt; Double -&gt; Bool
+  rcurry' :: (Rec Identity '[Double, String, ()] -&gt; Int) -&gt; Double -&gt; String -&gt; () -&gt; Int
+  rcurry' :: (Rec Identity '[] -&gt; Bool) -&gt; Bool
+  @
+
+  -}</span><span>
+</span><span id="line-49"></span><span>  </span><span id="rcurry%27"><span class="annot"><a href="Data.Vinyl.Curry.html#rcurry%27"><span class="hs-identifier hs-type">rcurry'</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679082998"><span class="hs-special">(</span><span class="annot"><a href="Data.Vinyl.Core.html#Rec"><span class="hs-identifier hs-type">Rec</span></a></span><span> </span><span class="annot"><a href="Data.Vinyl.Functor.html#Identity"><span class="hs-identifier hs-type">Identity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083001"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679082998"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#Curried"><span class="hs-identifier hs-type">Curried</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083001"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679082998"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#RecordCurry"><span class="hs-identifier hs-type">RecordCurry</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>  </span><span id="local-6989586621679083106"><span class="annot"><span class="annottext">rcurry :: forall (f :: u -&gt; *) a. (Rec f '[] -&gt; a) -&gt; CurriedF f '[] a
+</span><a href="Data.Vinyl.Curry.html#rcurry"><span class="hs-identifier hs-var hs-var hs-var hs-var">rcurry</span></a></span></span><span> </span><span id="local-6989586621679083107"><span class="annot"><span class="annottext">Rec f '[] -&gt; a
+</span><a href="#local-6989586621679083107"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rec f '[] -&gt; a
+</span><a href="#local-6989586621679083107"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Rec f '[]
+forall {u} (a :: u -&gt; *). Rec a '[]
+</span><a href="Data.Vinyl.Core.html#RNil"><span class="hs-identifier hs-var">RNil</span></a></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#rcurry"><span class="hs-pragma hs-type">rcurry</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-55"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#RecordCurry%27"><span class="hs-identifier hs-type">RecordCurry'</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621679083112"><span class="annot"><span class="annottext">rcurry' :: forall a. (Rec Identity '[] -&gt; a) -&gt; Curried '[] a
+</span><a href="Data.Vinyl.Curry.html#rcurry%27"><span class="hs-identifier hs-var hs-var hs-var hs-var">rcurry'</span></a></span></span><span> </span><span id="local-6989586621679083113"><span class="annot"><span class="annottext">Rec Identity '[] -&gt; a
+</span><a href="#local-6989586621679083113"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rec Identity '[] -&gt; a
+</span><a href="#local-6989586621679083113"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Rec Identity '[]
+forall {u} (a :: u -&gt; *). Rec a '[]
+</span><a href="Data.Vinyl.Core.html#RNil"><span class="hs-identifier hs-var">RNil</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#rcurry%27"><span class="hs-pragma hs-type">rcurry'</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679083007"><span id="local-6989586621679083008"><span class="annot"><a href="Data.Vinyl.Curry.html#RecordCurry"><span class="hs-identifier hs-type">RecordCurry</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083007"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#RecordCurry"><span class="hs-identifier hs-type">RecordCurry</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679083008"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-glyph">:</span><span> </span><span class="annot"><a href="#local-6989586621679083007"><span class="hs-identifier hs-type">ts</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span id="local-6989586621679083118"><span class="annot"><span class="annottext">rcurry :: forall (f :: u -&gt; *) a.
+(Rec f (t : ts) -&gt; a) -&gt; CurriedF f (t : ts) a
+</span><a href="Data.Vinyl.Curry.html#rcurry"><span class="hs-identifier hs-var hs-var hs-var hs-var">rcurry</span></a></span></span><span> </span><span id="local-6989586621679083119"><span class="annot"><span class="annottext">Rec f (t : ts) -&gt; a
+</span><a href="#local-6989586621679083119"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679083120"><span class="annot"><span class="annottext">f t
+</span><a href="#local-6989586621679083120"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Rec f ts -&gt; a) -&gt; CurriedF f ts a
+forall {u} (ts :: [u]) (f :: u -&gt; *) a.
+RecordCurry ts =&gt;
+(Rec f ts -&gt; a) -&gt; CurriedF f ts a
+forall (f :: u -&gt; *) a. (Rec f ts -&gt; a) -&gt; CurriedF f ts a
+</span><a href="Data.Vinyl.Curry.html#rcurry"><span class="hs-identifier hs-var">rcurry</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679083121"><span class="annot"><span class="annottext">Rec f ts
+</span><a href="#local-6989586621679083121"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Rec f (t : ts) -&gt; a
+</span><a href="#local-6989586621679083119"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">f t
+</span><a href="#local-6989586621679083120"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">f t -&gt; Rec f ts -&gt; Rec f (t : ts)
+forall {u} (a :: u -&gt; *) (r :: u) (rs :: [u]).
+a r -&gt; Rec a rs -&gt; Rec a (r : rs)
+</span><a href="Data.Vinyl.Core.html#%3A%26"><span class="hs-operator hs-var">:&amp;</span></a></span><span> </span><span class="annot"><span class="annottext">Rec f ts
+</span><a href="#local-6989586621679083121"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#rcurry"><span class="hs-pragma hs-type">rcurry</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679083015"><span id="local-6989586621679083016"><span class="annot"><a href="Data.Vinyl.Curry.html#RecordCurry%27"><span class="hs-identifier hs-type">RecordCurry'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083015"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#RecordCurry%27"><span class="hs-identifier hs-type">RecordCurry'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679083016"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-glyph">:</span><span> </span><span class="annot"><a href="#local-6989586621679083015"><span class="hs-identifier hs-type">ts</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679083127"><span class="annot"><span class="annottext">rcurry' :: forall a. (Rec Identity (t : ts) -&gt; a) -&gt; Curried (t : ts) a
+</span><a href="Data.Vinyl.Curry.html#rcurry%27"><span class="hs-identifier hs-var hs-var hs-var hs-var">rcurry'</span></a></span></span><span> </span><span id="local-6989586621679083128"><span class="annot"><span class="annottext">Rec Identity (t : ts) -&gt; a
+</span><a href="#local-6989586621679083128"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679083129"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679083129"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Rec Identity ts -&gt; a) -&gt; Curried ts a
+forall (ts :: [*]) a.
+RecordCurry' ts =&gt;
+(Rec Identity ts -&gt; a) -&gt; Curried ts a
+forall a. (Rec Identity ts -&gt; a) -&gt; Curried ts a
+</span><a href="Data.Vinyl.Curry.html#rcurry%27"><span class="hs-identifier hs-var">rcurry'</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679083130"><span class="annot"><span class="annottext">Rec Identity ts
+</span><a href="#local-6989586621679083130"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Rec Identity (t : ts) -&gt; a
+</span><a href="#local-6989586621679083128"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t -&gt; Identity t
+forall a. a -&gt; Identity a
+</span><a href="Data.Vinyl.Functor.html#Identity"><span class="hs-identifier hs-var">Identity</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679083129"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Identity t -&gt; Rec Identity ts -&gt; Rec Identity (t : ts)
+forall {u} (a :: u -&gt; *) (r :: u) (rs :: [u]).
+a r -&gt; Rec a rs -&gt; Rec a (r : rs)
+</span><a href="Data.Vinyl.Core.html#%3A%26"><span class="hs-operator hs-var">:&amp;</span></a></span><span> </span><span class="annot"><span class="annottext">Rec Identity ts
+</span><a href="#local-6989586621679083130"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#rcurry%27"><span class="hs-pragma hs-type">rcurry'</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="annot"><span class="hs-comment">-- * Uncurrying</span></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="annot"><span class="hs-comment">{-|
+N-ary version of 'uncurry' over functorial records.
+
+Example specialized signatures:
+
+@
+runcurry :: (Maybe Int -&gt; Maybe Double -&gt; String) -&gt; Rec Maybe '[Int, Double] -&gt; String
+runcurry :: (IO FilePath -&gt; String) -&gt; Rec IO '[FilePath] -&gt; String
+runcurry :: Int -&gt; Rec f '[] -&gt; Int
+@
+-}</span></span><span>
+</span><span id="line-79"></span><span id="local-6989586621679083020"><span id="local-6989586621679083021"><span id="local-6989586621679083022"><span class="annot"><a href="Data.Vinyl.Curry.html#runcurry"><span class="hs-identifier hs-type">runcurry</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedF"><span class="hs-identifier hs-type">CurriedF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083020"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083021"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083022"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Core.html#Rec"><span class="hs-identifier hs-type">Rec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083020"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083021"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679083022"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-80"></span><span id="runcurry"><span class="annot"><span class="annottext">runcurry :: forall {u} (f :: u -&gt; *) (ts :: [u]) a.
+CurriedF f ts a -&gt; Rec f ts -&gt; a
+</span><a href="Data.Vinyl.Curry.html#runcurry"><span class="hs-identifier hs-var hs-var">runcurry</span></a></span></span><span> </span><span id="local-6989586621679083134"><span class="annot"><span class="annottext">CurriedF f ts a
+</span><a href="#local-6989586621679083134"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="annottext">Rec f ts
+</span><a href="Data.Vinyl.Core.html#RNil"><span class="hs-identifier hs-var">RNil</span></a></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+CurriedF f ts a
+</span><a href="#local-6989586621679083134"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-81"></span><span class="annot"><a href="Data.Vinyl.Curry.html#runcurry"><span class="hs-identifier hs-var">runcurry</span></a></span><span> </span><span id="local-6989586621679083136"><span class="annot"><span class="annottext">CurriedF f ts a
+</span><a href="#local-6989586621679083136"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679083138"><span class="annot"><span class="annottext">f r
+</span><a href="#local-6989586621679083138"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><a href="Data.Vinyl.Core.html#%3A%26"><span class="hs-operator hs-type">:&amp;</span></a></span><span> </span><span id="local-6989586621679083139"><span class="annot"><span class="annottext">Rec f rs
+</span><a href="#local-6989586621679083139"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CurriedF f rs a -&gt; Rec f rs -&gt; a
+forall {u} (f :: u -&gt; *) (ts :: [u]) a.
+CurriedF f ts a -&gt; Rec f ts -&gt; a
+</span><a href="Data.Vinyl.Curry.html#runcurry"><span class="hs-identifier hs-var">runcurry</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CurriedF f ts a
+f r -&gt; CurriedF f rs a
+</span><a href="#local-6989586621679083136"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">f r
+</span><a href="#local-6989586621679083138"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Rec f rs
+</span><a href="#local-6989586621679083139"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-82"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#runcurry"><span class="hs-pragma hs-type">runcurry</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="annot"><span class="hs-comment">{-|
+N-ary version of 'uncurry' over pure records.
+
+Example specialized signatures:
+
+@
+runcurry' :: (Int -&gt; Double -&gt; String) -&gt; Rec Identity '[Int, Double] -&gt; String
+runcurry' :: Int -&gt; Rec Identity '[] -&gt; Int
+@
+
+Example usage:
+
+@
+f :: Rec Identity '[Bool, Int, Double] -&gt; Either Int Double
+f = runcurry' $ \b x y -&gt; if b then Left x else Right y
+@
+-}</span></span><span>
+</span><span id="line-102"></span><span id="local-6989586621679083029"><span id="local-6989586621679083030"><span class="annot"><a href="Data.Vinyl.Curry.html#runcurry%27"><span class="hs-identifier hs-type">runcurry'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#Curried"><span class="hs-identifier hs-type">Curried</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083029"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083030"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Core.html#Rec"><span class="hs-identifier hs-type">Rec</span></a></span><span> </span><span class="annot"><a href="Data.Vinyl.Functor.html#Identity"><span class="hs-identifier hs-type">Identity</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083029"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679083030"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-103"></span><span id="runcurry%27"><span class="annot"><span class="annottext">runcurry' :: forall (ts :: [*]) a. Curried ts a -&gt; Rec Identity ts -&gt; a
+</span><a href="Data.Vinyl.Curry.html#runcurry%27"><span class="hs-identifier hs-var hs-var">runcurry'</span></a></span></span><span> </span><span id="local-6989586621679083141"><span class="annot"><span class="annottext">Curried ts a
+</span><a href="#local-6989586621679083141"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="annottext">Rec Identity ts
+</span><a href="Data.Vinyl.Core.html#RNil"><span class="hs-identifier hs-var">RNil</span></a></span><span>               </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+Curried ts a
+</span><a href="#local-6989586621679083141"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-104"></span><span class="annot"><a href="Data.Vinyl.Curry.html#runcurry%27"><span class="hs-identifier hs-var">runcurry'</span></a></span><span> </span><span id="local-6989586621679083143"><span class="annot"><span class="annottext">Curried ts a
+</span><a href="#local-6989586621679083143"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Vinyl.Functor.html#Identity"><span class="hs-identifier hs-type">Identity</span></a></span><span> </span><span id="local-6989586621679083145"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679083145"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><a href="Data.Vinyl.Core.html#%3A%26"><span class="hs-operator hs-type">:&amp;</span></a></span><span> </span><span id="local-6989586621679083146"><span class="annot"><span class="annottext">Rec Identity rs
+</span><a href="#local-6989586621679083146"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Curried rs a -&gt; Rec Identity rs -&gt; a
+forall (ts :: [*]) a. Curried ts a -&gt; Rec Identity ts -&gt; a
+</span><a href="Data.Vinyl.Curry.html#runcurry%27"><span class="hs-identifier hs-var">runcurry'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Curried ts a
+r -&gt; Curried rs a
+</span><a href="#local-6989586621679083143"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679083145"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Rec Identity rs
+</span><a href="#local-6989586621679083146"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-105"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#runcurry%27"><span class="hs-pragma hs-type">runcurry'</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="annot"><span class="hs-comment">-- | Apply an uncurried function to an 'XRec'.</span></span><span>
+</span><span id="line-108"></span><span id="local-6989586621679083036"><span id="local-6989586621679083037"><span id="local-6989586621679083038"><span class="annot"><a href="Data.Vinyl.Curry.html#xruncurry"><span class="hs-identifier hs-type">xruncurry</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedX"><span class="hs-identifier hs-type">CurriedX</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083036"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083037"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083038"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.XRec.html#XRec"><span class="hs-identifier hs-type">XRec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083036"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083037"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679083038"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-109"></span><span id="xruncurry"><span class="annot"><span class="annottext">xruncurry :: forall {u} (f :: u -&gt; *) (ts :: [u]) a.
+CurriedX f ts a -&gt; XRec f ts -&gt; a
+</span><a href="Data.Vinyl.Curry.html#xruncurry"><span class="hs-identifier hs-var hs-var">xruncurry</span></a></span></span><span> </span><span id="local-6989586621679083148"><span class="annot"><span class="annottext">CurriedX f ts a
+</span><a href="#local-6989586621679083148"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="annottext">Rec (XData f) ts
+</span><a href="Data.Vinyl.Core.html#RNil"><span class="hs-identifier hs-var">RNil</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+CurriedX f ts a
+</span><a href="#local-6989586621679083148"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-110"></span><span class="annot"><a href="Data.Vinyl.Curry.html#xruncurry"><span class="hs-identifier hs-var">xruncurry</span></a></span><span> </span><span id="local-6989586621679083150"><span class="annot"><span class="annottext">CurriedX f ts a
+</span><a href="#local-6989586621679083150"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679083152"><span class="annot"><span class="annottext">XData f r
+</span><a href="#local-6989586621679083152"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><a href="Data.Vinyl.Core.html#%3A%26"><span class="hs-operator hs-type">:&amp;</span></a></span><span> </span><span id="local-6989586621679083153"><span class="annot"><span class="annottext">Rec (XData f) rs
+</span><a href="#local-6989586621679083153"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CurriedX f rs a -&gt; Rec (XData f) rs -&gt; a
+forall {u} (f :: u -&gt; *) (ts :: [u]) a.
+CurriedX f ts a -&gt; XRec f ts -&gt; a
+</span><a href="Data.Vinyl.Curry.html#xruncurry"><span class="hs-identifier hs-var">xruncurry</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CurriedX f ts a
+HKD f r -&gt; CurriedX f rs a
+</span><a href="#local-6989586621679083150"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">XData f r -&gt; HKD f r
+forall {k} (t :: k -&gt; *) (a :: k). XData t a -&gt; HKD t a
+</span><a href="Data.Vinyl.XRec.html#unX"><span class="hs-identifier hs-var">unX</span></a></span><span> </span><span class="annot"><span class="annottext">XData f r
+</span><a href="#local-6989586621679083152"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Rec (XData f) rs
+</span><a href="#local-6989586621679083153"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-111"></span><span class="hs-pragma">{-# INLINABLE</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#xruncurry"><span class="hs-pragma hs-type">xruncurry</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- | Apply an uncurried function to a 'Rec' like 'runcurry' except the</span><span>
+</span><span id="line-114"></span><span class="hs-comment">-- function enjoys a type simplified by the 'XData' machinery that</span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- strips away type-induced noise like 'Identity', 'Compose', and</span><span>
+</span><span id="line-116"></span><span class="hs-comment">-- 'ElField'.</span><span>
+</span><span id="line-117"></span><span id="local-6989586621679083053"><span id="local-6989586621679083054"><span id="local-6989586621679083056"><span class="annot"><a href="Data.Vinyl.Curry.html#runcurryX"><span class="hs-identifier hs-type">runcurryX</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Data.Vinyl.XRec.html#IsoXRec"><span class="hs-identifier hs-type">IsoXRec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083053"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083054"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedX"><span class="hs-identifier hs-type">CurriedX</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083053"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083054"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083056"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Core.html#Rec"><span class="hs-identifier hs-type">Rec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083053"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083054"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679083056"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-118"></span><span id="runcurryX"><span class="annot"><span class="annottext">runcurryX :: forall {u} (f :: u -&gt; *) (ts :: [u]) a.
+IsoXRec f ts =&gt;
+CurriedX f ts a -&gt; Rec f ts -&gt; a
+</span><a href="Data.Vinyl.Curry.html#runcurryX"><span class="hs-identifier hs-var hs-var">runcurryX</span></a></span></span><span> </span><span id="local-6989586621679083161"><span class="annot"><span class="annottext">CurriedX f ts a
+</span><a href="#local-6989586621679083161"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CurriedX f ts a -&gt; XRec f ts -&gt; a
+forall {u} (f :: u -&gt; *) (ts :: [u]) a.
+CurriedX f ts a -&gt; XRec f ts -&gt; a
+</span><a href="Data.Vinyl.Curry.html#xruncurry"><span class="hs-identifier hs-var">xruncurry</span></a></span><span> </span><span class="annot"><span class="annottext">CurriedX f ts a
+</span><a href="#local-6989586621679083161"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(XRec f ts -&gt; a) -&gt; (Rec f ts -&gt; XRec f ts) -&gt; Rec f ts -&gt; a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Rec f ts -&gt; XRec f ts
+forall {u} (f :: u -&gt; *) (ts :: [u]).
+IsoXRec f ts =&gt;
+Rec f ts -&gt; XRec f ts
+</span><a href="Data.Vinyl.XRec.html#toXRec"><span class="hs-identifier hs-var">toXRec</span></a></span><span>
+</span><span id="line-119"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#runcurryX"><span class="hs-pragma hs-type">runcurryX</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span class="annot"><span class="hs-comment">-- * Applicative Combinators</span></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="annot"><span class="hs-comment">{-|
+Lift an N-ary function to work over a record of 'Applicative' computations.
+
+&gt;&gt;&gt; runcurryA' (+) (Just 2 :&amp; Just 3 :&amp; RNil)
+Just 5
+
+&gt;&gt;&gt; runcurryA' (+) (Nothing :&amp; Just 3 :&amp; RNil)
+Nothing
+-}</span></span><span>
+</span><span id="line-132"></span><span id="local-6989586621679083067"><span id="local-6989586621679083068"><span id="local-6989586621679083069"><span class="annot"><a href="Data.Vinyl.Curry.html#runcurryA%27"><span class="hs-identifier hs-type">runcurryA'</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="annot"><a href="#local-6989586621679083067"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#Curried"><span class="hs-identifier hs-type">Curried</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083068"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083069"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Core.html#Rec"><span class="hs-identifier hs-type">Rec</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083067"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083068"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679083067"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083069"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-133"></span><span id="runcurryA%27"><span class="annot"><span class="annottext">runcurryA' :: forall (f :: * -&gt; *) (ts :: [*]) a.
+Applicative f =&gt;
+Curried ts a -&gt; Rec f ts -&gt; f a
+</span><a href="Data.Vinyl.Curry.html#runcurryA%27"><span class="hs-identifier hs-var hs-var">runcurryA'</span></a></span></span><span> </span><span id="local-6989586621679083170"><span class="annot"><span class="annottext">Curried ts a
+</span><a href="#local-6989586621679083170"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Rec Identity ts -&gt; a) -&gt; f (Rec Identity ts) -&gt; f a
+forall a b. (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Curried ts a -&gt; Rec Identity ts -&gt; a
+forall (ts :: [*]) a. Curried ts a -&gt; Rec Identity ts -&gt; a
+</span><a href="Data.Vinyl.Curry.html#runcurry%27"><span class="hs-identifier hs-var">runcurry'</span></a></span><span> </span><span class="annot"><span class="annottext">Curried ts a
+</span><a href="#local-6989586621679083170"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(f (Rec Identity ts) -&gt; f a)
+-&gt; (Rec f ts -&gt; f (Rec Identity ts)) -&gt; Rec f ts -&gt; f a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(forall x. f x -&gt; f (Identity x))
+-&gt; Rec f ts -&gt; f (Rec Identity ts)
+forall {u} (h :: * -&gt; *) (f :: u -&gt; *) (g :: u -&gt; *) (rs :: [u]).
+Applicative h =&gt;
+(forall (x :: u). f x -&gt; h (g x)) -&gt; Rec f rs -&gt; h (Rec g rs)
+</span><a href="Data.Vinyl.Core.html#rtraverse"><span class="hs-identifier hs-var">rtraverse</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(x -&gt; Identity x) -&gt; f x -&gt; f (Identity x)
+forall a b. (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">x -&gt; Identity x
+forall a. a -&gt; Identity a
+</span><a href="Data.Vinyl.Functor.html#Identity"><span class="hs-identifier hs-var">Identity</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#runcurryA%27"><span class="hs-pragma hs-type">runcurryA'</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span class="annot"><span class="hs-comment">{-|
+Lift an N-ary function over types in @g@ to work over a record of 'Compose'd
+'Applicative' computations. A more general version of 'runcurryA''.
+
+Example specialized signatures:
+
+@
+runcurryA :: (g x -&gt; g y -&gt; a) -&gt; Rec (Compose Maybe g) '[x, y] -&gt; Maybe a
+@
+-}</span></span><span>
+</span><span id="line-146"></span><span id="local-6989586621679083085"><span id="local-6989586621679083086"><span id="local-6989586621679083087"><span id="local-6989586621679083088"><span class="annot"><a href="Data.Vinyl.Curry.html#runcurryA"><span class="hs-identifier hs-type">runcurryA</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="annot"><a href="#local-6989586621679083085"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedF"><span class="hs-identifier hs-type">CurriedF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083086"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083087"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083088"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Core.html#Rec"><span class="hs-identifier hs-type">Rec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Vinyl.Functor.html#Compose"><span class="hs-identifier hs-type">Compose</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083085"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083086"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679083087"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679083085"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083088"><span class="hs-identifier hs-type">a</span></a></span></span></span></span></span><span>
+</span><span id="line-147"></span><span id="runcurryA"><span class="annot"><span class="annottext">runcurryA :: forall {u} (f :: * -&gt; *) (g :: u -&gt; *) (ts :: [u]) a.
+Applicative f =&gt;
+CurriedF g ts a -&gt; Rec (Compose f g) ts -&gt; f a
+</span><a href="Data.Vinyl.Curry.html#runcurryA"><span class="hs-identifier hs-var hs-var">runcurryA</span></a></span></span><span> </span><span id="local-6989586621679083178"><span class="annot"><span class="annottext">CurriedF g ts a
+</span><a href="#local-6989586621679083178"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Rec g ts -&gt; a) -&gt; f (Rec g ts) -&gt; f a
+forall a b. (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CurriedF g ts a -&gt; Rec g ts -&gt; a
+forall {u} (f :: u -&gt; *) (ts :: [u]) a.
+CurriedF f ts a -&gt; Rec f ts -&gt; a
+</span><a href="Data.Vinyl.Curry.html#runcurry"><span class="hs-identifier hs-var">runcurry</span></a></span><span> </span><span class="annot"><span class="annottext">CurriedF g ts a
+</span><a href="#local-6989586621679083178"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(f (Rec g ts) -&gt; f a)
+-&gt; (Rec (Compose f g) ts -&gt; f (Rec g ts))
+-&gt; Rec (Compose f g) ts
+-&gt; f a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(forall (x :: u). Compose f g x -&gt; f (g x))
+-&gt; Rec (Compose f g) ts -&gt; f (Rec g ts)
+forall {u} (h :: * -&gt; *) (f :: u -&gt; *) (g :: u -&gt; *) (rs :: [u]).
+Applicative h =&gt;
+(forall (x :: u). f x -&gt; h (g x)) -&gt; Rec f rs -&gt; h (Rec g rs)
+</span><a href="Data.Vinyl.Core.html#rtraverse"><span class="hs-identifier hs-var">rtraverse</span></a></span><span> </span><span class="annot"><span class="annottext">Compose f g x -&gt; f (g x)
+forall (x :: u). Compose f g x -&gt; f (g x)
+forall l k (f :: l -&gt; *) (g :: k -&gt; l) (x :: k).
+Compose f g x -&gt; f (g x)
+</span><a href="Data.Vinyl.Functor.html#getCompose"><span class="hs-identifier hs-var">getCompose</span></a></span><span>
+</span><span id="line-148"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#runcurryA"><span class="hs-pragma hs-type">runcurryA</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span class="annot"><span class="hs-comment">-- * Curried Function Types</span></span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span class="annot"><span class="hs-comment">{-|
+For the list of types @ts@, @'Curried' ts a@ is a curried function type from
+arguments of types in @ts@ to a result of type @a@.
+
+&gt;&gt;&gt; :kind! Curried '[Int, Bool, String] Int
+Curried '[Int, Bool, String] Int :: *
+= Int -&gt; Bool -&gt; [Char] -&gt; Int
+-}</span></span><span>
+</span><span id="line-160"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">family</span><span> </span><span id="Curried"><span class="annot"><a href="Data.Vinyl.Curry.html#Curried"><span class="hs-identifier hs-var">Curried</span></a></span></span><span> </span><span id="local-6989586621679083180"><span class="annot"><a href="#local-6989586621679083180"><span class="hs-identifier hs-type">ts</span></a></span></span><span> </span><span id="local-6989586621679083181"><span class="annot"><a href="#local-6989586621679083181"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-161"></span><span>  </span><span id="Curried"><span class="annot"><a href="Data.Vinyl.Curry.html#Curried"><span class="hs-identifier hs-var">Curried</span></a></span></span><span> </span><span id="local-6989586621679083182"><span class="hs-special">'</span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679083182"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679083182"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-162"></span><span>  </span><span id="Curried"><span class="annot"><a href="Data.Vinyl.Curry.html#Curried"><span class="hs-identifier hs-var">Curried</span></a></span></span><span> </span><span id="local-6989586621679083183"><span id="local-6989586621679083184"><span id="local-6989586621679083185"><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679083183"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-glyph">:</span><span> </span><span class="annot"><a href="#local-6989586621679083184"><span class="hs-identifier hs-type">ts</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679083185"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679083183"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#Curried"><span class="hs-identifier hs-type">Curried</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083184"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083185"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span>
+</span><span id="line-165"></span><span class="annot"><span class="hs-comment">{-|
+For the type-level list @ts@, @'CurriedF' f ts a@ is a curried function type
+from arguments of type @f t@ for @t@ in @ts@, to a result of type @a@.
+
+&gt;&gt;&gt; :kind! CurriedF Maybe '[Int, Bool, String] Int
+CurriedF Maybe '[Int, Bool, String] Int :: *
+= Maybe Int -&gt; Maybe Bool -&gt; Maybe [Char] -&gt; Int
+-}</span></span><span>
+</span><span id="line-173"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">family</span><span> </span><span id="CurriedF"><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedF"><span class="hs-identifier hs-var">CurriedF</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679083186"><span class="annot"><a href="#local-6989586621679083186"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679083187"><span class="hs-identifier hs-type">u</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span class="hs-special">)</span><span id="local-6989586621679083187"><span> </span><span class="hs-special">(</span><span id="local-6989586621679083188"><span class="annot"><a href="#local-6989586621679083188"><span class="hs-identifier hs-type">ts</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679083187"><span class="hs-identifier hs-type">u</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span id="local-6989586621679083189"><span class="annot"><a href="#local-6989586621679083189"><span class="hs-identifier hs-type">a</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-174"></span><span>  </span><span id="CurriedF"><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedF"><span class="hs-identifier hs-var">CurriedF</span></a></span></span><span> </span><span id="local-6989586621679083190"><span id="local-6989586621679083191"><span class="annot"><a href="#local-6989586621679083190"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679083191"><span class="hs-identifier hs-type">a</span></a></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679083191"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-175"></span><span>  </span><span id="CurriedF"><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedF"><span class="hs-identifier hs-var">CurriedF</span></a></span></span><span> </span><span id="local-6989586621679083192"><span id="local-6989586621679083193"><span id="local-6989586621679083194"><span id="local-6989586621679083195"><span class="annot"><a href="#local-6989586621679083192"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679083193"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-glyph">:</span><span> </span><span class="annot"><a href="#local-6989586621679083194"><span class="hs-identifier hs-type">ts</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679083195"><span class="hs-identifier hs-type">a</span></a></span></span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679083192"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083193"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedF"><span class="hs-identifier hs-type">CurriedF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083192"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083194"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083195"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-176"></span><span>
+</span><span id="line-177"></span><span class="annot"><span class="hs-comment">{-|
+For the type-level list @ts@, @'CurriedX' f ts a@ is a curried function type
+from arguments of type @HKD f t@ for @t@ in @ts@, to a result of type @a@.
+
+&gt;&gt;&gt; :set -XTypeOperators
+&gt;&gt;&gt; :kind! CurriedX (Maybe :. Identity) '[Int, Bool, String] Int
+CurriedX (Maybe :. Identity) '[Int, Bool, String] Int :: *
+= Maybe Int -&gt; Maybe Bool -&gt; Maybe [Char] -&gt; Int
+-}</span></span><span>
+</span><span id="line-186"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">family</span><span> </span><span id="CurriedX"><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedX"><span class="hs-identifier hs-var">CurriedX</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679083196"><span class="annot"><a href="#local-6989586621679083196"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679083197"><span class="hs-identifier hs-type">u</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679083198"><span class="annot"><a href="#local-6989586621679083198"><span class="hs-identifier hs-type">ts</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679083197"><span class="hs-identifier hs-type">u</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span id="local-6989586621679083199"><span class="annot"><a href="#local-6989586621679083199"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-187"></span><span>  </span><span id="CurriedX"><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedX"><span class="hs-identifier hs-var">CurriedX</span></a></span></span><span> </span><span id="local-6989586621679083200"><span id="local-6989586621679083201"><span class="annot"><a href="#local-6989586621679083200"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679083201"><span class="hs-identifier hs-type">a</span></a></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679083201"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-188"></span><span>  </span><span id="CurriedX"><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedX"><span class="hs-identifier hs-var">CurriedX</span></a></span></span><span> </span><span id="local-6989586621679083202"><span id="local-6989586621679083203"><span id="local-6989586621679083204"><span id="local-6989586621679083205"><span class="annot"><a href="#local-6989586621679083202"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679083203"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-special">'</span><span class="hs-glyph">:</span><span> </span><span class="annot"><a href="#local-6989586621679083204"><span class="hs-identifier hs-type">ts</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679083205"><span class="hs-identifier hs-type">a</span></a></span></span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Data.Vinyl.XRec.html#HKD"><span class="hs-identifier hs-type">HKD</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083202"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083203"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Vinyl.Curry.html#CurriedX"><span class="hs-identifier hs-type">CurriedX</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083202"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083204"><span class="hs-identifier hs-type">ts</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679083205"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-189"></span></pre></body></html>

@@ -12,12 +12,12 @@
 </span><span id="line-12"></span><span>
 </span><span id="line-13"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>                  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">forM_</span></span><span> </span><span class="hs-special">)</span><span>
 </span><span id="line-14"></span><span>
-</span><span id="line-15"></span><span class="hs-keyword">data</span><span> </span><span id="PianoRollPlot"><span class="annot"><a href="Musicology.Plotting.Charts.html#PianoRollPlot"><span class="hs-identifier hs-var">PianoRollPlot</span></a></span></span><span> </span><span id="local-6989586621679121573"><span class="annot"><a href="#local-6989586621679121573"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PRPlot"><span class="annot"><a href="Musicology.Plotting.Charts.html#PRPlot"><span class="hs-identifier hs-var">PRPlot</span></a></span></span><span>
-</span><span id="line-16"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="_prNotes"><span class="annot"><span class="annottext">PianoRollPlot n -&gt; [n]
-</span><a href="Musicology.Plotting.Charts.html#_prNotes"><span class="hs-identifier hs-var hs-var">_prNotes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679121573"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="_prStyle"><span class="annot"><span class="annottext">PianoRollPlot n -&gt; (FillStyle, Maybe LineStyle)
+</span><span id="line-15"></span><span class="hs-keyword">data</span><span> </span><span id="PianoRollPlot"><span class="annot"><a href="Musicology.Plotting.Charts.html#PianoRollPlot"><span class="hs-identifier hs-var">PianoRollPlot</span></a></span></span><span> </span><span id="local-6989586621679129932"><span class="annot"><a href="#local-6989586621679129932"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PRPlot"><span class="annot"><a href="Musicology.Plotting.Charts.html#PRPlot"><span class="hs-identifier hs-var">PRPlot</span></a></span></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="_prNotes"><span class="annot"><span class="annottext">forall n. PianoRollPlot n -&gt; [n]
+</span><a href="Musicology.Plotting.Charts.html#_prNotes"><span class="hs-identifier hs-var hs-var">_prNotes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679129932"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="_prStyle"><span class="annot"><span class="annottext">forall n. PianoRollPlot n -&gt; (FillStyle, Maybe LineStyle)
 </span><a href="Musicology.Plotting.Charts.html#_prStyle"><span class="hs-identifier hs-var hs-var">_prStyle</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FillStyle</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">LineStyle</span></span><span class="hs-special">)</span><span class="hs-special">}</span><span>
-</span><span id="line-18"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679121564"><span id="local-6989586621679121566"><span id="local-6989586621679121568"><span class="annot"><span class="annottext">Int -&gt; PianoRollPlot n -&gt; ShowS
+</span><span id="line-18"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679130040"><span id="local-6989586621679130050"><span id="local-6989586621679130054"><span class="annot"><span class="annottext">Int -&gt; PianoRollPlot n -&gt; ShowS
 [PianoRollPlot n] -&gt; ShowS
 PianoRollPlot n -&gt; String
 (Int -&gt; PianoRollPlot n -&gt; ShowS)
@@ -29,30 +29,30 @@ forall n. Show n =&gt; [PianoRollPlot n] -&gt; ShowS
 forall n. Show n =&gt; PianoRollPlot n -&gt; String
 forall a.
 (Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
-showList :: [PianoRollPlot n] -&gt; ShowS
-$cshowList :: forall n. Show n =&gt; [PianoRollPlot n] -&gt; ShowS
-show :: PianoRollPlot n -&gt; String
-$cshow :: forall n. Show n =&gt; PianoRollPlot n -&gt; String
-showsPrec :: Int -&gt; PianoRollPlot n -&gt; ShowS
 $cshowsPrec :: forall n. Show n =&gt; Int -&gt; PianoRollPlot n -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679121559"><span id="local-6989586621679121561"><span class="annot"><span class="annottext">PianoRollPlot n -&gt; PianoRollPlot n -&gt; Bool
+showsPrec :: Int -&gt; PianoRollPlot n -&gt; ShowS
+$cshow :: forall n. Show n =&gt; PianoRollPlot n -&gt; String
+show :: PianoRollPlot n -&gt; String
+$cshowList :: forall n. Show n =&gt; [PianoRollPlot n] -&gt; ShowS
+showList :: [PianoRollPlot n] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130063"><span id="local-6989586621679130071"><span class="annot"><span class="annottext">PianoRollPlot n -&gt; PianoRollPlot n -&gt; Bool
 (PianoRollPlot n -&gt; PianoRollPlot n -&gt; Bool)
 -&gt; (PianoRollPlot n -&gt; PianoRollPlot n -&gt; Bool)
 -&gt; Eq (PianoRollPlot n)
 forall n. Eq n =&gt; PianoRollPlot n -&gt; PianoRollPlot n -&gt; Bool
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
-/= :: PianoRollPlot n -&gt; PianoRollPlot n -&gt; Bool
-$c/= :: forall n. Eq n =&gt; PianoRollPlot n -&gt; PianoRollPlot n -&gt; Bool
-== :: PianoRollPlot n -&gt; PianoRollPlot n -&gt; Bool
 $c== :: forall n. Eq n =&gt; PianoRollPlot n -&gt; PianoRollPlot n -&gt; Bool
+== :: PianoRollPlot n -&gt; PianoRollPlot n -&gt; Bool
+$c/= :: forall n. Eq n =&gt; PianoRollPlot n -&gt; PianoRollPlot n -&gt; Bool
+/= :: PianoRollPlot n -&gt; PianoRollPlot n -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-19"></span><span>
 </span><span id="line-20"></span><span id="pianoRollStyle"><span class="annot"><span class="annottext">pianoRollStyle :: AlphaColour Double -&gt; (FillStyle, Maybe LineStyle)
-</span><a href="Musicology.Plotting.Charts.html#pianoRollStyle"><span class="hs-identifier hs-var hs-var">pianoRollStyle</span></a></span></span><span> </span><span id="local-6989586621679121556"><span class="annot"><span class="annottext">AlphaColour Double
-</span><a href="#local-6989586621679121556"><span class="hs-identifier hs-var">color</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Musicology.Plotting.Charts.html#pianoRollStyle"><span class="hs-identifier hs-var hs-var">pianoRollStyle</span></a></span></span><span> </span><span id="local-6989586621679130083"><span class="annot"><span class="annottext">AlphaColour Double
+</span><a href="#local-6989586621679130083"><span class="hs-identifier hs-var">color</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-21"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">AlphaColour Double -&gt; FillStyle
 </span><span class="hs-identifier hs-var">solidFillStyle</span></span><span> </span><span class="annot"><span class="annottext">AlphaColour Double
-</span><a href="#local-6989586621679121556"><span class="hs-identifier hs-var">color</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">LineStyle -&gt; Maybe LineStyle
+</span><a href="#local-6989586621679130083"><span class="hs-identifier hs-var">color</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">LineStyle -&gt; Maybe LineStyle
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(LineStyle -&gt; Maybe LineStyle) -&gt; LineStyle -&gt; Maybe LineStyle
 forall a b. (a -&gt; b) -&gt; a -&gt; b
@@ -67,8 +67,8 @@ forall a. Num a =&gt; Colour a -&gt; AlphaColour a
 forall a. Num a =&gt; Colour a
 </span><span class="hs-identifier hs-var">black</span></span><span class="hs-special">)</span><span>
 </span><span id="line-22"></span><span>
-</span><span id="line-23"></span><span id="local-6989586621679121604"><span class="annot"><a href="Musicology.Plotting.Charts.html#ptod"><span class="hs-identifier hs-type">ptod</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Interval</span></span><span> </span><span class="annot"><a href="#local-6989586621679121604"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToMidi</span></span><span> </span><span class="annot"><a href="#local-6989586621679121604"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Pitch</span></span><span> </span><span class="annot"><a href="#local-6989586621679121604"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span></span><span>
-</span><span id="line-24"></span><span id="ptod"><span class="annot"><span class="annottext">ptod :: Pitch p -&gt; Double
+</span><span id="line-23"></span><span id="local-6989586621679129961"><span class="annot"><a href="Musicology.Plotting.Charts.html#ptod"><span class="hs-identifier hs-type">ptod</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Interval</span></span><span> </span><span class="annot"><a href="#local-6989586621679129961"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToMidi</span></span><span> </span><span class="annot"><a href="#local-6989586621679129961"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Pitch</span></span><span> </span><span class="annot"><a href="#local-6989586621679129961"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span></span><span>
+</span><span id="line-24"></span><span id="ptod"><span class="annot"><span class="annottext">ptod :: forall p. (Interval p, ToMidi p) =&gt; Pitch p -&gt; Double
 </span><a href="Musicology.Plotting.Charts.html#ptod"><span class="hs-identifier hs-var hs-var">ptod</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Double
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Double) -&gt; (Pitch p -&gt; Int) -&gt; Pitch p -&gt; Double
@@ -78,17 +78,20 @@ forall i. ToMidi i =&gt; i -&gt; Int
 </span><span class="hs-identifier hs-var">toMidi</span></span><span> </span><span class="annot"><span class="annottext">(p -&gt; Int) -&gt; (Pitch p -&gt; p) -&gt; Pitch p -&gt; Int
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Pitch p -&gt; p
-forall a. Pitch a -&gt; a
+forall {a}. Pitch a -&gt; a
 </span><span class="hs-identifier hs-var">toInterval</span></span><span>
 </span><span id="line-25"></span><span>
-</span><span id="line-26"></span><span id="local-6989586621679121547"><span class="annot"><a href="Musicology.Plotting.Charts.html#plotPianoRoll"><span class="hs-identifier hs-type">plotPianoRoll</span></a></span><span>
-</span><span id="line-27"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasPitch</span></span><span> </span><span class="annot"><a href="#local-6989586621679121547"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasTime</span></span><span> </span><span class="annot"><a href="#local-6989586621679121547"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TimeOf</span></span><span> </span><span class="annot"><a href="#local-6989586621679121547"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToMidi</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IntervalOf</span></span><span> </span><span class="annot"><a href="#local-6989586621679121547"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-28"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Musicology.Plotting.Charts.html#PianoRollPlot"><span class="hs-identifier hs-type">PianoRollPlot</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679121547"><span class="hs-identifier hs-type">n</span></a></span><span>
-</span><span id="line-29"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Plot</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TimeOf</span></span><span> </span><span class="annot"><a href="#local-6989586621679121547"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span></span><span>
-</span><span id="line-30"></span><span id="plotPianoRoll"><span class="annot"><span class="annottext">plotPianoRoll :: PianoRollPlot n -&gt; Plot (TimeOf n) Double
-</span><a href="Musicology.Plotting.Charts.html#plotPianoRoll"><span class="hs-identifier hs-var hs-var">plotPianoRoll</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Musicology.Plotting.Charts.html#PRPlot"><span class="hs-identifier hs-type">PRPlot</span></a></span><span> </span><span id="local-6989586621679121545"><span class="annot"><span class="annottext">[n]
-</span><a href="#local-6989586621679121545"><span class="hs-identifier hs-var">notes</span></a></span></span><span> </span><span id="local-6989586621679121544"><span class="annot"><span class="annottext">(FillStyle, Maybe LineStyle)
-</span><a href="#local-6989586621679121544"><span class="hs-identifier hs-var">style</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PointMapFn (TimeOf n) Double -&gt; BackendProgram ())
+</span><span id="line-26"></span><span id="local-6989586621679129973"><span class="annot"><a href="Musicology.Plotting.Charts.html#plotPianoRoll"><span class="hs-identifier hs-type">plotPianoRoll</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasPitch</span></span><span> </span><span class="annot"><a href="#local-6989586621679129973"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasTime</span></span><span> </span><span class="annot"><a href="#local-6989586621679129973"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TimeOf</span></span><span> </span><span class="annot"><a href="#local-6989586621679129973"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToMidi</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IntervalOf</span></span><span> </span><span class="annot"><a href="#local-6989586621679129973"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Musicology.Plotting.Charts.html#PianoRollPlot"><span class="hs-identifier hs-type">PianoRollPlot</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679129973"><span class="hs-identifier hs-type">n</span></a></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Plot</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TimeOf</span></span><span> </span><span class="annot"><a href="#local-6989586621679129973"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span></span><span>
+</span><span id="line-30"></span><span id="plotPianoRoll"><span class="annot"><span class="annottext">plotPianoRoll :: forall n.
+(HasPitch n, HasTime n, PlotValue (TimeOf n),
+ ToMidi (IntervalOf n)) =&gt;
+PianoRollPlot n -&gt; Plot (TimeOf n) Double
+</span><a href="Musicology.Plotting.Charts.html#plotPianoRoll"><span class="hs-identifier hs-var hs-var">plotPianoRoll</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Musicology.Plotting.Charts.html#PRPlot"><span class="hs-identifier hs-type">PRPlot</span></a></span><span> </span><span id="local-6989586621679130124"><span class="annot"><span class="annottext">[n]
+</span><a href="#local-6989586621679130124"><span class="hs-identifier hs-var">notes</span></a></span></span><span> </span><span id="local-6989586621679130125"><span class="annot"><span class="annottext">(FillStyle, Maybe LineStyle)
+</span><a href="#local-6989586621679130125"><span class="hs-identifier hs-var">style</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(PointMapFn (TimeOf n) Double -&gt; BackendProgram ())
 -&gt; [(String, Rect -&gt; BackendProgram ())]
 -&gt; ([TimeOf n], [Double])
 -&gt; Plot (TimeOf n) Double
@@ -96,13 +99,13 @@ forall x y.
 (PointMapFn x y -&gt; BackendProgram ())
 -&gt; [(String, Rect -&gt; BackendProgram ())] -&gt; ([x], [y]) -&gt; Plot x y
 </span><span class="hs-identifier hs-var">Plot</span></span><span> </span><span class="annot"><span class="annottext">PointMapFn (TimeOf n) Double -&gt; BackendProgram ()
-</span><a href="#local-6989586621679121542"><span class="hs-identifier hs-var">render</span></a></span><span> </span><span class="annot"><span class="annottext">[(String, Rect -&gt; BackendProgram ())]
-forall a. [a]
-</span><a href="#local-6989586621679121541"><span class="hs-identifier hs-var">legend</span></a></span><span> </span><span class="annot"><span class="annottext">([TimeOf n], [Double])
-</span><a href="#local-6989586621679121540"><span class="hs-identifier hs-var">points</span></a></span><span>
+</span><a href="#local-6989586621679130127"><span class="hs-identifier hs-var">render</span></a></span><span> </span><span class="annot"><span class="annottext">[(String, Rect -&gt; BackendProgram ())]
+forall {a}. [a]
+</span><a href="#local-6989586621679130128"><span class="hs-identifier hs-var">legend</span></a></span><span> </span><span class="annot"><span class="annottext">([TimeOf n], [Double])
+</span><a href="#local-6989586621679130129"><span class="hs-identifier hs-var">points</span></a></span><span>
 </span><span id="line-31"></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-32"></span><span>  </span><span id="local-6989586621679121539"><span class="annot"><span class="annottext">ps :: [Double]
-</span><a href="#local-6989586621679121539"><span class="hs-identifier hs-var hs-var">ps</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Pitch (IntervalOf n) -&gt; Double
+</span><span id="line-32"></span><span>  </span><span id="local-6989586621679130142"><span class="annot"><span class="annottext">ps :: [Double]
+</span><a href="#local-6989586621679130142"><span class="hs-identifier hs-var hs-var">ps</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Pitch (IntervalOf n) -&gt; Double
 forall p. (Interval p, ToMidi p) =&gt; Pitch p -&gt; Double
 </span><a href="Musicology.Plotting.Charts.html#ptod"><span class="hs-identifier hs-var">ptod</span></a></span><span> </span><span class="annot"><span class="annottext">(Pitch (IntervalOf n) -&gt; Double)
 -&gt; (n -&gt; Pitch (IntervalOf n)) -&gt; n -&gt; Double
@@ -112,23 +115,23 @@ forall a. HasPitch a =&gt; a -&gt; Pitch (IntervalOf a)
 </span><span class="hs-identifier hs-var">pitch</span></span><span> </span><span class="annot"><span class="annottext">(n -&gt; Double) -&gt; [n] -&gt; [Double]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[n]
-</span><a href="#local-6989586621679121545"><span class="hs-identifier hs-var">notes</span></a></span><span>
-</span><span id="line-33"></span><span>  </span><span id="local-6989586621679121536"><span class="annot"><span class="annottext">ons :: [TimeOf n]
-</span><a href="#local-6989586621679121536"><span class="hs-identifier hs-var hs-var">ons</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">n -&gt; TimeOf n
+</span><a href="#local-6989586621679130124"><span class="hs-identifier hs-var">notes</span></a></span><span>
+</span><span id="line-33"></span><span>  </span><span id="local-6989586621679130151"><span class="annot"><span class="annottext">ons :: [TimeOf n]
+</span><a href="#local-6989586621679130151"><span class="hs-identifier hs-var hs-var">ons</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">n -&gt; TimeOf n
 forall a. HasTime a =&gt; a -&gt; TimeOf a
 </span><span class="hs-identifier hs-var">onset</span></span><span> </span><span class="annot"><span class="annottext">(n -&gt; TimeOf n) -&gt; [n] -&gt; [TimeOf n]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[n]
-</span><a href="#local-6989586621679121545"><span class="hs-identifier hs-var">notes</span></a></span><span>
-</span><span id="line-34"></span><span>  </span><span id="local-6989586621679121534"><span class="annot"><span class="annottext">offs :: [TimeOf n]
-</span><a href="#local-6989586621679121534"><span class="hs-identifier hs-var hs-var">offs</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">n -&gt; TimeOf n
+</span><a href="#local-6989586621679130124"><span class="hs-identifier hs-var">notes</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span id="local-6989586621679130159"><span class="annot"><span class="annottext">offs :: [TimeOf n]
+</span><a href="#local-6989586621679130159"><span class="hs-identifier hs-var hs-var">offs</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">n -&gt; TimeOf n
 forall a. HasTime a =&gt; a -&gt; TimeOf a
 </span><span class="hs-identifier hs-var">offset</span></span><span> </span><span class="annot"><span class="annottext">(n -&gt; TimeOf n) -&gt; [n] -&gt; [TimeOf n]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[n]
-</span><a href="#local-6989586621679121545"><span class="hs-identifier hs-var">notes</span></a></span><span>
-</span><span id="line-35"></span><span>  </span><span id="local-6989586621679121542"><span class="annot"><span class="annottext">render :: PointMapFn (TimeOf n) Double -&gt; BackendProgram ()
-</span><a href="#local-6989586621679121542"><span class="hs-identifier hs-var hs-var">render</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[n]
+</span><a href="#local-6989586621679130124"><span class="hs-identifier hs-var">notes</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span id="local-6989586621679130127"><span class="annot"><span class="annottext">render :: PointMapFn (TimeOf n) Double -&gt; BackendProgram ()
+</span><a href="#local-6989586621679130127"><span class="hs-identifier hs-var hs-var">render</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[n]
 -&gt; (FillStyle, Maybe LineStyle)
 -&gt; PointMapFn (TimeOf n) Double
 -&gt; BackendProgram ()
@@ -140,151 +143,177 @@ forall n.
 -&gt; PointMapFn (TimeOf n) Double
 -&gt; BackendProgram ()
 </span><a href="Musicology.Plotting.Charts.html#renderPianoRoll"><span class="hs-identifier hs-var">renderPianoRoll</span></a></span><span> </span><span class="annot"><span class="annottext">[n]
-</span><a href="#local-6989586621679121545"><span class="hs-identifier hs-var">notes</span></a></span><span> </span><span class="annot"><span class="annottext">(FillStyle, Maybe LineStyle)
-</span><a href="#local-6989586621679121544"><span class="hs-identifier hs-var">style</span></a></span><span>
-</span><span id="line-36"></span><span>  </span><span id="local-6989586621679121541"><span class="annot"><span class="annottext">legend :: [a]
-</span><a href="#local-6989586621679121541"><span class="hs-identifier hs-var hs-var">legend</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-37"></span><span>  </span><span id="local-6989586621679121540"><span class="annot"><span class="annottext">points :: ([TimeOf n], [Double])
-</span><a href="#local-6989586621679121540"><span class="hs-identifier hs-var hs-var">points</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[TimeOf n]
-</span><a href="#local-6989586621679121536"><span class="hs-identifier hs-var">ons</span></a></span><span> </span><span class="annot"><span class="annottext">[TimeOf n] -&gt; [TimeOf n] -&gt; [TimeOf n]
+</span><a href="#local-6989586621679130124"><span class="hs-identifier hs-var">notes</span></a></span><span> </span><span class="annot"><span class="annottext">(FillStyle, Maybe LineStyle)
+</span><a href="#local-6989586621679130125"><span class="hs-identifier hs-var">style</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span id="local-6989586621679130128"><span class="annot"><span class="annottext">legend :: [a]
+</span><a href="#local-6989586621679130128"><span class="hs-identifier hs-var hs-var">legend</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-37"></span><span>  </span><span id="local-6989586621679130129"><span class="annot"><span class="annottext">points :: ([TimeOf n], [Double])
+</span><a href="#local-6989586621679130129"><span class="hs-identifier hs-var hs-var">points</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[TimeOf n]
+</span><a href="#local-6989586621679130151"><span class="hs-identifier hs-var">ons</span></a></span><span> </span><span class="annot"><span class="annottext">[TimeOf n] -&gt; [TimeOf n] -&gt; [TimeOf n]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[TimeOf n]
-</span><a href="#local-6989586621679121534"><span class="hs-identifier hs-var">offs</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679130159"><span class="hs-identifier hs-var">offs</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">0.5</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Double) -&gt; [Double] -&gt; [Double]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Double]
-</span><a href="#local-6989586621679121539"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Double] -&gt; [Double] -&gt; [Double]
+</span><a href="#local-6989586621679130142"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Double] -&gt; [Double] -&gt; [Double]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
-</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679121530"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679121530"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679121530"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679130188"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130188"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130188"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">0.5</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Double) -&gt; [Double] -&gt; [Double]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Double]
-</span><a href="#local-6989586621679121539"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679130142"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-38"></span><span>
-</span><span id="line-39"></span><span id="local-6989586621679121595"><span class="annot"><a href="Musicology.Plotting.Charts.html#renderPianoRoll"><span class="hs-identifier hs-type">renderPianoRoll</span></a></span><span>
-</span><span id="line-40"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasPitch</span></span><span> </span><span class="annot"><a href="#local-6989586621679121595"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasTime</span></span><span> </span><span class="annot"><a href="#local-6989586621679121595"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TimeOf</span></span><span> </span><span class="annot"><a href="#local-6989586621679121595"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToMidi</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IntervalOf</span></span><span> </span><span class="annot"><a href="#local-6989586621679121595"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-41"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679121595"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-39"></span><span id="local-6989586621679130005"><span class="annot"><a href="Musicology.Plotting.Charts.html#renderPianoRoll"><span class="hs-identifier hs-type">renderPianoRoll</span></a></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HasPitch</span></span><span> </span><span class="annot"><a href="#local-6989586621679130005"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasTime</span></span><span> </span><span class="annot"><a href="#local-6989586621679130005"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TimeOf</span></span><span> </span><span class="annot"><a href="#local-6989586621679130005"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToMidi</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IntervalOf</span></span><span> </span><span class="annot"><a href="#local-6989586621679130005"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679130005"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-42"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">FillStyle</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">LineStyle</span></span><span class="hs-special">)</span><span>
-</span><span id="line-43"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PointMapFn</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TimeOf</span></span><span> </span><span class="annot"><a href="#local-6989586621679121595"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PointMapFn</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TimeOf</span></span><span> </span><span class="annot"><a href="#local-6989586621679130005"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
 </span><span id="line-44"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">BackendProgram</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
-</span><span id="line-45"></span><span id="renderPianoRoll"><span class="annot"><span class="annottext">renderPianoRoll :: [n]
+</span><span id="line-45"></span><span id="renderPianoRoll"><span class="annot"><span class="annottext">renderPianoRoll :: forall n.
+(HasPitch n, HasTime n, PlotValue (TimeOf n),
+ ToMidi (IntervalOf n)) =&gt;
+[n]
 -&gt; (FillStyle, Maybe LineStyle)
 -&gt; PointMapFn (TimeOf n) Double
 -&gt; BackendProgram ()
-</span><a href="Musicology.Plotting.Charts.html#renderPianoRoll"><span class="hs-identifier hs-var hs-var">renderPianoRoll</span></a></span></span><span> </span><span id="local-6989586621679121529"><span class="annot"><span class="annottext">[n]
-</span><a href="#local-6989586621679121529"><span class="hs-identifier hs-var">notes</span></a></span></span><span> </span><span id="local-6989586621679121528"><span class="annot"><span class="annottext">(FillStyle, Maybe LineStyle)
-</span><a href="#local-6989586621679121528"><span class="hs-identifier hs-var">style</span></a></span></span><span> </span><span id="local-6989586621679121527"><span class="annot"><span class="annottext">PointMapFn (TimeOf n) Double
-</span><a href="#local-6989586621679121527"><span class="hs-identifier hs-var">pmap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[n] -&gt; (n -&gt; BackendProgram ()) -&gt; BackendProgram ()
+</span><a href="Musicology.Plotting.Charts.html#renderPianoRoll"><span class="hs-identifier hs-var hs-var">renderPianoRoll</span></a></span></span><span> </span><span id="local-6989586621679130207"><span class="annot"><span class="annottext">[n]
+</span><a href="#local-6989586621679130207"><span class="hs-identifier hs-var">notes</span></a></span></span><span> </span><span id="local-6989586621679130208"><span class="annot"><span class="annottext">(FillStyle, Maybe LineStyle)
+</span><a href="#local-6989586621679130208"><span class="hs-identifier hs-var">style</span></a></span></span><span> </span><span id="local-6989586621679130209"><span class="annot"><span class="annottext">PointMapFn (TimeOf n) Double
+</span><a href="#local-6989586621679130209"><span class="hs-identifier hs-var">pmap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[n] -&gt; (n -&gt; BackendProgram ()) -&gt; BackendProgram ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 t a -&gt; (a -&gt; m b) -&gt; m ()
 </span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="annot"><span class="annottext">[n]
-</span><a href="#local-6989586621679121529"><span class="hs-identifier hs-var">notes</span></a></span><span> </span><span class="annot"><span class="annottext">n -&gt; BackendProgram ()
-</span><a href="#local-6989586621679121526"><span class="hs-identifier hs-var">renderNote</span></a></span><span>
+</span><a href="#local-6989586621679130207"><span class="hs-identifier hs-var">notes</span></a></span><span> </span><span class="annot"><span class="annottext">n -&gt; BackendProgram ()
+forall {p}.
+(TimeOf p ~ TimeOf n, ToMidi (IntervalOf p), HasPitch p,
+ HasTime p) =&gt;
+p -&gt; BackendProgram ()
+</span><a href="#local-6989586621679130210"><span class="hs-identifier hs-var">renderNote</span></a></span><span>
 </span><span id="line-46"></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-47"></span><span>  </span><span id="local-6989586621679121525"><span class="annot"><span class="annottext">pmap' :: (TimeOf n, Double) -&gt; Point
-</span><a href="#local-6989586621679121525"><span class="hs-identifier hs-var hs-var">pmap'</span></a></span></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PointMapFn (TimeOf n) Double -&gt; (TimeOf n, Double) -&gt; Point
+</span><span id="line-47"></span><span>  </span><span id="local-6989586621679130211"><span class="annot"><span class="annottext">pmap' :: (TimeOf n, Double) -&gt; Point
+</span><a href="#local-6989586621679130211"><span class="hs-identifier hs-var hs-var">pmap'</span></a></span></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PointMapFn (TimeOf n) Double -&gt; (TimeOf n, Double) -&gt; Point
 forall x y. PointMapFn x y -&gt; (x, y) -&gt; Point
 </span><span class="hs-identifier hs-var">mapXY</span></span><span> </span><span class="annot"><span class="annottext">PointMapFn (TimeOf n) Double
-</span><a href="#local-6989586621679121527"><span class="hs-identifier hs-var">pmap</span></a></span><span>
-</span><span id="line-48"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679121523"><span class="annot"><span class="annottext">FillStyle
-</span><a href="#local-6989586621679121523"><span class="hs-identifier hs-var">fStyle</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679121522"><span class="annot"><span class="annottext">Maybe LineStyle
-</span><a href="#local-6989586621679121522"><span class="hs-identifier hs-var">lStyle</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(FillStyle, Maybe LineStyle)
-</span><a href="#local-6989586621679121528"><span class="hs-identifier hs-var">style</span></a></span><span>
-</span><span id="line-49"></span><span>  </span><span id="local-6989586621679121521"><span class="annot"><span class="annottext">nPath :: n -&gt; Path
-</span><a href="#local-6989586621679121521"><span class="hs-identifier hs-var hs-var">nPath</span></a></span></span><span> </span><span id="local-6989586621679121520"><span class="annot"><span class="annottext">n
-</span><a href="#local-6989586621679121520"><span class="hs-identifier hs-var">note</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rect -&gt; Path
+</span><a href="#local-6989586621679130209"><span class="hs-identifier hs-var">pmap</span></a></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679130213"><span class="annot"><span class="annottext">FillStyle
+</span><a href="#local-6989586621679130213"><span class="hs-identifier hs-var">fStyle</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130214"><span class="annot"><span class="annottext">Maybe LineStyle
+</span><a href="#local-6989586621679130214"><span class="hs-identifier hs-var">lStyle</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(FillStyle, Maybe LineStyle)
+</span><a href="#local-6989586621679130208"><span class="hs-identifier hs-var">style</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span id="local-6989586621679130233"><span class="annot"><span class="annottext">nPath :: p -&gt; Path
+</span><a href="#local-6989586621679130233"><span class="hs-identifier hs-var hs-var">nPath</span></a></span></span><span> </span><span id="local-6989586621679130234"><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679130234"><span class="hs-identifier hs-var">note</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rect -&gt; Path
 </span><span class="hs-identifier hs-var">rectPath</span></span><span> </span><span class="annot"><span class="annottext">(Rect -&gt; Path) -&gt; Rect -&gt; Path
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point -&gt; Point -&gt; Rect
 </span><span class="hs-identifier hs-var">Rect</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(TimeOf n, Double) -&gt; Point
-</span><a href="#local-6989586621679121525"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimeOf n
-</span><a href="#local-6989586621679121517"><span class="hs-identifier hs-var">on</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679121516"><span class="hs-identifier hs-var">py</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679130211"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimeOf n
+TimeOf p
+</span><a href="#local-6989586621679130237"><span class="hs-identifier hs-var">on</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130238"><span class="hs-identifier hs-var">py</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">0.5</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(TimeOf n, Double) -&gt; Point
-</span><a href="#local-6989586621679121525"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimeOf n
-</span><a href="#local-6989586621679121515"><span class="hs-identifier hs-var">off</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679121516"><span class="hs-identifier hs-var">py</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
+</span><a href="#local-6989586621679130211"><span class="hs-identifier hs-var">pmap'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">TimeOf n
+TimeOf p
+</span><a href="#local-6989586621679130239"><span class="hs-identifier hs-var">off</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130238"><span class="hs-identifier hs-var">py</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">0.5</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-50"></span><span>   </span><span class="hs-keyword">where</span><span>
-</span><span id="line-51"></span><span>    </span><span id="local-6989586621679121517"><span class="annot"><span class="annottext">on :: TimeOf n
-</span><a href="#local-6989586621679121517"><span class="hs-identifier hs-var hs-var">on</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">n -&gt; TimeOf n
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621679130237"><span class="annot"><span class="annottext">on :: TimeOf p
+</span><a href="#local-6989586621679130237"><span class="hs-identifier hs-var hs-var">on</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p -&gt; TimeOf p
 forall a. HasTime a =&gt; a -&gt; TimeOf a
-</span><span class="hs-identifier hs-var">onset</span></span><span> </span><span class="annot"><span class="annottext">n
-</span><a href="#local-6989586621679121520"><span class="hs-identifier hs-var">note</span></a></span><span>
-</span><span id="line-52"></span><span>    </span><span id="local-6989586621679121515"><span class="annot"><span class="annottext">off :: TimeOf n
-</span><a href="#local-6989586621679121515"><span class="hs-identifier hs-var hs-var">off</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">n -&gt; TimeOf n
+</span><span class="hs-identifier hs-var">onset</span></span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679130234"><span class="hs-identifier hs-var">note</span></a></span><span>
+</span><span id="line-52"></span><span>    </span><span id="local-6989586621679130239"><span class="annot"><span class="annottext">off :: TimeOf p
+</span><a href="#local-6989586621679130239"><span class="hs-identifier hs-var hs-var">off</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p -&gt; TimeOf p
 forall a. HasTime a =&gt; a -&gt; TimeOf a
-</span><span class="hs-identifier hs-var">offset</span></span><span> </span><span class="annot"><span class="annottext">n
-</span><a href="#local-6989586621679121520"><span class="hs-identifier hs-var">note</span></a></span><span>
-</span><span id="line-53"></span><span>    </span><span id="local-6989586621679121516"><span class="annot"><span class="annottext">py :: Double
-</span><a href="#local-6989586621679121516"><span class="hs-identifier hs-var hs-var">py</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Pitch (IntervalOf n) -&gt; Double
+</span><span class="hs-identifier hs-var">offset</span></span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679130234"><span class="hs-identifier hs-var">note</span></a></span><span>
+</span><span id="line-53"></span><span>    </span><span id="local-6989586621679130238"><span class="annot"><span class="annottext">py :: Double
+</span><a href="#local-6989586621679130238"><span class="hs-identifier hs-var hs-var">py</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Pitch (IntervalOf p) -&gt; Double
 forall p. (Interval p, ToMidi p) =&gt; Pitch p -&gt; Double
-</span><a href="Musicology.Plotting.Charts.html#ptod"><span class="hs-identifier hs-var">ptod</span></a></span><span> </span><span class="annot"><span class="annottext">(Pitch (IntervalOf n) -&gt; Double) -&gt; Pitch (IntervalOf n) -&gt; Double
+</span><a href="Musicology.Plotting.Charts.html#ptod"><span class="hs-identifier hs-var">ptod</span></a></span><span> </span><span class="annot"><span class="annottext">(Pitch (IntervalOf p) -&gt; Double) -&gt; Pitch (IntervalOf p) -&gt; Double
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">n -&gt; Pitch (IntervalOf n)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">p -&gt; Pitch (IntervalOf p)
 forall a. HasPitch a =&gt; a -&gt; Pitch (IntervalOf a)
-</span><span class="hs-identifier hs-var">pitch</span></span><span> </span><span class="annot"><span class="annottext">n
-</span><a href="#local-6989586621679121520"><span class="hs-identifier hs-var">note</span></a></span><span>
-</span><span id="line-54"></span><span>  </span><span id="local-6989586621679121526"><span class="annot"><span class="annottext">renderNote :: n -&gt; BackendProgram ()
-</span><a href="#local-6989586621679121526"><span class="hs-identifier hs-var hs-var">renderNote</span></a></span></span><span> </span><span id="local-6989586621679121514"><span class="annot"><span class="annottext">n
-</span><a href="#local-6989586621679121514"><span class="hs-identifier hs-var">note</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span class="hs-identifier hs-var">pitch</span></span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679130234"><span class="hs-identifier hs-var">note</span></a></span><span>
+</span><span id="line-54"></span><span>  </span><span id="local-6989586621679130210"><span class="annot"><span class="annottext">renderNote :: p -&gt; BackendProgram ()
+</span><a href="#local-6989586621679130210"><span class="hs-identifier hs-var hs-var">renderNote</span></a></span></span><span> </span><span id="local-6989586621679130300"><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679130300"><span class="hs-identifier hs-var">note</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-55"></span><span>    </span><span class="annot"><span class="annottext">FillStyle -&gt; BackendProgram () -&gt; BackendProgram ()
 forall a. FillStyle -&gt; BackendProgram a -&gt; BackendProgram a
 </span><span class="hs-identifier hs-var">withFillStyle</span></span><span> </span><span class="annot"><span class="annottext">FillStyle
-</span><a href="#local-6989586621679121523"><span class="hs-identifier hs-var">fStyle</span></a></span><span> </span><span class="annot"><span class="annottext">(BackendProgram () -&gt; BackendProgram ())
+</span><a href="#local-6989586621679130213"><span class="hs-identifier hs-var">fStyle</span></a></span><span> </span><span class="annot"><span class="annottext">(BackendProgram () -&gt; BackendProgram ())
 -&gt; BackendProgram () -&gt; BackendProgram ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Path -&gt; BackendProgram Path
-</span><span class="hs-identifier hs-var">alignFillPath</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">n -&gt; Path
-</span><a href="#local-6989586621679121521"><span class="hs-identifier hs-var">nPath</span></a></span><span> </span><span class="annot"><span class="annottext">n
-</span><a href="#local-6989586621679121514"><span class="hs-identifier hs-var">note</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BackendProgram Path
+</span><span class="hs-identifier hs-var">alignFillPath</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">p -&gt; Path
+forall {p}.
+(TimeOf p ~ TimeOf n, ToMidi (IntervalOf p), HasPitch p,
+ HasTime p) =&gt;
+p -&gt; Path
+</span><a href="#local-6989586621679130233"><span class="hs-identifier hs-var">nPath</span></a></span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679130300"><span class="hs-identifier hs-var">note</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BackendProgram Path
 -&gt; (Path -&gt; BackendProgram ()) -&gt; BackendProgram ()
+forall a b.
+ProgramT ChartBackendInstr Identity a
+-&gt; (a -&gt; ProgramT ChartBackendInstr Identity b)
+-&gt; ProgramT ChartBackendInstr Identity b
 forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
 </span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Path -&gt; BackendProgram ()
 </span><span class="hs-identifier hs-var">fillPath</span></span><span>
 </span><span id="line-56"></span><span>    </span><span class="annot"><span class="annottext">Maybe LineStyle
 -&gt; (LineStyle -&gt; BackendProgram ()) -&gt; BackendProgram ()
-forall (m :: * -&gt; *) t. Monad m =&gt; Maybe t -&gt; (t -&gt; m ()) -&gt; m ()
-</span><a href="#local-6989586621679121510"><span class="hs-identifier hs-var">whenJust</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe LineStyle
-</span><a href="#local-6989586621679121522"><span class="hs-identifier hs-var">lStyle</span></a></span><span> </span><span class="annot"><span class="annottext">((LineStyle -&gt; BackendProgram ()) -&gt; BackendProgram ())
+forall {m :: * -&gt; *} {t}. Monad m =&gt; Maybe t -&gt; (t -&gt; m ()) -&gt; m ()
+</span><a href="#local-6989586621679130304"><span class="hs-identifier hs-var">whenJust</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe LineStyle
+</span><a href="#local-6989586621679130214"><span class="hs-identifier hs-var">lStyle</span></a></span><span> </span><span class="annot"><span class="annottext">((LineStyle -&gt; BackendProgram ()) -&gt; BackendProgram ())
 -&gt; (LineStyle -&gt; BackendProgram ()) -&gt; BackendProgram ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679121509"><span class="annot"><span class="annottext">LineStyle
-</span><a href="#local-6989586621679121509"><span class="hs-identifier hs-var">lst</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679130305"><span class="annot"><span class="annottext">LineStyle
+</span><a href="#local-6989586621679130305"><span class="hs-identifier hs-var">lst</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-57"></span><span>      </span><span class="annot"><span class="annottext">LineStyle -&gt; BackendProgram () -&gt; BackendProgram ()
 forall a. LineStyle -&gt; BackendProgram a -&gt; BackendProgram a
 </span><span class="hs-identifier hs-var">withLineStyle</span></span><span> </span><span class="annot"><span class="annottext">LineStyle
-</span><a href="#local-6989586621679121509"><span class="hs-identifier hs-var">lst</span></a></span><span> </span><span class="annot"><span class="annottext">(BackendProgram () -&gt; BackendProgram ())
+</span><a href="#local-6989586621679130305"><span class="hs-identifier hs-var">lst</span></a></span><span> </span><span class="annot"><span class="annottext">(BackendProgram () -&gt; BackendProgram ())
 -&gt; BackendProgram () -&gt; BackendProgram ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Path -&gt; BackendProgram Path
-</span><span class="hs-identifier hs-var">alignStrokePath</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">n -&gt; Path
-</span><a href="#local-6989586621679121521"><span class="hs-identifier hs-var">nPath</span></a></span><span> </span><span class="annot"><span class="annottext">n
-</span><a href="#local-6989586621679121514"><span class="hs-identifier hs-var">note</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BackendProgram Path
+</span><span class="hs-identifier hs-var">alignStrokePath</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">p -&gt; Path
+forall {p}.
+(TimeOf p ~ TimeOf n, ToMidi (IntervalOf p), HasPitch p,
+ HasTime p) =&gt;
+p -&gt; Path
+</span><a href="#local-6989586621679130233"><span class="hs-identifier hs-var">nPath</span></a></span><span> </span><span class="annot"><span class="annottext">p
+</span><a href="#local-6989586621679130300"><span class="hs-identifier hs-var">note</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BackendProgram Path
 -&gt; (Path -&gt; BackendProgram ()) -&gt; BackendProgram ()
+forall a b.
+ProgramT ChartBackendInstr Identity a
+-&gt; (a -&gt; ProgramT ChartBackendInstr Identity b)
+-&gt; ProgramT ChartBackendInstr Identity b
 forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
 </span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Path -&gt; BackendProgram ()
 </span><span class="hs-identifier hs-var">strokePath</span></span><span>
-</span><span id="line-58"></span><span>  </span><span id="local-6989586621679121510"><span class="annot"><span class="annottext">whenJust :: Maybe t -&gt; (t -&gt; m ()) -&gt; m ()
-</span><a href="#local-6989586621679121510"><span class="hs-identifier hs-var hs-var">whenJust</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679121505"><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679121505"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679121504"><span class="annot"><span class="annottext">t -&gt; m ()
-</span><a href="#local-6989586621679121504"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">t -&gt; m ()
-</span><a href="#local-6989586621679121504"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679121505"><span class="hs-identifier hs-var">a</span></a></span><span>
-</span><span id="line-59"></span><span>  </span><span class="annot"><a href="#local-6989586621679121510"><span class="hs-identifier hs-var">whenJust</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe t
+</span><span id="line-58"></span><span>  </span><span id="local-6989586621679130304"><span class="annot"><span class="annottext">whenJust :: Maybe t -&gt; (t -&gt; m ()) -&gt; m ()
+</span><a href="#local-6989586621679130304"><span class="hs-identifier hs-var hs-var">whenJust</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679130317"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679130317"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679130318"><span class="annot"><span class="annottext">t -&gt; m ()
+</span><a href="#local-6989586621679130318"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">t -&gt; m ()
+</span><a href="#local-6989586621679130318"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679130317"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-59"></span><span>  </span><span class="annot"><a href="#local-6989586621679130304"><span class="hs-identifier hs-var">whenJust</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe t
 </span><span class="hs-identifier">_</span></span><span>        </span><span class="annot"><span class="annottext">t -&gt; m ()
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">() -&gt; m ()
+forall a. a -&gt; m a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
 </span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-60"></span></pre></body></html>

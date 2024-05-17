@@ -1,0 +1,683 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="annot"><span class="hs-comment">{-|
+Module      : Graphics.Vega.VegaLite.Time
+Copyright   : (c) Douglas Burke, 2018-2021
+License     : BSD3
+
+Maintainer  : dburke.gw@gmail.com
+Stability   : unstable
+Portability : OverloadedStrings
+
+Time-related types.
+
+-}</span></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Graphics.Vega.VegaLite.Time</span><span>
+</span><span id="line-18"></span><span>       </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DateTime"><span class="hs-identifier">DateTime</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#MonthName"><span class="hs-identifier">MonthName</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DayName"><span class="hs-identifier">DayName</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#TimeUnit"><span class="hs-identifier">TimeUnit</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#BaseTimeUnit"><span class="hs-identifier">BaseTimeUnit</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span>       </span><span class="hs-comment">-- not for external export</span><span>
+</span><span id="line-25"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeSpec"><span class="hs-identifier">dateTimeSpec</span></a></span><span>
+</span><span id="line-26"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#timeUnitSpec"><span class="hs-identifier">timeUnitSpec</span></a></span><span>
+</span><span id="line-27"></span><span>       </span><span>
+</span><span id="line-28"></span><span>       </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(.=)</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">object</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">toJSON</span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson.Types</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Pair</span></span><span class="hs-special">)</span><span class="hs-cpp">
+
+#if !(MIN_VERSION_base(4, 12, 0))
+</span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Monoid</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-operator">&lt;&gt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- added in base 4.8.0.0 / ghc 7.10.1</span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.Natural</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Natural</span></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html"><span class="hs-identifier">Graphics.Vega.VegaLite.Specification</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier">VLSpec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="annot"><span class="hs-comment">{-|
+
+Allows a date or time to be represented. This is typically part of a list of
+@DateTime@ items to provide a specific point in time. For details see the
+&lt;https://vega.github.io/vega-lite/docs/types.html#datetime Vega-Lite documentation&gt;.
+
+There is __no check__ that the provided @Int@ values lie within the
+required bounds.
+
+A 'DateTime' value of 'DTDay' or 'DTDayNum' should not be combined with
+'DTYear', 'DTQuarter', 'DTMonth', 'DTMonthNum', or 'DTDate'.
+
+-}</span></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-keyword">data</span><span> </span><span id="DateTime"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DateTime"><span class="hs-identifier hs-var">DateTime</span></a></span></span><span>
+</span><span id="line-60"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="DTYear"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTYear"><span class="hs-identifier hs-var">DTYear</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-61"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DTQuarter"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTQuarter"><span class="hs-identifier hs-var">DTQuarter</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-62"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ The quarter of the year (1 to 4, inclusive).</span></span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DTMonth"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTMonth"><span class="hs-identifier hs-var">DTMonth</span></a></span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#MonthName"><span class="hs-identifier hs-type">MonthName</span></a></span><span>
+</span><span id="line-64"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DTMonthNum"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTMonthNum"><span class="hs-identifier hs-var">DTMonthNum</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-65"></span><span>      </span><span class="hs-comment">-- ^ The month number (1 to 12, inclusive).</span><span>
+</span><span id="line-66"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-67"></span><span>      </span><span class="hs-comment">--    @since 0.5.0.0</span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DTWeek"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTWeek"><span class="hs-identifier hs-var">DTWeek</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-69"></span><span>      </span><span class="hs-comment">-- ^ The week number. Each week begins on Sunday, which means that days</span><span>
+</span><span id="line-70"></span><span>      </span><span class="hs-comment">--   before the first Sunday of the year are considered to be in week 0,</span><span>
+</span><span id="line-71"></span><span>      </span><span class="hs-comment">--   as the first Sunday of the year is the start of week 1.</span><span>
+</span><span id="line-72"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-73"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DTDay"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTDay"><span class="hs-identifier hs-var">DTDay</span></a></span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DayName"><span class="hs-identifier hs-type">DayName</span></a></span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DTDayNum"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTDayNum"><span class="hs-identifier hs-var">DTDayNum</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-76"></span><span>      </span><span class="hs-comment">-- ^ The day number (1 represents Monday, 7 is Sunday).</span><span>
+</span><span id="line-77"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-78"></span><span>      </span><span class="hs-comment">--   @since 0.5.0.0</span><span>
+</span><span id="line-79"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DTDayOfYear"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTDayOfYear"><span class="hs-identifier hs-var">DTDayOfYear</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-80"></span><span>      </span><span class="hs-comment">-- ^ The day of the year (1 to 366).</span><span>
+</span><span id="line-81"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-82"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DTDate"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTDate"><span class="hs-identifier hs-var">DTDate</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-84"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Day of the month (1 to 31, inclusive).</span></span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DTHours"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTHours"><span class="hs-identifier hs-var">DTHours</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-86"></span><span>      </span><span class="hs-comment">-- ^ Hour of the day, where 0 is midnight, 1 is 1am, and</span><span>
+</span><span id="line-87"></span><span>      </span><span class="hs-comment">--   23 is 11pm.</span><span>
+</span><span id="line-88"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DTMinutes"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTMinutes"><span class="hs-identifier hs-var">DTMinutes</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-89"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ The minute of an hour (0 to 59, inclusive).</span></span><span>
+</span><span id="line-90"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DTSeconds"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTSeconds"><span class="hs-identifier hs-var">DTSeconds</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-91"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ The second of a minute (0 to 59, inclusive).</span></span><span>
+</span><span id="line-92"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DTMilliseconds"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTMilliseconds"><span class="hs-identifier hs-var">DTMilliseconds</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-93"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ The milliseconds of a second (0 to 999, inclusive).</span></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="annot"><span class="hs-comment">-- | Identifies the day of the week.</span></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span class="hs-keyword">data</span><span> </span><span id="DayName"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DayName"><span class="hs-identifier hs-var">DayName</span></a></span></span><span>
+</span><span id="line-99"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="Mon"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Mon"><span class="hs-identifier hs-var">Mon</span></a></span></span><span>
+</span><span id="line-100"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Tue"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Tue"><span class="hs-identifier hs-var">Tue</span></a></span></span><span>
+</span><span id="line-101"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Wed"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Wed"><span class="hs-identifier hs-var">Wed</span></a></span></span><span>
+</span><span id="line-102"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Thu"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Thu"><span class="hs-identifier hs-var">Thu</span></a></span></span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Fri"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Fri"><span class="hs-identifier hs-var">Fri</span></a></span></span><span>
+</span><span id="line-104"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Sat"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Sat"><span class="hs-identifier hs-var">Sat</span></a></span></span><span>
+</span><span id="line-105"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Sun"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Sun"><span class="hs-identifier hs-var">Sun</span></a></span></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span class="annot"><span class="hs-comment">-- | Identifies a month of the year.</span></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="hs-keyword">data</span><span> </span><span id="MonthName"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#MonthName"><span class="hs-identifier hs-var">MonthName</span></a></span></span><span>
+</span><span id="line-111"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="Jan"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Jan"><span class="hs-identifier hs-var">Jan</span></a></span></span><span>
+</span><span id="line-112"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Feb"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Feb"><span class="hs-identifier hs-var">Feb</span></a></span></span><span>
+</span><span id="line-113"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Mar"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Mar"><span class="hs-identifier hs-var">Mar</span></a></span></span><span>
+</span><span id="line-114"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Apr"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Apr"><span class="hs-identifier hs-var">Apr</span></a></span></span><span>
+</span><span id="line-115"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="May"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#May"><span class="hs-identifier hs-var">May</span></a></span></span><span>
+</span><span id="line-116"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Jun"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Jun"><span class="hs-identifier hs-var">Jun</span></a></span></span><span>
+</span><span id="line-117"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Jul"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Jul"><span class="hs-identifier hs-var">Jul</span></a></span></span><span>
+</span><span id="line-118"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Aug"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Aug"><span class="hs-identifier hs-var">Aug</span></a></span></span><span>
+</span><span id="line-119"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Sep"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Sep"><span class="hs-identifier hs-var">Sep</span></a></span></span><span>
+</span><span id="line-120"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Oct"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Oct"><span class="hs-identifier hs-var">Oct</span></a></span></span><span>
+</span><span id="line-121"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Nov"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Nov"><span class="hs-identifier hs-var">Nov</span></a></span></span><span>
+</span><span id="line-122"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Dec"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Dec"><span class="hs-identifier hs-var">Dec</span></a></span></span><span>
+</span><span id="line-123"></span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span class="hs-comment">-- Vega-Lite 4.4.0 has</span><span>
+</span><span id="line-127"></span><span class="hs-comment">--   LocalMultiTimeUnit which is yearquarter, yearquartermonth, ,secondsmilliseconds</span><span>
+</span><span id="line-128"></span><span class="hs-comment">--   LocalSingleTimeUnit year, quarter, ..., milliseconds</span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- and</span><span>
+</span><span id="line-130"></span><span class="hs-comment">--   UtcMultiTimeUnit which is utc &lt;&gt; LocalMultiTimeUnit</span><span>
+</span><span id="line-131"></span><span class="hs-comment">--   UtcSingleTimeUnit         utc &lt;&gt; LocalSingleTimeUnit</span><span>
+</span><span id="line-132"></span><span class="hs-comment">--</span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- TimeUnit       is either of SingleTimeUnit or MultiTimeUnit</span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- SingleTimeUnut is either of LocalSingleTimeUnit or UtcSingleTimeUnit</span><span>
+</span><span id="line-135"></span><span class="hs-comment">-- MultiTimeUnit  is either of LocalMultiTieUnit or UtcMultiTimeUnit</span><span>
+</span><span id="line-136"></span><span class="hs-comment">--</span><span>
+</span><span id="line-137"></span><span class="hs-comment">-- &quot;timeUnit&quot; settings are TimeUnit or TimeUnitParams</span><span>
+</span><span id="line-138"></span><span class="hs-comment">--</span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- TimeUnitParams is an object with fields</span><span>
+</span><span id="line-140"></span><span class="hs-comment">--   maxbins - number</span><span>
+</span><span id="line-141"></span><span class="hs-comment">--   step    - number</span><span>
+</span><span id="line-142"></span><span class="hs-comment">--   unit    - this is TimeUnit</span><span>
+</span><span id="line-143"></span><span class="hs-comment">--   utc     - boolean</span><span>
+</span><span id="line-144"></span><span class="hs-comment">--</span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span class="annot"><span class="hs-comment">{-|
+
+Describes a unit of time. Useful for encoding and transformations. See the
+&lt;https://vega.github.io/vega-lite/docs/timeunit.html Vega-Lite documentation&gt;
+for further details.
+
+@
+'Graphics.Vega.VegaLite.encoding'
+    . 'Graphics.Vega.VegaLite.position' 'Graphics.Vega.VegaLite.X' [ 'Graphics.Vega.VegaLite.PName' &quot;date&quot;, 'Graphics.Vega.VegaLite.PmType' 'Graphics.Vega.VegaLite.Temporal', 'Graphics.Vega.VegaLite.PTimeUnit' ('Utc' 'YearMonthDateHours') ]
+@
+
+Prior to version @0.10.0.0@ the field was a combination of what is now
+'BaseTimeUnit' and the \&quot;option\&quot; fields (e.g. encode as UTC or the
+maximum nuber of bins).
+
+-}</span></span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span class="hs-keyword">data</span><span> </span><span id="TimeUnit"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#TimeUnit"><span class="hs-identifier hs-var">TimeUnit</span></a></span></span><span>
+</span><span id="line-165"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="TU"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#TU"><span class="hs-identifier hs-var">TU</span></a></span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#BaseTimeUnit"><span class="hs-identifier hs-type">BaseTimeUnit</span></a></span><span>
+</span><span id="line-166"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Encode a time as local time.</span></span><span>
+</span><span id="line-167"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Utc"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Utc"><span class="hs-identifier hs-var">Utc</span></a></span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#BaseTimeUnit"><span class="hs-identifier hs-type">BaseTimeUnit</span></a></span><span>
+</span><span id="line-168"></span><span>    </span><span class="hs-comment">-- ^ Encode a time as UTC (coordinated universal time, independent of local time</span><span>
+</span><span id="line-169"></span><span>    </span><span class="hs-comment">--   zones or daylight saving).</span><span>
+</span><span id="line-170"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="TUMaxBins"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#TUMaxBins"><span class="hs-identifier hs-var">TUMaxBins</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Natural</span></span><span>
+</span><span id="line-171"></span><span>    </span><span class="hs-comment">-- ^ The maximum number of bins to use when discretising time values.</span><span>
+</span><span id="line-172"></span><span>    </span><span class="hs-comment">--   This can be useful as an algternative to explicitly providing the</span><span>
+</span><span id="line-173"></span><span>    </span><span class="hs-comment">--   time unit to bin by, as it will be inferred from the temporal</span><span>
+</span><span id="line-174"></span><span>    </span><span class="hs-comment">--   extent and the number of bins. As an example, @[TUMaxBins 366]@</span><span>
+</span><span id="line-175"></span><span>    </span><span class="hs-comment">--   will bin by day when applied to a dataset of hourly readings</span><span>
+</span><span id="line-176"></span><span>    </span><span class="hs-comment">--   for a full year.</span><span>
+</span><span id="line-177"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-178"></span><span>    </span><span class="hs-comment">--   @since 0.6.0.0</span><span>
+</span><span id="line-179"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="TUStep"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#TUStep"><span class="hs-identifier hs-var">TUStep</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#BaseTimeUnit"><span class="hs-identifier hs-type">BaseTimeUnit</span></a></span><span>
+</span><span id="line-180"></span><span>    </span><span class="hs-comment">-- ^ The number of steps between time-unit bins, in terms of the</span><span>
+</span><span id="line-181"></span><span>    </span><span class="hs-comment">--   least-significant unit provided. So @TUStep 14 YearMonthDate@</span><span>
+</span><span id="line-182"></span><span>    </span><span class="hs-comment">--   will bin temporal data into bi-weekly groups.</span><span>
+</span><span id="line-183"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-184"></span><span>    </span><span class="hs-comment">--   @since 0.6.0.0</span><span>
+</span><span id="line-185"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="UtcStep"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#UtcStep"><span class="hs-identifier hs-var">UtcStep</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#BaseTimeUnit"><span class="hs-identifier hs-type">BaseTimeUnit</span></a></span><span>
+</span><span id="line-186"></span><span>    </span><span class="hs-comment">-- ^ The number of steps between time-unit bins, in terms of the</span><span>
+</span><span id="line-187"></span><span>    </span><span class="hs-comment">--   least-significant unit provided for UTC times.</span><span>
+</span><span id="line-188"></span><span>    </span><span class="hs-comment">--   So @UtcStep 14 YearMonthDate]@</span><span>
+</span><span id="line-189"></span><span>    </span><span class="hs-comment">--   will bin temporal data into bi-weekly groups.</span><span>
+</span><span id="line-190"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-191"></span><span>    </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-192"></span><span>
+</span><span id="line-193"></span><span>
+</span><span id="line-194"></span><span class="annot"><span class="hs-comment">{-|
+
+Define the time unit, either as a base unit - such as 'Hours' - or
+as a composite type, for example 'WeeksDayHours'.
+
+@since 0.10.0.0
+
+-}</span></span><span>
+</span><span id="line-202"></span><span>
+</span><span id="line-203"></span><span class="hs-keyword">data</span><span> </span><span id="BaseTimeUnit"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#BaseTimeUnit"><span class="hs-identifier hs-var">BaseTimeUnit</span></a></span></span><span>
+</span><span id="line-204"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="Year"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Year"><span class="hs-identifier hs-var">Year</span></a></span></span><span>
+</span><span id="line-205"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Year.</span></span><span>
+</span><span id="line-206"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Quarter"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Quarter"><span class="hs-identifier hs-var">Quarter</span></a></span></span><span>
+</span><span id="line-207"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Quarter of the year.</span></span><span>
+</span><span id="line-208"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Month"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Month"><span class="hs-identifier hs-var">Month</span></a></span></span><span>
+</span><span id="line-209"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Month of the year.</span></span><span>
+</span><span id="line-210"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Week"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Week"><span class="hs-identifier hs-var">Week</span></a></span></span><span>
+</span><span id="line-211"></span><span>      </span><span class="hs-comment">-- ^ Sunday-based week number. Days before the first Sunday of the year</span><span>
+</span><span id="line-212"></span><span>      </span><span class="hs-comment">--   are considered to be in week 0, and the first Sunday of the year</span><span>
+</span><span id="line-213"></span><span>      </span><span class="hs-comment">--   is the start of week 1,</span><span>
+</span><span id="line-214"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-215"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-216"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Date"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Date"><span class="hs-identifier hs-var">Date</span></a></span></span><span>
+</span><span id="line-217"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Day of the month (1 to 31).</span></span><span>
+</span><span id="line-218"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Day"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Day"><span class="hs-identifier hs-var">Day</span></a></span></span><span>
+</span><span id="line-219"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Day of the week.</span></span><span>
+</span><span id="line-220"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DayOfYear"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DayOfYear"><span class="hs-identifier hs-var">DayOfYear</span></a></span></span><span>
+</span><span id="line-221"></span><span>      </span><span class="hs-comment">-- ^ Day of the year (starting at 1).</span><span>
+</span><span id="line-222"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-223"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-224"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Hours"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Hours"><span class="hs-identifier hs-var">Hours</span></a></span></span><span>
+</span><span id="line-225"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Hour of the day.</span></span><span>
+</span><span id="line-226"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Minutes"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Minutes"><span class="hs-identifier hs-var">Minutes</span></a></span></span><span>
+</span><span id="line-227"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Minutes of the hour.</span></span><span>
+</span><span id="line-228"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Seconds"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Seconds"><span class="hs-identifier hs-var">Seconds</span></a></span></span><span>
+</span><span id="line-229"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Seconds of the minute.</span></span><span>
+</span><span id="line-230"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Milliseconds"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Milliseconds"><span class="hs-identifier hs-var">Milliseconds</span></a></span></span><span>
+</span><span id="line-231"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Milliseconds.</span></span><span>
+</span><span id="line-232"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearQuarter"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearQuarter"><span class="hs-identifier hs-var">YearQuarter</span></a></span></span><span>
+</span><span id="line-233"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Year and quarter.</span></span><span>
+</span><span id="line-234"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearQuarterMonth"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearQuarterMonth"><span class="hs-identifier hs-var">YearQuarterMonth</span></a></span></span><span>
+</span><span id="line-235"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Year, quarter, and month.</span></span><span>
+</span><span id="line-236"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearMonth"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearMonth"><span class="hs-identifier hs-var">YearMonth</span></a></span></span><span>
+</span><span id="line-237"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Year and month.</span></span><span>
+</span><span id="line-238"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearMonthDate"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearMonthDate"><span class="hs-identifier hs-var">YearMonthDate</span></a></span></span><span>
+</span><span id="line-239"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Year, month, and day of month.</span></span><span>
+</span><span id="line-240"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearMonthDateHours"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearMonthDateHours"><span class="hs-identifier hs-var">YearMonthDateHours</span></a></span></span><span>
+</span><span id="line-241"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Year, month, day of month, and hour of day.</span></span><span>
+</span><span id="line-242"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearMonthDateHoursMinutes"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearMonthDateHoursMinutes"><span class="hs-identifier hs-var">YearMonthDateHoursMinutes</span></a></span></span><span>
+</span><span id="line-243"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Year, month, day of month, hour of day, and minutes.</span></span><span>
+</span><span id="line-244"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearMonthDateHoursMinutesSeconds"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearMonthDateHoursMinutesSeconds"><span class="hs-identifier hs-var">YearMonthDateHoursMinutesSeconds</span></a></span></span><span>
+</span><span id="line-245"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Year, month, day of month, hour of day, minutes, and seconds.</span></span><span>
+</span><span id="line-246"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearWeek"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearWeek"><span class="hs-identifier hs-var">YearWeek</span></a></span></span><span>
+</span><span id="line-247"></span><span>      </span><span class="hs-comment">-- ^ Year and week.</span><span>
+</span><span id="line-248"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-249"></span><span>      </span><span class="hs-comment">--   @since 0.10.0</span><span>
+</span><span id="line-250"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearWeekDay"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearWeekDay"><span class="hs-identifier hs-var">YearWeekDay</span></a></span></span><span>
+</span><span id="line-251"></span><span>      </span><span class="hs-comment">-- ^ Year, week, and day.</span><span>
+</span><span id="line-252"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-253"></span><span>      </span><span class="hs-comment">--   @since 0.10.0</span><span>
+</span><span id="line-254"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearWeekDayHours"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearWeekDayHours"><span class="hs-identifier hs-var">YearWeekDayHours</span></a></span></span><span>
+</span><span id="line-255"></span><span>      </span><span class="hs-comment">-- ^ Year, week, day, and hour of day.</span><span>
+</span><span id="line-256"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-257"></span><span>      </span><span class="hs-comment">--   @since 0.10.0</span><span>
+</span><span id="line-258"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearWeekDayHoursMinutes"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearWeekDayHoursMinutes"><span class="hs-identifier hs-var">YearWeekDayHoursMinutes</span></a></span></span><span>
+</span><span id="line-259"></span><span>      </span><span class="hs-comment">-- ^ Year, week, day, hour of day, and minutes.</span><span>
+</span><span id="line-260"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-261"></span><span>      </span><span class="hs-comment">--   @since 0.10.0</span><span>
+</span><span id="line-262"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearWeekDayHoursMinutesSeconds"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearWeekDayHoursMinutesSeconds"><span class="hs-identifier hs-var">YearWeekDayHoursMinutesSeconds</span></a></span></span><span>
+</span><span id="line-263"></span><span>      </span><span class="hs-comment">-- ^ Year, week, day, hour of day, minutes, and seconds.</span><span>
+</span><span id="line-264"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-265"></span><span>      </span><span class="hs-comment">--   @since 0.10.0</span><span>
+</span><span id="line-266"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="YearDayOfYear"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#YearDayOfYear"><span class="hs-identifier hs-var">YearDayOfYear</span></a></span></span><span>
+</span><span id="line-267"></span><span>      </span><span class="hs-comment">-- ^ Year and day of year.</span><span>
+</span><span id="line-268"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-269"></span><span>      </span><span class="hs-comment">--   @since 0.10.0</span><span>
+</span><span id="line-270"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="QuarterMonth"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#QuarterMonth"><span class="hs-identifier hs-var">QuarterMonth</span></a></span></span><span>
+</span><span id="line-271"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Quarter of the year and month.</span></span><span>
+</span><span id="line-272"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="MonthDate"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#MonthDate"><span class="hs-identifier hs-var">MonthDate</span></a></span></span><span>
+</span><span id="line-273"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Month of the year and day of the month.</span></span><span>
+</span><span id="line-274"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="MonthDateHours"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#MonthDateHours"><span class="hs-identifier hs-var">MonthDateHours</span></a></span></span><span>
+</span><span id="line-275"></span><span>      </span><span class="hs-comment">-- ^ Month, day of the month, and hours.</span><span>
+</span><span id="line-276"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-277"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-278"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="MonthDateHoursMinutes"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#MonthDateHoursMinutes"><span class="hs-identifier hs-var">MonthDateHoursMinutes</span></a></span></span><span>
+</span><span id="line-279"></span><span>      </span><span class="hs-comment">-- ^ Month, day of the month, hours, and minutes.</span><span>
+</span><span id="line-280"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-281"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-282"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="MonthDateHoursMinutesSeconds"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#MonthDateHoursMinutesSeconds"><span class="hs-identifier hs-var">MonthDateHoursMinutesSeconds</span></a></span></span><span>
+</span><span id="line-283"></span><span>      </span><span class="hs-comment">-- ^ Month, day of the month, hours, minutes, and seconds.</span><span>
+</span><span id="line-284"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-285"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-286"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="WeekDay"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#WeekDay"><span class="hs-identifier hs-var">WeekDay</span></a></span></span><span>
+</span><span id="line-287"></span><span>      </span><span class="hs-comment">-- ^ Week and day of month.</span><span>
+</span><span id="line-288"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-289"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-290"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="WeeksDayHours"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#WeeksDayHours"><span class="hs-identifier hs-var">WeeksDayHours</span></a></span></span><span>
+</span><span id="line-291"></span><span>      </span><span class="hs-comment">-- ^ Week, day of month, and hours.</span><span>
+</span><span id="line-292"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-293"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-294"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="WeeksDayHoursMinutes"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#WeeksDayHoursMinutes"><span class="hs-identifier hs-var">WeeksDayHoursMinutes</span></a></span></span><span>
+</span><span id="line-295"></span><span>      </span><span class="hs-comment">-- ^ Week, day of month, hours, and minutes.</span><span>
+</span><span id="line-296"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-297"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-298"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="WeeksDayHoursMinutesSeconds"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#WeeksDayHoursMinutesSeconds"><span class="hs-identifier hs-var">WeeksDayHoursMinutesSeconds</span></a></span></span><span>
+</span><span id="line-299"></span><span>      </span><span class="hs-comment">-- ^ Week, day of month, hours, minutes, and seconds.</span><span>
+</span><span id="line-300"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-301"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-302"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DayHours"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DayHours"><span class="hs-identifier hs-var">DayHours</span></a></span></span><span>
+</span><span id="line-303"></span><span>      </span><span class="hs-comment">-- ^ Day of the week and hours.</span><span>
+</span><span id="line-304"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-305"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-306"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DayHoursMinutes"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DayHoursMinutes"><span class="hs-identifier hs-var">DayHoursMinutes</span></a></span></span><span>
+</span><span id="line-307"></span><span>      </span><span class="hs-comment">-- ^ Day of the week, hours, and minutes.</span><span>
+</span><span id="line-308"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-309"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-310"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DayHoursMinutesSeconds"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DayHoursMinutesSeconds"><span class="hs-identifier hs-var">DayHoursMinutesSeconds</span></a></span></span><span>
+</span><span id="line-311"></span><span>      </span><span class="hs-comment">-- ^ Day of the week, hours, minutes, and seconds.</span><span>
+</span><span id="line-312"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-313"></span><span>      </span><span class="hs-comment">--   @since 0.10.0.0</span><span>
+</span><span id="line-314"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="HoursMinutes"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#HoursMinutes"><span class="hs-identifier hs-var">HoursMinutes</span></a></span></span><span>
+</span><span id="line-315"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Hour of the day and minutes.</span></span><span>
+</span><span id="line-316"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="HoursMinutesSeconds"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#HoursMinutesSeconds"><span class="hs-identifier hs-var">HoursMinutesSeconds</span></a></span></span><span>
+</span><span id="line-317"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Hour of the day, minutes, and seconds.</span></span><span>
+</span><span id="line-318"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="MinutesSeconds"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#MinutesSeconds"><span class="hs-identifier hs-var">MinutesSeconds</span></a></span></span><span>
+</span><span id="line-319"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Minutes of the hour and seconds.</span></span><span>
+</span><span id="line-320"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="SecondsMilliseconds"><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#SecondsMilliseconds"><span class="hs-identifier hs-var">SecondsMilliseconds</span></a></span></span><span>
+</span><span id="line-321"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Seconds of the minute and milliseconds.</span></span><span>
+</span><span id="line-322"></span><span>
+</span><span id="line-323"></span><span>
+</span><span id="line-324"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-type">baseTimeUnitLabel</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#BaseTimeUnit"><span class="hs-identifier hs-type">BaseTimeUnit</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-325"></span><span id="baseTimeUnitLabel"><span class="annot"><span class="annottext">baseTimeUnitLabel :: BaseTimeUnit -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var hs-var">baseTimeUnitLabel</span></a></span></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#Year"><span class="hs-identifier hs-var">Year</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;year&quot;</span></span><span>
+</span><span id="line-326"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#Quarter"><span class="hs-identifier hs-var">Quarter</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;quarter&quot;</span></span><span>
+</span><span id="line-327"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#Month"><span class="hs-identifier hs-var">Month</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;month&quot;</span></span><span>
+</span><span id="line-328"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#Week"><span class="hs-identifier hs-var">Week</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;week&quot;</span></span><span>
+</span><span id="line-329"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#Date"><span class="hs-identifier hs-var">Date</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;date&quot;</span></span><span>
+</span><span id="line-330"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#Day"><span class="hs-identifier hs-var">Day</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;day&quot;</span></span><span>
+</span><span id="line-331"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#DayOfYear"><span class="hs-identifier hs-var">DayOfYear</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;dayofyear&quot;</span></span><span>
+</span><span id="line-332"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#Hours"><span class="hs-identifier hs-var">Hours</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;hours&quot;</span></span><span>
+</span><span id="line-333"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#Minutes"><span class="hs-identifier hs-var">Minutes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;minutes&quot;</span></span><span>
+</span><span id="line-334"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#Seconds"><span class="hs-identifier hs-var">Seconds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;seconds&quot;</span></span><span>
+</span><span id="line-335"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#Milliseconds"><span class="hs-identifier hs-var">Milliseconds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;milliseconds&quot;</span></span><span>
+</span><span id="line-336"></span><span>
+</span><span id="line-337"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearQuarter"><span class="hs-identifier hs-var">YearQuarter</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yearquarter&quot;</span></span><span>
+</span><span id="line-338"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearQuarterMonth"><span class="hs-identifier hs-var">YearQuarterMonth</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yearquartermonth&quot;</span></span><span>
+</span><span id="line-339"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearMonth"><span class="hs-identifier hs-var">YearMonth</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yearmonth&quot;</span></span><span>
+</span><span id="line-340"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearMonthDate"><span class="hs-identifier hs-var">YearMonthDate</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yearmonthdate&quot;</span></span><span>
+</span><span id="line-341"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearMonthDateHours"><span class="hs-identifier hs-var">YearMonthDateHours</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yearmonthdatehours&quot;</span></span><span>
+</span><span id="line-342"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearMonthDateHoursMinutes"><span class="hs-identifier hs-var">YearMonthDateHoursMinutes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yearmonthdatehoursminutes&quot;</span></span><span>
+</span><span id="line-343"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearMonthDateHoursMinutesSeconds"><span class="hs-identifier hs-var">YearMonthDateHoursMinutesSeconds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yearmonthdatehoursminutesseconds&quot;</span></span><span>
+</span><span id="line-344"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearWeek"><span class="hs-identifier hs-var">YearWeek</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yearweek&quot;</span></span><span>
+</span><span id="line-345"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearWeekDay"><span class="hs-identifier hs-var">YearWeekDay</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yearweekday&quot;</span></span><span>
+</span><span id="line-346"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearWeekDayHours"><span class="hs-identifier hs-var">YearWeekDayHours</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yearweekdayhours&quot;</span></span><span>
+</span><span id="line-347"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearWeekDayHoursMinutes"><span class="hs-identifier hs-var">YearWeekDayHoursMinutes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yearweekdayhoursminutes&quot;</span></span><span>
+</span><span id="line-348"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearWeekDayHoursMinutesSeconds"><span class="hs-identifier hs-var">YearWeekDayHoursMinutesSeconds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yearweekdayhoursminutesseconds&quot;</span></span><span>
+</span><span id="line-349"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#YearDayOfYear"><span class="hs-identifier hs-var">YearDayOfYear</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;yeardayofyear&quot;</span></span><span>
+</span><span id="line-350"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#QuarterMonth"><span class="hs-identifier hs-var">QuarterMonth</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;quartermonth&quot;</span></span><span>
+</span><span id="line-351"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#MonthDate"><span class="hs-identifier hs-var">MonthDate</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;monthdate&quot;</span></span><span>
+</span><span id="line-352"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#MonthDateHours"><span class="hs-identifier hs-var">MonthDateHours</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;monthdatehours&quot;</span></span><span>
+</span><span id="line-353"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#MonthDateHoursMinutes"><span class="hs-identifier hs-var">MonthDateHoursMinutes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;monthdatehoursminutes&quot;</span></span><span>
+</span><span id="line-354"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#MonthDateHoursMinutesSeconds"><span class="hs-identifier hs-var">MonthDateHoursMinutesSeconds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;monthdatehoursminutesseconds&quot;</span></span><span>
+</span><span id="line-355"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#WeekDay"><span class="hs-identifier hs-var">WeekDay</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;weekday&quot;</span></span><span>
+</span><span id="line-356"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#WeeksDayHours"><span class="hs-identifier hs-var">WeeksDayHours</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;weeksdayhours&quot;</span></span><span>
+</span><span id="line-357"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#WeeksDayHoursMinutes"><span class="hs-identifier hs-var">WeeksDayHoursMinutes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;weeksdayhoursminutes&quot;</span></span><span>
+</span><span id="line-358"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#WeeksDayHoursMinutesSeconds"><span class="hs-identifier hs-var">WeeksDayHoursMinutesSeconds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;weeksdayhoursminutesseconds&quot;</span></span><span>
+</span><span id="line-359"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#DayHours"><span class="hs-identifier hs-var">DayHours</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;dayhours&quot;</span></span><span>
+</span><span id="line-360"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#DayHoursMinutes"><span class="hs-identifier hs-var">DayHoursMinutes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;dayhoursminutes&quot;</span></span><span>
+</span><span id="line-361"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#DayHoursMinutesSeconds"><span class="hs-identifier hs-var">DayHoursMinutesSeconds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;dayhoursminutesseconds&quot;</span></span><span>
+</span><span id="line-362"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#HoursMinutes"><span class="hs-identifier hs-var">HoursMinutes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;hoursminutes&quot;</span></span><span>
+</span><span id="line-363"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#HoursMinutesSeconds"><span class="hs-identifier hs-var">HoursMinutesSeconds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;hoursminutesseconds&quot;</span></span><span>
+</span><span id="line-364"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#MinutesSeconds"><span class="hs-identifier hs-var">MinutesSeconds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;minutesseconds&quot;</span></span><span>
+</span><span id="line-365"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Time.html#SecondsMilliseconds"><span class="hs-identifier hs-var">SecondsMilliseconds</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;secondsmilliseconds&quot;</span></span><span>
+</span><span id="line-366"></span><span>
+</span><span id="line-367"></span><span>
+</span><span id="line-368"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-type">dateTimeProperty</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DateTime"><span class="hs-identifier hs-type">DateTime</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Pair</span></span><span>
+</span><span id="line-369"></span><span id="dateTimeProperty"><span class="annot"><span class="annottext">dateTimeProperty :: DateTime -&gt; Pair
+</span><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var hs-var">dateTimeProperty</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTYear"><span class="hs-identifier hs-type">DTYear</span></a></span><span> </span><span id="local-6989586621679117559"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117559"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;year&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Int -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117559"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-370"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTQuarter"><span class="hs-identifier hs-type">DTQuarter</span></a></span><span> </span><span id="local-6989586621679117560"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117560"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;quarter&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Int -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117560"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-371"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTMonth"><span class="hs-identifier hs-type">DTMonth</span></a></span><span> </span><span id="local-6989586621679117561"><span class="annot"><span class="annottext">MonthName
+</span><a href="#local-6989586621679117561"><span class="hs-identifier hs-var">mon</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;month&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">MonthName -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var">monthNameLabel</span></a></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="#local-6989586621679117561"><span class="hs-identifier hs-var">mon</span></a></span><span>
+</span><span id="line-372"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTMonthNum"><span class="hs-identifier hs-type">DTMonthNum</span></a></span><span> </span><span id="local-6989586621679117563"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117563"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;month&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Int -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117563"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-373"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTWeek"><span class="hs-identifier hs-type">DTWeek</span></a></span><span> </span><span id="local-6989586621679117564"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117564"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;week&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Int -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117564"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><span id="line-374"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTDate"><span class="hs-identifier hs-type">DTDate</span></a></span><span> </span><span id="local-6989586621679117565"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117565"><span class="hs-identifier hs-var">dt</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;date&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Int -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117565"><span class="hs-identifier hs-var">dt</span></a></span><span>
+</span><span id="line-375"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTDay"><span class="hs-identifier hs-type">DTDay</span></a></span><span> </span><span id="local-6989586621679117566"><span class="annot"><span class="annottext">DayName
+</span><a href="#local-6989586621679117566"><span class="hs-identifier hs-var">day</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;day&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">DayName -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Time.html#dayLabel"><span class="hs-identifier hs-var">dayLabel</span></a></span><span> </span><span class="annot"><span class="annottext">DayName
+</span><a href="#local-6989586621679117566"><span class="hs-identifier hs-var">day</span></a></span><span>
+</span><span id="line-376"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTDayOfYear"><span class="hs-identifier hs-type">DTDayOfYear</span></a></span><span> </span><span id="local-6989586621679117568"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117568"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;dayofyear&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Int -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117568"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-377"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTDayNum"><span class="hs-identifier hs-type">DTDayNum</span></a></span><span> </span><span id="local-6989586621679117569"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117569"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;day&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Int -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117569"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-378"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTHours"><span class="hs-identifier hs-type">DTHours</span></a></span><span> </span><span id="local-6989586621679117570"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117570"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;hours&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Int -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117570"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-379"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTMinutes"><span class="hs-identifier hs-type">DTMinutes</span></a></span><span> </span><span id="local-6989586621679117571"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117571"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;minutes&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Int -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117571"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-380"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTSeconds"><span class="hs-identifier hs-type">DTSeconds</span></a></span><span> </span><span id="local-6989586621679117572"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117572"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;seconds&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Int -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117572"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-381"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DTMilliseconds"><span class="hs-identifier hs-type">DTMilliseconds</span></a></span><span> </span><span id="local-6989586621679117573"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117573"><span class="hs-identifier hs-var">ms</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;milliseconds&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Int -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117573"><span class="hs-identifier hs-var">ms</span></a></span><span>
+</span><span id="line-382"></span><span>
+</span><span id="line-383"></span><span>
+</span><span id="line-384"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeSpec"><span class="hs-identifier hs-type">dateTimeSpec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DateTime"><span class="hs-identifier hs-type">DateTime</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier hs-type">VLSpec</span></a></span><span>
+</span><span id="line-385"></span><span id="dateTimeSpec"><span class="annot"><span class="annottext">dateTimeSpec :: [DateTime] -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Time.html#dateTimeSpec"><span class="hs-identifier hs-var hs-var">dateTimeSpec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="annot"><span class="annottext">([Pair] -&gt; Value) -&gt; ([DateTime] -&gt; [Pair]) -&gt; [DateTime] -&gt; Value
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(DateTime -&gt; Pair) -&gt; [DateTime] -&gt; [Pair]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">DateTime -&gt; Pair
+</span><a href="Graphics.Vega.VegaLite.Time.html#dateTimeProperty"><span class="hs-identifier hs-var">dateTimeProperty</span></a></span><span>
+</span><span id="line-386"></span><span>
+</span><span id="line-387"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dayLabel"><span class="hs-identifier hs-type">dayLabel</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DayName"><span class="hs-identifier hs-type">DayName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-388"></span><span id="dayLabel"><span class="annot"><span class="annottext">dayLabel :: DayName -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Time.html#dayLabel"><span class="hs-identifier hs-var hs-var">dayLabel</span></a></span></span><span> </span><span class="annot"><span class="annottext">DayName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Mon"><span class="hs-identifier hs-var">Mon</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Mon&quot;</span></span><span>
+</span><span id="line-389"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dayLabel"><span class="hs-identifier hs-var">dayLabel</span></a></span><span> </span><span class="annot"><span class="annottext">DayName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Tue"><span class="hs-identifier hs-var">Tue</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Tue&quot;</span></span><span>
+</span><span id="line-390"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dayLabel"><span class="hs-identifier hs-var">dayLabel</span></a></span><span> </span><span class="annot"><span class="annottext">DayName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Wed"><span class="hs-identifier hs-var">Wed</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Wed&quot;</span></span><span>
+</span><span id="line-391"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dayLabel"><span class="hs-identifier hs-var">dayLabel</span></a></span><span> </span><span class="annot"><span class="annottext">DayName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Thu"><span class="hs-identifier hs-var">Thu</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Thu&quot;</span></span><span>
+</span><span id="line-392"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dayLabel"><span class="hs-identifier hs-var">dayLabel</span></a></span><span> </span><span class="annot"><span class="annottext">DayName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Fri"><span class="hs-identifier hs-var">Fri</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Fri&quot;</span></span><span>
+</span><span id="line-393"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dayLabel"><span class="hs-identifier hs-var">dayLabel</span></a></span><span> </span><span class="annot"><span class="annottext">DayName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Sat"><span class="hs-identifier hs-var">Sat</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Sat&quot;</span></span><span>
+</span><span id="line-394"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dayLabel"><span class="hs-identifier hs-var">dayLabel</span></a></span><span> </span><span class="annot"><span class="annottext">DayName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Sun"><span class="hs-identifier hs-var">Sun</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Sun&quot;</span></span><span>
+</span><span id="line-395"></span><span>
+</span><span id="line-396"></span><span>
+</span><span id="line-397"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-type">monthNameLabel</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#MonthName"><span class="hs-identifier hs-type">MonthName</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-398"></span><span id="monthNameLabel"><span class="annot"><span class="annottext">monthNameLabel :: MonthName -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var hs-var">monthNameLabel</span></a></span></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Jan"><span class="hs-identifier hs-var">Jan</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Jan&quot;</span></span><span>
+</span><span id="line-399"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var">monthNameLabel</span></a></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Feb"><span class="hs-identifier hs-var">Feb</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Feb&quot;</span></span><span>
+</span><span id="line-400"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var">monthNameLabel</span></a></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Mar"><span class="hs-identifier hs-var">Mar</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Mar&quot;</span></span><span>
+</span><span id="line-401"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var">monthNameLabel</span></a></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Apr"><span class="hs-identifier hs-var">Apr</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Apr&quot;</span></span><span>
+</span><span id="line-402"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var">monthNameLabel</span></a></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="Graphics.Vega.VegaLite.Time.html#May"><span class="hs-identifier hs-var">May</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;May&quot;</span></span><span>
+</span><span id="line-403"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var">monthNameLabel</span></a></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Jun"><span class="hs-identifier hs-var">Jun</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Jun&quot;</span></span><span>
+</span><span id="line-404"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var">monthNameLabel</span></a></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Jul"><span class="hs-identifier hs-var">Jul</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Jul&quot;</span></span><span>
+</span><span id="line-405"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var">monthNameLabel</span></a></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Aug"><span class="hs-identifier hs-var">Aug</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Aug&quot;</span></span><span>
+</span><span id="line-406"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var">monthNameLabel</span></a></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Sep"><span class="hs-identifier hs-var">Sep</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Sep&quot;</span></span><span>
+</span><span id="line-407"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var">monthNameLabel</span></a></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Oct"><span class="hs-identifier hs-var">Oct</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Oct&quot;</span></span><span>
+</span><span id="line-408"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var">monthNameLabel</span></a></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Nov"><span class="hs-identifier hs-var">Nov</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Nov&quot;</span></span><span>
+</span><span id="line-409"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#monthNameLabel"><span class="hs-identifier hs-var">monthNameLabel</span></a></span><span> </span><span class="annot"><span class="annottext">MonthName
+</span><a href="Graphics.Vega.VegaLite.Time.html#Dec"><span class="hs-identifier hs-var">Dec</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;Dec&quot;</span></span><span>
+</span><span id="line-410"></span><span>
+</span><span id="line-411"></span><span>
+</span><span id="line-412"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#fromT"><span class="hs-identifier hs-type">fromT</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier hs-type">VLSpec</span></a></span><span>
+</span><span id="line-413"></span><span id="fromT"><span class="annot"><span class="annottext">fromT :: Text -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Time.html#fromT"><span class="hs-identifier hs-var hs-var">fromT</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Value
+forall a. ToJSON a =&gt; a -&gt; Value
+</span><span class="hs-identifier hs-var">toJSON</span></span><span>
+</span><span id="line-414"></span><span>
+</span><span id="line-415"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#timeUnitSpec"><span class="hs-identifier hs-type">timeUnitSpec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#TimeUnit"><span class="hs-identifier hs-type">TimeUnit</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier hs-type">VLSpec</span></a></span><span>
+</span><span id="line-416"></span><span id="timeUnitSpec"><span class="annot"><span class="annottext">timeUnitSpec :: TimeUnit -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Time.html#timeUnitSpec"><span class="hs-identifier hs-var hs-var">timeUnitSpec</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#TU"><span class="hs-identifier hs-type">TU</span></a></span><span> </span><span id="local-6989586621679117576"><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="#local-6989586621679117576"><span class="hs-identifier hs-var">tu</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Time.html#fromT"><span class="hs-identifier hs-var">fromT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BaseTimeUnit -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="#local-6989586621679117576"><span class="hs-identifier hs-var">tu</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-417"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#timeUnitSpec"><span class="hs-identifier hs-var">timeUnitSpec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#Utc"><span class="hs-identifier hs-type">Utc</span></a></span><span> </span><span id="local-6989586621679117577"><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="#local-6989586621679117577"><span class="hs-identifier hs-var">tu</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; Value
+</span><a href="Graphics.Vega.VegaLite.Time.html#fromT"><span class="hs-identifier hs-var">fromT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;utc&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="#local-6989586621679117577"><span class="hs-identifier hs-var">tu</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-418"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#timeUnitSpec"><span class="hs-identifier hs-var">timeUnitSpec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#TUStep"><span class="hs-identifier hs-type">TUStep</span></a></span><span> </span><span id="local-6989586621679117578"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679117578"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679117579"><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="#local-6989586621679117579"><span class="hs-identifier hs-var">tu</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;step&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Double -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679117578"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;unit&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="#local-6989586621679117579"><span class="hs-identifier hs-var">tu</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-419"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#timeUnitSpec"><span class="hs-identifier hs-var">timeUnitSpec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#UtcStep"><span class="hs-identifier hs-type">UtcStep</span></a></span><span> </span><span id="local-6989586621679117580"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679117580"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679117581"><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="#local-6989586621679117581"><span class="hs-identifier hs-var">tu</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;step&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Double -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679117580"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;unit&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;utc&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Text -&gt; Text
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Time.html#baseTimeUnitLabel"><span class="hs-identifier hs-var">baseTimeUnitLabel</span></a></span><span> </span><span class="annot"><span class="annottext">BaseTimeUnit
+</span><a href="#local-6989586621679117581"><span class="hs-identifier hs-var">tu</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-420"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#timeUnitSpec"><span class="hs-identifier hs-var">timeUnitSpec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#TUMaxBins"><span class="hs-identifier hs-type">TUMaxBins</span></a></span><span> </span><span id="local-6989586621679117582"><span class="annot"><span class="annottext">Natural
+</span><a href="#local-6989586621679117582"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;maxbins&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Natural -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Natural
+</span><a href="#local-6989586621679117582"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-421"></span></pre></body></html>

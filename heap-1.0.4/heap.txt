@@ -133,10 +133,10 @@ class (Ord (Prio pol item)) => HeapItem pol item where {
     
     -- | The part of <tt>item</tt> that determines the order of elements on a
     --   <a>HeapT</a>.
-    data family Prio pol item :: *;
+    data Prio pol item :: *;
     
     -- | Everything not part of <tt><a>Prio</a> pol item</tt>
-    type family Val pol item :: *;
+    type Val pol item :: *;
 }
 
 -- | Translate an <tt>item</tt> into a priority-value pair.

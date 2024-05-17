@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- | Utilities for working with machines that run in transformed monads,</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- inspired by @Pipes.Lift@.</span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Machine.Lift</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Lift.html#execStateM"><span class="hs-identifier">execStateM</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Lift.html#catchExcept"><span class="hs-identifier">catchExcept</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Lift.html#runReaderM"><span class="hs-identifier">runReaderM</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Trans.State.Strict</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Trans.Reader</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Trans.Except</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Machine.Type.html"><span class="hs-identifier">Data.Machine.Type</span></a></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- | Given an initial state and a 'MachineT' that runs in @'StateT' s m@,</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- produce a 'MachineT' that runs in @m@.</span><span>
+</span><span id="line-12"></span><span id="local-6989586621679100048"><span id="local-6989586621679100049"><span id="local-6989586621679100051"><span id="local-6989586621679100052"><span class="annot"><a href="Data.Machine.Lift.html#execStateM"><span class="hs-identifier hs-type">execStateM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679100048"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679100049"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-type">MachineT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">StateT</span></span><span> </span><span class="annot"><a href="#local-6989586621679100049"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100048"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679100051"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100052"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-type">MachineT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100048"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100051"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100052"><span class="hs-identifier hs-type">o</span></a></span></span></span></span></span><span>
+</span><span id="line-13"></span><span id="execStateM"><span class="annot"><span class="annottext">execStateM :: forall (m :: * -&gt; *) s (k :: * -&gt; *) o.
+Monad m =&gt;
+s -&gt; MachineT (StateT s m) k o -&gt; MachineT m k o
+</span><a href="Data.Machine.Lift.html#execStateM"><span class="hs-identifier hs-var hs-var">execStateM</span></a></span></span><span> </span><span id="local-6989586621679100130"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679100130"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679100131"><span class="annot"><span class="annottext">MachineT (StateT s m) k o
+</span><a href="#local-6989586621679100131"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m (Step k o (MachineT m k o)) -&gt; MachineT m k o
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+m (Step k o (MachineT m k o)) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-var">MachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(m (Step k o (MachineT m k o)) -&gt; MachineT m k o)
+-&gt; m (Step k o (MachineT m k o)) -&gt; MachineT m k o
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679100132"><span class="annot"><span class="annottext">Step k o (MachineT (StateT s m) k o)
+</span><a href="#local-6989586621679100132"><span class="hs-identifier hs-var">stp</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679100133"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679100133"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StateT s m (Step k o (MachineT (StateT s m) k o))
+-&gt; s -&gt; m (Step k o (MachineT (StateT s m) k o), s)
+forall s (m :: * -&gt; *) a. StateT s m a -&gt; s -&gt; m (a, s)
+</span><span class="hs-identifier hs-var">runStateT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MachineT (StateT s m) k o
+-&gt; StateT s m (Step k o (MachineT (StateT s m) k o))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT (StateT s m) k o
+</span><a href="#local-6989586621679100131"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679100130"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Step k o (MachineT (StateT s m) k o)
+</span><a href="#local-6989586621679100132"><span class="hs-identifier hs-var">stp</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><span class="annottext">Step k o (MachineT (StateT s m) k o)
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step k o (MachineT m k o) -&gt; m (Step k o (MachineT m k o))
+forall a. a -&gt; m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Step k o (MachineT m k o)
+forall (k :: * -&gt; *) o r. Step k o r
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-type">Yield</span></a></span><span> </span><span id="local-6989586621679100138"><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679100138"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span id="local-6989586621679100139"><span class="annot"><span class="annottext">MachineT (StateT s m) k o
+</span><a href="#local-6989586621679100139"><span class="hs-identifier hs-var">m'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step k o (MachineT m k o) -&gt; m (Step k o (MachineT m k o))
+forall a. a -&gt; m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step k o (MachineT m k o) -&gt; m (Step k o (MachineT m k o)))
+-&gt; Step k o (MachineT m k o) -&gt; m (Step k o (MachineT m k o))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">o -&gt; MachineT m k o -&gt; Step k o (MachineT m k o)
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679100138"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; MachineT (StateT s m) k o -&gt; MachineT m k o
+forall (m :: * -&gt; *) s (k :: * -&gt; *) o.
+Monad m =&gt;
+s -&gt; MachineT (StateT s m) k o -&gt; MachineT m k o
+</span><a href="Data.Machine.Lift.html#execStateM"><span class="hs-identifier hs-var">execStateM</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679100133"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT (StateT s m) k o
+</span><a href="#local-6989586621679100139"><span class="hs-identifier hs-var">m'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span id="local-6989586621679100144"><span class="annot"><span class="annottext">t -&gt; MachineT (StateT s m) k o
+</span><a href="#local-6989586621679100144"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679100145"><span class="annot"><span class="annottext">k t
+</span><a href="#local-6989586621679100145"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span id="local-6989586621679100146"><span class="annot"><span class="annottext">MachineT (StateT s m) k o
+</span><a href="#local-6989586621679100146"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step k o (MachineT m k o) -&gt; m (Step k o (MachineT m k o))
+forall a. a -&gt; m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step k o (MachineT m k o) -&gt; m (Step k o (MachineT m k o)))
+-&gt; Step k o (MachineT m k o) -&gt; m (Step k o (MachineT m k o))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(t -&gt; MachineT m k o)
+-&gt; k t -&gt; MachineT m k o -&gt; Step k o (MachineT m k o)
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; MachineT (StateT s m) k o -&gt; MachineT m k o
+forall (m :: * -&gt; *) s (k :: * -&gt; *) o.
+Monad m =&gt;
+s -&gt; MachineT (StateT s m) k o -&gt; MachineT m k o
+</span><a href="Data.Machine.Lift.html#execStateM"><span class="hs-identifier hs-var">execStateM</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679100133"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT (StateT s m) k o -&gt; MachineT m k o)
+-&gt; (t -&gt; MachineT (StateT s m) k o) -&gt; t -&gt; MachineT m k o
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">t -&gt; MachineT (StateT s m) k o
+</span><a href="#local-6989586621679100144"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">k t
+</span><a href="#local-6989586621679100145"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; MachineT (StateT s m) k o -&gt; MachineT m k o
+forall (m :: * -&gt; *) s (k :: * -&gt; *) o.
+Monad m =&gt;
+s -&gt; MachineT (StateT s m) k o -&gt; MachineT m k o
+</span><a href="Data.Machine.Lift.html#execStateM"><span class="hs-identifier hs-var">execStateM</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679100133"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT (StateT s m) k o
+</span><a href="#local-6989586621679100146"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- | 'catchExcept' allows a broken machine to be replaced without stopping the</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- assembly line.</span><span>
+</span><span id="line-22"></span><span id="local-6989586621679100081"><span id="local-6989586621679100082"><span id="local-6989586621679100084"><span id="local-6989586621679100085"><span class="annot"><a href="Data.Machine.Lift.html#catchExcept"><span class="hs-identifier hs-type">catchExcept</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679100081"><span class="hs-identifier hs-type">m</span></a></span><span>
+</span><span id="line-23"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-type">MachineT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ExceptT</span></span><span> </span><span class="annot"><a href="#local-6989586621679100082"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100081"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679100084"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100085"><span class="hs-identifier hs-type">o</span></a></span><span>
+</span><span id="line-24"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679100082"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-type">MachineT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ExceptT</span></span><span> </span><span class="annot"><a href="#local-6989586621679100082"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100081"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679100084"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100085"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-type">MachineT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ExceptT</span></span><span> </span><span class="annot"><a href="#local-6989586621679100082"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100081"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679100084"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100085"><span class="hs-identifier hs-type">o</span></a></span></span></span></span></span><span>
+</span><span id="line-26"></span><span id="catchExcept"><span class="annot"><span class="annottext">catchExcept :: forall (m :: * -&gt; *) e (k :: * -&gt; *) o.
+Monad m =&gt;
+MachineT (ExceptT e m) k o
+-&gt; (e -&gt; MachineT (ExceptT e m) k o) -&gt; MachineT (ExceptT e m) k o
+</span><a href="Data.Machine.Lift.html#catchExcept"><span class="hs-identifier hs-var hs-var">catchExcept</span></a></span></span><span> </span><span id="local-6989586621679100156"><span class="annot"><span class="annottext">MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100156"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679100157"><span class="annot"><span class="annottext">e -&gt; MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100157"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ExceptT e m (Step k o (MachineT (ExceptT e m) k o))
+-&gt; MachineT (ExceptT e m) k o
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+m (Step k o (MachineT m k o)) -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-var">MachineT</span></a></span><span> </span><span class="annot"><span class="annottext">(ExceptT e m (Step k o (MachineT (ExceptT e m) k o))
+ -&gt; MachineT (ExceptT e m) k o)
+-&gt; ExceptT e m (Step k o (MachineT (ExceptT e m) k o))
+-&gt; MachineT (ExceptT e m) k o
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-27"></span><span>  </span><span id="local-6989586621679100158"><span class="annot"><span class="annottext">Step k o (MachineT (ExceptT e m) k o)
+</span><a href="#local-6989586621679100158"><span class="hs-identifier hs-var">step</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MachineT (ExceptT e m) k o
+-&gt; ExceptT e m (Step k o (MachineT (ExceptT e m) k o))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var">runMachineT</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100156"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">ExceptT e m (Step k o (MachineT (ExceptT e m) k o))
+-&gt; (e -&gt; ExceptT e m (Step k o (MachineT (ExceptT e m) k o)))
+-&gt; ExceptT e m (Step k o (MachineT (ExceptT e m) k o))
+forall (m :: * -&gt; *) e a e'.
+Monad m =&gt;
+ExceptT e m a -&gt; (e -&gt; ExceptT e' m a) -&gt; ExceptT e' m a
+</span><span class="hs-operator hs-var">`catchE`</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679100160"><span class="annot"><span class="annottext">e
+</span><a href="#local-6989586621679100160"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">MachineT (ExceptT e m) k o
+-&gt; ExceptT e m (Step k o (MachineT (ExceptT e m) k o))
+forall (m :: * -&gt; *) (k :: * -&gt; *) o.
+MachineT m k o -&gt; m (Step k o (MachineT m k o))
+</span><a href="Data.Machine.Type.html#runMachineT"><span class="hs-identifier hs-var">runMachineT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MachineT (ExceptT e m) k o
+-&gt; (e -&gt; MachineT (ExceptT e m) k o) -&gt; MachineT (ExceptT e m) k o
+forall (m :: * -&gt; *) e (k :: * -&gt; *) o.
+Monad m =&gt;
+MachineT (ExceptT e m) k o
+-&gt; (e -&gt; MachineT (ExceptT e m) k o) -&gt; MachineT (ExceptT e m) k o
+</span><a href="Data.Machine.Lift.html#catchExcept"><span class="hs-identifier hs-var">catchExcept</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">e -&gt; MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100157"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">e
+</span><a href="#local-6989586621679100160"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">e -&gt; MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100157"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Step k o (MachineT (ExceptT e m) k o)
+</span><a href="#local-6989586621679100158"><span class="hs-identifier hs-var">step</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-29"></span><span>    </span><span class="annot"><span class="annottext">Step k o (MachineT (ExceptT e m) k o)
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step k o (MachineT (ExceptT e m) k o)
+-&gt; ExceptT e m (Step k o (MachineT (ExceptT e m) k o))
+forall a. a -&gt; ExceptT e m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Step k o (MachineT (ExceptT e m) k o)
+forall (k :: * -&gt; *) o r. Step k o r
+</span><a href="Data.Machine.Type.html#Stop"><span class="hs-identifier hs-var">Stop</span></a></span><span>
+</span><span id="line-30"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-type">Yield</span></a></span><span> </span><span id="local-6989586621679100161"><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679100161"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span id="local-6989586621679100162"><span class="annot"><span class="annottext">MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100162"><span class="hs-identifier hs-var">m'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step k o (MachineT (ExceptT e m) k o)
+-&gt; ExceptT e m (Step k o (MachineT (ExceptT e m) k o))
+forall a. a -&gt; ExceptT e m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step k o (MachineT (ExceptT e m) k o)
+ -&gt; ExceptT e m (Step k o (MachineT (ExceptT e m) k o)))
+-&gt; Step k o (MachineT (ExceptT e m) k o)
+-&gt; ExceptT e m (Step k o (MachineT (ExceptT e m) k o))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">o
+-&gt; MachineT (ExceptT e m) k o
+-&gt; Step k o (MachineT (ExceptT e m) k o)
+forall (k :: * -&gt; *) o r. o -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Yield"><span class="hs-identifier hs-var">Yield</span></a></span><span> </span><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679100161"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MachineT (ExceptT e m) k o
+-&gt; (e -&gt; MachineT (ExceptT e m) k o) -&gt; MachineT (ExceptT e m) k o
+forall (m :: * -&gt; *) e (k :: * -&gt; *) o.
+Monad m =&gt;
+MachineT (ExceptT e m) k o
+-&gt; (e -&gt; MachineT (ExceptT e m) k o) -&gt; MachineT (ExceptT e m) k o
+</span><a href="Data.Machine.Lift.html#catchExcept"><span class="hs-identifier hs-var">catchExcept</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100162"><span class="hs-identifier hs-var">m'</span></a></span><span> </span><span class="annot"><span class="annottext">e -&gt; MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100157"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-type">Await</span></a></span><span> </span><span id="local-6989586621679100166"><span class="annot"><span class="annottext">t -&gt; MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100166"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679100167"><span class="annot"><span class="annottext">k t
+</span><a href="#local-6989586621679100167"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span id="local-6989586621679100168"><span class="annot"><span class="annottext">MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100168"><span class="hs-identifier hs-var">m'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Step k o (MachineT (ExceptT e m) k o)
+-&gt; ExceptT e m (Step k o (MachineT (ExceptT e m) k o))
+forall a. a -&gt; ExceptT e m a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Step k o (MachineT (ExceptT e m) k o)
+ -&gt; ExceptT e m (Step k o (MachineT (ExceptT e m) k o)))
+-&gt; Step k o (MachineT (ExceptT e m) k o)
+-&gt; ExceptT e m (Step k o (MachineT (ExceptT e m) k o))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(t -&gt; MachineT (ExceptT e m) k o)
+-&gt; k t
+-&gt; MachineT (ExceptT e m) k o
+-&gt; Step k o (MachineT (ExceptT e m) k o)
+forall (k :: * -&gt; *) o r t. (t -&gt; r) -&gt; k t -&gt; r -&gt; Step k o r
+</span><a href="Data.Machine.Type.html#Await"><span class="hs-identifier hs-var">Await</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(MachineT (ExceptT e m) k o
+ -&gt; (e -&gt; MachineT (ExceptT e m) k o) -&gt; MachineT (ExceptT e m) k o)
+-&gt; (e -&gt; MachineT (ExceptT e m) k o)
+-&gt; MachineT (ExceptT e m) k o
+-&gt; MachineT (ExceptT e m) k o
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">MachineT (ExceptT e m) k o
+-&gt; (e -&gt; MachineT (ExceptT e m) k o) -&gt; MachineT (ExceptT e m) k o
+forall (m :: * -&gt; *) e (k :: * -&gt; *) o.
+Monad m =&gt;
+MachineT (ExceptT e m) k o
+-&gt; (e -&gt; MachineT (ExceptT e m) k o) -&gt; MachineT (ExceptT e m) k o
+</span><a href="Data.Machine.Lift.html#catchExcept"><span class="hs-identifier hs-var">catchExcept</span></a></span><span> </span><span class="annot"><span class="annottext">e -&gt; MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100157"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">(MachineT (ExceptT e m) k o -&gt; MachineT (ExceptT e m) k o)
+-&gt; (t -&gt; MachineT (ExceptT e m) k o)
+-&gt; t
+-&gt; MachineT (ExceptT e m) k o
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">t -&gt; MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100166"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">k t
+</span><a href="#local-6989586621679100167"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MachineT (ExceptT e m) k o
+-&gt; (e -&gt; MachineT (ExceptT e m) k o) -&gt; MachineT (ExceptT e m) k o
+forall (m :: * -&gt; *) e (k :: * -&gt; *) o.
+Monad m =&gt;
+MachineT (ExceptT e m) k o
+-&gt; (e -&gt; MachineT (ExceptT e m) k o) -&gt; MachineT (ExceptT e m) k o
+</span><a href="Data.Machine.Lift.html#catchExcept"><span class="hs-identifier hs-var">catchExcept</span></a></span><span> </span><span class="annot"><span class="annottext">MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100168"><span class="hs-identifier hs-var">m'</span></a></span><span> </span><span class="annot"><span class="annottext">e -&gt; MachineT (ExceptT e m) k o
+</span><a href="#local-6989586621679100157"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- | Given an environment and a 'MachineT' that runs in @'ReaderT' e m@,</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- produce a 'MachineT' that runs in @m@.</span><span>
+</span><span id="line-35"></span><span id="local-6989586621679100100"><span id="local-6989586621679100101"><span id="local-6989586621679100103"><span id="local-6989586621679100104"><span class="annot"><a href="Data.Machine.Lift.html#runReaderM"><span class="hs-identifier hs-type">runReaderM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679100100"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679100101"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-type">MachineT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ReaderT</span></span><span> </span><span class="annot"><a href="#local-6989586621679100101"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100100"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679100103"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100104"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Type.html#MachineT"><span class="hs-identifier hs-type">MachineT</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100100"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100103"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679100104"><span class="hs-identifier hs-type">o</span></a></span></span></span></span></span><span>
+</span><span id="line-36"></span><span id="runReaderM"><span class="annot"><span class="annottext">runReaderM :: forall (m :: * -&gt; *) e (k :: * -&gt; *) o.
+Monad m =&gt;
+e -&gt; MachineT (ReaderT e m) k o -&gt; MachineT m k o
+</span><a href="Data.Machine.Lift.html#runReaderM"><span class="hs-identifier hs-var hs-var">runReaderM</span></a></span></span><span> </span><span id="local-6989586621679100175"><span class="annot"><span class="annottext">e
+</span><a href="#local-6989586621679100175"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall a. ReaderT e m a -&gt; m a)
+-&gt; MachineT (ReaderT e m) k o -&gt; MachineT m k o
+forall (m :: * -&gt; *) (m' :: * -&gt; *) (k :: * -&gt; *) o.
+(Monad m, Monad m') =&gt;
+(forall a. m a -&gt; m' a) -&gt; MachineT m k o -&gt; MachineT m' k o
+</span><a href="Data.Machine.Type.html#fitM"><span class="hs-identifier hs-var">fitM</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(ReaderT e m a -&gt; e -&gt; m a) -&gt; e -&gt; ReaderT e m a -&gt; m a
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">ReaderT e m a -&gt; e -&gt; m a
+forall r (m :: * -&gt; *) a. ReaderT r m a -&gt; r -&gt; m a
+</span><span class="hs-identifier hs-var">runReaderT</span></span><span> </span><span class="annot"><span class="annottext">e
+</span><a href="#local-6989586621679100175"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span></pre></body></html>

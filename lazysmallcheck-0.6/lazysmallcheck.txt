@@ -66,7 +66,7 @@ instance (Test.LazySmallCheck.Serial a, Test.LazySmallCheck.Serial b, Test.LazyS
 instance (Test.LazySmallCheck.Serial a, Test.LazySmallCheck.Serial b, Test.LazySmallCheck.Serial c, Test.LazySmallCheck.Serial d) => Test.LazySmallCheck.Serial (a, b, c, d)
 instance (Test.LazySmallCheck.Serial a, Test.LazySmallCheck.Serial b, Test.LazySmallCheck.Serial c, Test.LazySmallCheck.Serial d, Test.LazySmallCheck.Serial e) => Test.LazySmallCheck.Serial (a, b, c, d, e)
 instance Test.LazySmallCheck.Serial GHC.Types.Int
-instance Test.LazySmallCheck.Serial GHC.Integer.Type.Integer
+instance Test.LazySmallCheck.Serial GHC.Num.Integer.Integer
 instance Test.LazySmallCheck.Serial GHC.Types.Char
 instance Test.LazySmallCheck.Serial GHC.Types.Float
 instance Test.LazySmallCheck.Serial GHC.Types.Double

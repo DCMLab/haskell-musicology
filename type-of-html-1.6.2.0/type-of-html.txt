@@ -70,8 +70,8 @@ instance Html.Convert.Convert GHC.Base.String
 instance Html.Convert.Convert Data.Text.Internal.Text
 instance Html.Convert.Convert Data.Text.Internal.Lazy.Text
 instance Html.Convert.Convert GHC.Types.Int
-instance Html.Convert.Convert GHC.Integer.Type.Integer
-instance Html.Convert.Convert GHC.Natural.Natural
+instance Html.Convert.Convert GHC.Num.Integer.Integer
+instance Html.Convert.Convert GHC.Num.Natural.Natural
 instance Html.Convert.Convert GHC.Types.Float
 instance Html.Convert.Convert GHC.Types.Double
 instance Html.Convert.Convert GHC.Types.Word
@@ -786,7 +786,7 @@ Palpable :: ContentCategory
 Scripting :: ContentCategory
 infixr 2 :|:
 infixr 3 :&:
-type (&) k b = GetAttributeName k : b
+type (&) k b = GetAttributeName k ': b
 infixr 5 &
 
 module Html.Obsolete

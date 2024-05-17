@@ -4,26 +4,26 @@
 </span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Musicology.Pitch</span></span><span>
 </span><span id="line-5"></span><span>
 </span><span id="line-6"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">EM.ToMusic1</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">MidiIC</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-7"></span><span>  </span><span id="local-6989586621679042338"><span class="annot"><span class="annottext">toMusic1 :: Music MidiIC -&gt; Music1
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toMusic1</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Music MidiInterval -&gt; Music1
+</span><span id="line-7"></span><span>  </span><span id="local-6989586621679045615"><span class="annot"><span class="annottext">toMusic1 :: Music MidiIC -&gt; Music1
+</span><a href="#local-6989586621679045615"><span class="hs-identifier hs-var hs-var hs-var hs-var">toMusic1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Music MidiInterval -&gt; Music1
 forall a. ToMusic1 a =&gt; Music a -&gt; Music1
 </span><span class="hs-identifier hs-var">EM.toMusic1</span></span><span> </span><span class="annot"><span class="annottext">(Music MidiInterval -&gt; Music1)
 -&gt; (Music MidiIC -&gt; Music MidiInterval) -&gt; Music MidiIC -&gt; Music1
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(MidiIC -&gt; MidiInterval) -&gt; Music MidiIC -&gt; Music MidiInterval
 forall a b. (a -&gt; b) -&gt; Music a -&gt; Music b
-</span><span class="hs-identifier hs-var">EM.mMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679042334"><span class="annot"><span class="annottext">MidiIC
-</span><a href="#local-6989586621679042334"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MidiIC -&gt; IOf MidiIC
+</span><span class="hs-identifier hs-var">EM.mMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679045619"><span class="annot"><span class="annottext">MidiIC
+</span><a href="#local-6989586621679045619"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MidiIC -&gt; IOf MidiIC
 forall i. IntervalClass i =&gt; i -&gt; IOf i
 </span><span class="hs-identifier hs-var">emb</span></span><span> </span><span class="annot"><span class="annottext">MidiIC
-</span><a href="#local-6989586621679042334"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">MidiInterval -&gt; MidiInterval -&gt; MidiInterval
+</span><a href="#local-6989586621679045619"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">MidiInterval -&gt; MidiInterval -&gt; MidiInterval
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">MidiInterval
 </span><span class="hs-number">60</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-8"></span><span>
 </span><span id="line-9"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">EM.ToMusic1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SInterval</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-10"></span><span>  </span><span id="local-6989586621679042330"><span class="annot"><span class="annottext">toMusic1 :: Music SInterval -&gt; Music1
-</span><a href="#local-6989586621679042330"><span class="hs-identifier hs-var hs-var hs-var hs-var">toMusic1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Music MidiInterval -&gt; Music1
+</span><span id="line-10"></span><span>  </span><span id="local-6989586621679045627"><span class="annot"><span class="annottext">toMusic1 :: Music SInterval -&gt; Music1
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toMusic1</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Music MidiInterval -&gt; Music1
 forall a. ToMusic1 a =&gt; Music a -&gt; Music1
 </span><span class="hs-identifier hs-var">EM.toMusic1</span></span><span> </span><span class="annot"><span class="annottext">(Music MidiInterval -&gt; Music1)
 -&gt; (Music SInterval -&gt; Music MidiInterval)
@@ -38,8 +38,8 @@ forall i. ToMidi i =&gt; i -&gt; MidiInterval
 </span><span class="hs-identifier hs-var">toMidi</span></span><span>
 </span><span id="line-11"></span><span>
 </span><span id="line-12"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">EM.ToMusic1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">SIC</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-13"></span><span>  </span><span id="local-6989586621679042327"><span class="annot"><span class="annottext">toMusic1 :: Music SIC -&gt; Music1
-</span><a href="#local-6989586621679042327"><span class="hs-identifier hs-var hs-var hs-var hs-var">toMusic1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Music MidiInterval -&gt; Music1
+</span><span id="line-13"></span><span>  </span><span id="local-6989586621679045636"><span class="annot"><span class="annottext">toMusic1 :: Music SIC -&gt; Music1
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toMusic1</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Music MidiInterval -&gt; Music1
 forall a. ToMusic1 a =&gt; Music a -&gt; Music1
 </span><span class="hs-identifier hs-var">EM.toMusic1</span></span><span> </span><span class="annot"><span class="annottext">(Music MidiInterval -&gt; Music1)
 -&gt; (Music SIC -&gt; Music MidiInterval) -&gt; Music SIC -&gt; Music1
@@ -56,9 +56,9 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall i. ToMidi i =&gt; i -&gt; MidiInterval
 </span><span class="hs-identifier hs-var">toMidi</span></span><span class="hs-special">)</span><span>
 </span><span id="line-14"></span><span>
-</span><span id="line-15"></span><span id="local-6989586621679042326"><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">EM.ToMusic1</span></span><span> </span><span class="annot"><a href="#local-6989586621679042326"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">EM.ToMusic1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pitch</span></span><span> </span><span class="annot"><a href="#local-6989586621679042326"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-16"></span><span>  </span><span id="local-6989586621679042324"><span class="annot"><span class="annottext">toMusic1 :: Music (Pitch p) -&gt; Music1
-</span><a href="#local-6989586621679042324"><span class="hs-identifier hs-var hs-var hs-var hs-var">toMusic1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Music p -&gt; Music1
+</span><span id="line-15"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679045603"><span class="annot"><span class="hs-identifier hs-type">EM.ToMusic1</span></span><span> </span><span class="annot"><a href="#local-6989586621679045603"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">EM.ToMusic1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Pitch</span></span><span> </span><span class="annot"><a href="#local-6989586621679045603"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>  </span><span id="local-6989586621679045641"><span class="annot"><span class="annottext">toMusic1 :: Music (Pitch p) -&gt; Music1
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toMusic1</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Music p -&gt; Music1
 forall a. ToMusic1 a =&gt; Music a -&gt; Music1
 </span><span class="hs-identifier hs-var">EM.toMusic1</span></span><span> </span><span class="annot"><span class="annottext">(Music p -&gt; Music1)
 -&gt; (Music (Pitch p) -&gt; Music p) -&gt; Music (Pitch p) -&gt; Music1
@@ -66,7 +66,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Pitch p -&gt; p) -&gt; Music (Pitch p) -&gt; Music p
 forall a b. (a -&gt; b) -&gt; Music a -&gt; Music b
 </span><span class="hs-identifier hs-var">EM.mMap</span></span><span> </span><span class="annot"><span class="annottext">Pitch p -&gt; p
-forall a. Pitch a -&gt; a
-</span><span class="hs-identifier hs-var">toInterval</span></span></span><span>
+forall {a}. Pitch a -&gt; a
+</span><span class="hs-identifier hs-var">toInterval</span></span><span>
 </span><span id="line-17"></span><span>
 </span><span id="line-18"></span></pre></body></html>

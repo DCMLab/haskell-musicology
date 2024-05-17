@@ -382,21 +382,13 @@ unwords :: Monad m => FreeT (Producer ByteString m) m x -> Producer ByteString m
 --   A <a>ByteString</a> contains 8-bit bytes, or by using the operations
 --   from <a>Data.ByteString.Char8</a> it can be interpreted as containing
 --   8-bit characters.
-data ByteString
+data () => ByteString
 
 -- | 8-bit unsigned integer type
-data Word8
+data () => Word8
 
 -- | The "free monad transformer" for a functor <tt>f</tt>
-data FreeT (f :: Type -> Type) (m :: Type -> Type) a
-
--- | Join a <a>FreeT</a>-delimited stream of <a>Producer</a>s into a single
---   <a>Producer</a> by intercalating a <a>Producer</a> in between them
---   
---   <pre>
---   intercalates :: Monad m =&gt; <a>Producer</a> a m () -&gt; Joiner a m x
---   </pre>
-intercalates :: forall (m :: Type -> Type) a x. Monad m => Producer a m () -> FreeT (Producer a m) m x -> Producer a m x
+data () => FreeT (f :: Type -> Type) (m :: Type -> Type) a
 
 -- | Join a <a>FreeT</a>-delimited stream of <a>Producer</a>s into a single
 --   <a>Producer</a>
@@ -405,6 +397,14 @@ intercalates :: forall (m :: Type -> Type) a x. Monad m => Producer a m () -> Fr
 --   concats :: Monad m =&gt; Joiner a m x
 --   </pre>
 concats :: forall (m :: Type -> Type) a x. Monad m => FreeT (Producer a m) m x -> Producer a m x
+
+-- | Join a <a>FreeT</a>-delimited stream of <a>Producer</a>s into a single
+--   <a>Producer</a> by intercalating a <a>Producer</a> in between them
+--   
+--   <pre>
+--   intercalates :: Monad m =&gt; <a>Producer</a> a m () -&gt; Joiner a m x
+--   </pre>
+intercalates :: forall (m :: Type -> Type) a x. Monad m => Producer a m () -> FreeT (Producer a m) m x -> Producer a m x
 
 -- | A <a>Parser</a> is an action that reads from and writes to a stored
 --   <a>Producer</a>

@@ -161,7 +161,7 @@ lift :: (MonadTrans t, Monad m) => m a -> t m a
 --   The <a>return</a> function leaves the state unchanged, while
 --   <tt>&gt;&gt;=</tt> uses the final state of the first computation as
 --   the initial state of the second.
-newtype StateT s (m :: Type -> Type) a
+newtype () => StateT s (m :: Type -> Type) a
 StateT :: (s -> m (a, s)) -> StateT s (m :: Type -> Type) a
 [runStateT] :: StateT s (m :: Type -> Type) a -> s -> m (a, s)
 
@@ -183,12 +183,8 @@ evalStateT :: Monad m => StateT s m a -> s -> m a
 --   </ul>
 execStateT :: Monad m => StateT s m a -> s -> m s
 
--- | Consume the first value from a <a>Producer</a>
---   
---   <a>next</a> either fails with a <a>Left</a> if the <a>Producer</a>
---   terminates or succeeds with a <a>Right</a> providing the next value
---   and the remainder of the <a>Producer</a>.
-next :: Monad m => Producer a m r -> m (Either r (a, Producer a m r))
+-- | <a>Producer</a>s can only <a>yield</a>
+type Producer b = Proxy X () () b
 
 -- | Produce a value
 --   
@@ -198,8 +194,12 @@ next :: Monad m => Producer a m r -> m (Either r (a, Producer a m r))
 --   </pre>
 yield :: forall (m :: Type -> Type) a x' x. Functor m => a -> Proxy x' x () a m ()
 
--- | <a>Producer</a>s can only <a>yield</a>
-type Producer b = Proxy X () () b
+-- | Consume the first value from a <a>Producer</a>
+--   
+--   <a>next</a> either fails with a <a>Left</a> if the <a>Producer</a>
+--   terminates or succeeds with a <a>Right</a> providing the next value
+--   and the remainder of the <a>Producer</a>.
+next :: Monad m => Producer a m r -> m (Either r (a, Producer a m r))
 
 
 -- | <tt>pipes-parse</tt> builds upon <tt>pipes</tt> to add several missing

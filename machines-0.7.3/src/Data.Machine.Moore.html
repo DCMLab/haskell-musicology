@@ -1,0 +1,599 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses #-}</span><span class="hs-cpp">
+
+#ifndef MIN_VERSION_profunctors
+</span><span class="hs-cpp">#define MIN_VERSION_profunctors(x,y,z) 0
+</span><span class="hs-cpp">#endif
+</span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Module      :  Data.Machine.Moore</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Copyright   :  (C) 2012 Edward Kmett</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- License     :  BSD-style (see the file LICENSE)</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--</span><span>
+</span><span id="line-14"></span><span class="hs-comment">-- Maintainer  :  Edward Kmett &lt;ekmett@gmail.com&gt;</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- Stability   :  provisional</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-17"></span><span class="hs-comment">--</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- &lt;http://en.wikipedia.org/wiki/Moore_machine&gt;</span><span>
+</span><span id="line-19"></span><span class="hs-comment">----------------------------------------------------------------------------</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Machine.Moore</span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier">Moore</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#logMoore"><span class="hs-identifier">logMoore</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#unfoldMoore"><span class="hs-identifier">unfoldMoore</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Applicative</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Comonad</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Fix</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Reader.Class</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Zip</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Copointed</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Distributive</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor.Rep</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Functor</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Machine.Plan.html"><span class="hs-identifier">Data.Machine.Plan</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Machine.Type.html"><span class="hs-identifier">Data.Machine.Type</span></a></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Machine.Process.html"><span class="hs-identifier">Data.Machine.Process</span></a></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Semigroup</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Pointed</span></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Profunctor.Closed</span></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Profunctor</span></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Profunctor.Sieve</span></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Profunctor.Rep</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Profunctor</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="annot"><span class="hs-comment">-- | 'Moore' machines</span></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">data</span><span> </span><span id="Moore"><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span></span><span> </span><span id="local-6989586621679098597"><span class="annot"><a href="#local-6989586621679098597"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span id="local-6989586621679098596"><span class="annot"><a href="#local-6989586621679098596"><span class="hs-identifier hs-type">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Moore"><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679098596"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679098597"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098597"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098596"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="annot"><span class="hs-comment">-- | Accumulate the input as a sequence.</span></span><span>
+</span><span id="line-49"></span><span id="local-6989586621679098591"><span class="annot"><a href="Data.Machine.Moore.html#logMoore"><span class="hs-identifier hs-type">logMoore</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679098591"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098591"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098591"><span class="hs-identifier hs-type">m</span></a></span></span><span>
+</span><span id="line-50"></span><span id="logMoore"><span class="annot"><span class="annottext">logMoore :: forall m. Monoid m =&gt; Moore m m
+</span><a href="Data.Machine.Moore.html#logMoore"><span class="hs-identifier hs-var hs-var">logMoore</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">m -&gt; Moore m m
+forall {t}. Monoid t =&gt; t -&gt; Moore t t
+</span><a href="#local-6989586621679098898"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">m
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-51"></span><span>  </span><span id="local-6989586621679098898"><span class="annot"><span class="annottext">h :: t -&gt; Moore t t
+</span><a href="#local-6989586621679098898"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679098904"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679098904"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">t -&gt; (t -&gt; Moore t t) -&gt; Moore t t
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679098904"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679098905"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679098905"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">t -&gt; Moore t t
+</span><a href="#local-6989586621679098898"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679098904"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">t -&gt; t -&gt; t
+forall a. Monoid a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">`mappend`</span></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679098905"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#logMoore"><span class="hs-pragma hs-type">logMoore</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="annot"><span class="hs-comment">-- | Construct a Moore machine from a state valuation and transition function</span></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679098598"><span id="local-6989586621679098599"><span id="local-6989586621679098600"><span class="annot"><a href="Data.Machine.Moore.html#unfoldMoore"><span class="hs-identifier hs-type">unfoldMoore</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679098598"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679098599"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679098600"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679098598"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679098598"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098600"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098599"><span class="hs-identifier hs-type">b</span></a></span></span></span></span><span>
+</span><span id="line-56"></span><span id="unfoldMoore"><span class="annot"><span class="annottext">unfoldMoore :: forall s b a. (s -&gt; (b, a -&gt; s)) -&gt; s -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#unfoldMoore"><span class="hs-identifier hs-var hs-var">unfoldMoore</span></a></span></span><span> </span><span id="local-6989586621679098906"><span class="annot"><span class="annottext">s -&gt; (b, a -&gt; s)
+</span><a href="#local-6989586621679098906"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">s -&gt; Moore a b
+</span><a href="#local-6989586621679098907"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>  </span><span id="local-6989586621679098907"><span class="annot"><span class="annottext">go :: s -&gt; Moore a b
+</span><a href="#local-6989586621679098907"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679098908"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679098908"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">s -&gt; (b, a -&gt; s)
+</span><a href="#local-6989586621679098906"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679098908"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-58"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679098909"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679098909"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679098910"><span class="annot"><span class="annottext">a -&gt; s
+</span><a href="#local-6989586621679098910"><span class="hs-identifier hs-var">g</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679098909"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s -&gt; Moore a b
+</span><a href="#local-6989586621679098907"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">(s -&gt; Moore a b) -&gt; (a -&gt; s) -&gt; a -&gt; Moore a b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; s
+</span><a href="#local-6989586621679098910"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#unfoldMoore"><span class="hs-pragma hs-type">unfoldMoore</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#Automaton"><span class="hs-identifier hs-type">Automaton</span></a></span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679098919"><span class="annot"><span class="annottext">auto :: forall a b. Moore a b -&gt; Process a b
+</span><a href="#local-6989586621679098919"><span class="hs-identifier hs-var hs-var hs-var hs-var">auto</span></a></span></span><span> </span><span id="local-6989586621679098921"><span class="annot"><span class="annottext">Moore a b
+</span><a href="#local-6989586621679098921"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanT (Is a) b m Any -&gt; MachineT m (Is a) b
+forall (m :: * -&gt; *) (k :: * -&gt; *) o a.
+Monad m =&gt;
+PlanT k o m a -&gt; MachineT m k o
+</span><a href="Data.Machine.Type.html#construct"><span class="hs-identifier hs-var">construct</span></a></span><span> </span><span class="annot"><span class="annottext">(PlanT (Is a) b m Any -&gt; MachineT m (Is a) b)
+-&gt; PlanT (Is a) b m Any -&gt; MachineT m (Is a) b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Moore a b -&gt; PlanT (Is a) b m Any
+forall {k :: * -&gt; * -&gt; *} {a} {o} {m :: * -&gt; *} {b}.
+Category k =&gt;
+Moore a o -&gt; PlanT (k a) o m b
+</span><a href="#local-6989586621679098923"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Moore a b
+</span><a href="#local-6989586621679098921"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>    </span><span id="local-6989586621679098923"><span class="annot"><span class="annottext">go :: Moore a o -&gt; PlanT (k a) o m b
+</span><a href="#local-6989586621679098923"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679098929"><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679098929"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679098930"><span class="annot"><span class="annottext">a -&gt; Moore a o
+</span><a href="#local-6989586621679098930"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-64"></span><span>      </span><span class="annot"><span class="annottext">o -&gt; Plan (k a) o ()
+forall o (k :: * -&gt; *). o -&gt; Plan k o ()
+</span><a href="Data.Machine.Plan.html#yield"><span class="hs-identifier hs-var">yield</span></a></span><span> </span><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679098929"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-65"></span><span>      </span><span class="annot"><span class="annottext">PlanT (k a) o m a
+Plan (k a) o a
+forall (k :: * -&gt; * -&gt; *) i o. Category k =&gt; Plan (k i) o i
+</span><a href="Data.Machine.Plan.html#await"><span class="hs-identifier hs-var">await</span></a></span><span> </span><span class="annot"><span class="annottext">PlanT (k a) o m a -&gt; (a -&gt; PlanT (k a) o m b) -&gt; PlanT (k a) o m b
+forall a b.
+PlanT (k a) o m a -&gt; (a -&gt; PlanT (k a) o m b) -&gt; PlanT (k a) o m b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Moore a o -&gt; PlanT (k a) o m b
+</span><a href="#local-6989586621679098923"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">(Moore a o -&gt; PlanT (k a) o m b)
+-&gt; (a -&gt; Moore a o) -&gt; a -&gt; PlanT (k a) o m b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a o
+</span><a href="#local-6989586621679098930"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Data.Machine.Process.html#auto"><span class="hs-pragma hs-type">auto</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098649"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098649"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-69"></span><span>  </span><span id="local-6989586621679098938"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621679098939"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679098939"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679098940"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679098940"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679098941"><span class="annot"><span class="annottext">a -&gt; Moore a a
+</span><a href="#local-6989586621679098941"><span class="hs-identifier hs-var">g</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679098939"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679098940"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall a b. (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679098939"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(Moore a a -&gt; Moore a b) -&gt; (a -&gt; Moore a a) -&gt; a -&gt; Moore a b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a a
+</span><a href="#local-6989586621679098941"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">fmap</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621679098944"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679098944"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679098945"><span class="annot"><span class="annottext">&lt;$ :: forall a b. a -&gt; Moore a b -&gt; Moore a a
+</span><a href="#local-6989586621679098945"><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;$</span></a></span></span><span> </span><span class="annot"><span class="annottext">Moore a b
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a a
+forall a. a -&gt; Moore a a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679098944"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">&lt;$</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098951"><span id="local-6989586621679098957"><span class="annot"><span class="hs-identifier hs-type">Profunctor</span></span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>  </span><span id="local-6989586621679098963"><span class="annot"><span class="annottext">rmap :: forall b c a. (b -&gt; c) -&gt; Moore a b -&gt; Moore a c
+</span><a href="#local-6989586621679098963"><span class="hs-identifier hs-var hs-var hs-var hs-var">rmap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(b -&gt; c) -&gt; Moore a b -&gt; Moore a c
+forall a b. (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">rmap</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-77"></span><span>  </span><span id="local-6989586621679098965"><span class="annot"><span class="annottext">lmap :: forall a b c. (a -&gt; b) -&gt; Moore b c -&gt; Moore a c
+</span><a href="#local-6989586621679098965"><span class="hs-identifier hs-var hs-var hs-var hs-var">lmap</span></a></span></span><span> </span><span id="local-6989586621679098967"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679098967"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore b c -&gt; Moore a c
+</span><a href="#local-6989586621679098968"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-78"></span><span>    </span><span id="local-6989586621679098968"><span class="annot"><span class="annottext">go :: Moore b c -&gt; Moore a c
+</span><a href="#local-6989586621679098968"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679098969"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679098969"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679098970"><span class="annot"><span class="annottext">b -&gt; Moore b c
+</span><a href="#local-6989586621679098970"><span class="hs-identifier hs-var">g</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">c -&gt; (a -&gt; Moore a c) -&gt; Moore a c
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679098969"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Moore b c -&gt; Moore a c
+</span><a href="#local-6989586621679098968"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">(Moore b c -&gt; Moore a c) -&gt; (a -&gt; Moore b c) -&gt; a -&gt; Moore a c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; Moore b c
+</span><a href="#local-6989586621679098970"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; Moore b c) -&gt; (a -&gt; b) -&gt; a -&gt; Moore b c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679098967"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">lmap</span></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-cpp">
+#if MIN_VERSION_profunctors(3,1,1)
+</span><span>  </span><span id="local-6989586621679098971"><span class="annot"><span class="annottext">dimap :: forall a b c d. (a -&gt; b) -&gt; (c -&gt; d) -&gt; Moore b c -&gt; Moore a d
+</span><a href="#local-6989586621679098971"><span class="hs-identifier hs-var hs-var hs-var hs-var">dimap</span></a></span></span><span> </span><span id="local-6989586621679098973"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679098973"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679098974"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679098974"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore b c -&gt; Moore a d
+</span><a href="#local-6989586621679098975"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>    </span><span id="local-6989586621679098975"><span class="annot"><span class="annottext">go :: Moore b c -&gt; Moore a d
+</span><a href="#local-6989586621679098975"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679098976"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679098976"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679098977"><span class="annot"><span class="annottext">b -&gt; Moore b c
+</span><a href="#local-6989586621679098977"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">d -&gt; (a -&gt; Moore a d) -&gt; Moore a d
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679098974"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679098976"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Moore b c -&gt; Moore a d
+</span><a href="#local-6989586621679098975"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">(Moore b c -&gt; Moore a d) -&gt; (a -&gt; Moore b c) -&gt; a -&gt; Moore a d
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; Moore b c
+</span><a href="#local-6989586621679098977"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; Moore b c) -&gt; (a -&gt; b) -&gt; a -&gt; Moore b c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679098973"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">dimap</span></span><span> </span><span class="hs-pragma">#-}</span><span class="hs-cpp">
+#endif
+</span><span>
+</span><span id="line-86"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098702"><span id="local-6989586621679098983"><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098702"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-87"></span><span>  </span><span id="local-6989586621679098989"><span class="annot"><span class="annottext">pure :: forall a. a -&gt; Moore a a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pure</span></span></span><span> </span><span id="local-6989586621679098990"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679098990"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore a a
+</span><a href="#local-6989586621679098991"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679098991"><span class="annot"><span class="annottext">r :: Moore a a
+</span><a href="#local-6989586621679098991"><span class="hs-identifier hs-var hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; (a -&gt; Moore a a) -&gt; Moore a a
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679098990"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Moore a a -&gt; a -&gt; Moore a a
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Moore a a
+</span><a href="#local-6989586621679098991"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">pure</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-89"></span><span>  </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679098994"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679098994"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679098995"><span class="annot"><span class="annottext">a -&gt; Moore a (a -&gt; b)
+</span><a href="#local-6989586621679098995"><span class="hs-identifier hs-var">ff</span></a></span></span><span> </span><span id="local-6989586621679098996"><span class="annot"><span class="annottext">&lt;*&gt; :: forall a b. Moore a (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;*&gt;</span></span></span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679098997"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679098997"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679098998"><span class="annot"><span class="annottext">a -&gt; Moore a a
+</span><a href="#local-6989586621679098998"><span class="hs-identifier hs-var">fa</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679098994"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679098997"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679098999"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679098999"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a (a -&gt; b)
+</span><a href="#local-6989586621679098995"><span class="hs-identifier hs-var">ff</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679098999"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Moore a (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall a b. Moore a (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a a
+</span><a href="#local-6989586621679098998"><span class="hs-identifier hs-var">fa</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679098999"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>  </span><span id="local-6989586621679099000"><span class="annot"><span class="annottext">Moore a a
+</span><a href="#local-6989586621679099000"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679099001"><span class="annot"><span class="annottext">&lt;* :: forall a b. Moore a a -&gt; Moore a b -&gt; Moore a a
+</span><a href="#local-6989586621679099001"><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;*</span></a></span></span><span> </span><span class="annot"><span class="annottext">Moore a b
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore a a
+</span><a href="#local-6989586621679099000"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-91"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">&lt;*</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-92"></span><span>  </span><span class="annot"><span class="annottext">Moore a a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679099003"><span class="annot"><span class="annottext">*&gt; :: forall a b. Moore a a -&gt; Moore a b -&gt; Moore a b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">*&gt;</span></span></span><span> </span><span id="local-6989586621679099004"><span class="annot"><span class="annottext">Moore a b
+</span><a href="#local-6989586621679099004"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore a b
+</span><a href="#local-6989586621679099004"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-93"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">*&gt;</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098716"><span class="annot"><span class="hs-identifier hs-type">Pointed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098716"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-96"></span><span>  </span><span id="local-6989586621679099008"><span class="annot"><span class="annottext">point :: forall a. a -&gt; Moore a a
+</span><a href="#local-6989586621679099008"><span class="hs-identifier hs-var hs-var hs-var hs-var">point</span></a></span></span><span> </span><span id="local-6989586621679099010"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099010"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore a a
+</span><a href="#local-6989586621679099011"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679099011"><span class="annot"><span class="annottext">r :: Moore a a
+</span><a href="#local-6989586621679099011"><span class="hs-identifier hs-var hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; (a -&gt; Moore a a) -&gt; Moore a a
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099010"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Moore a a -&gt; a -&gt; Moore a a
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Moore a a
+</span><a href="#local-6989586621679099011"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-97"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">point</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span class="annot"><span class="hs-comment">-- | slow diagonalization</span></span><span>
+</span><span id="line-100"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098652"><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098652"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-101"></span><span>  </span><span id="local-6989586621679099019"><span class="annot"><span class="annottext">return :: forall a. a -&gt; Moore a a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">return</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a a
+forall a. a -&gt; Moore a a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span>
+</span><span id="line-102"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">return</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-103"></span><span>  </span><span id="local-6989586621679099021"><span class="annot"><span class="annottext">Moore a a
+</span><a href="#local-6989586621679099021"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span id="local-6989586621679099022"><span class="annot"><span class="annottext">&gt;&gt;= :: forall a b. Moore a a -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&gt;&gt;=</span></span></span><span> </span><span id="local-6989586621679099023"><span class="annot"><span class="annottext">a -&gt; Moore a b
+</span><a href="#local-6989586621679099023"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore a (Moore a b) -&gt; Moore a b
+forall {a} {b}. Moore a (Moore a b) -&gt; Moore a b
+</span><a href="#local-6989586621679099024"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; Moore a b) -&gt; Moore a a -&gt; Moore a (Moore a b)
+forall a b. (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a b
+</span><a href="#local-6989586621679099023"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Moore a a
+</span><a href="#local-6989586621679099021"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-104"></span><span>    </span><span id="local-6989586621679099024"><span class="annot"><span class="annottext">j :: Moore a (Moore a b) -&gt; Moore a b
+</span><a href="#local-6989586621679099024"><span class="hs-identifier hs-var hs-var">j</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679099028"><span class="annot"><span class="annottext">Moore a b
+</span><a href="#local-6989586621679099028"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679099029"><span class="annot"><span class="annottext">a -&gt; Moore a (Moore a b)
+</span><a href="#local-6989586621679099029"><span class="hs-identifier hs-var">g</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Moore a b -&gt; b
+forall a. Moore a a -&gt; a
+forall (w :: * -&gt; *) a. Comonad w =&gt; w a -&gt; a
+</span><span class="hs-identifier hs-var">extract</span></span><span> </span><span class="annot"><span class="annottext">Moore a b
+</span><a href="#local-6989586621679099028"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679099031"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099031"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Moore a (Moore a b) -&gt; Moore a b
+</span><a href="#local-6989586621679099024"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="annot"><span class="annottext">(Moore a (Moore a b) -&gt; Moore a b)
+-&gt; Moore a (Moore a b) -&gt; Moore a b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Moore a b -&gt; Moore a b)
+-&gt; Moore a (Moore a b) -&gt; Moore a (Moore a b)
+forall a b. (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679099032"><span class="annot"><span class="annottext">a -&gt; Moore a b
+</span><a href="#local-6989586621679099032"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a b
+</span><a href="#local-6989586621679099032"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099031"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Moore a (Moore a b)
+</span><a href="#local-6989586621679099029"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099031"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-105"></span><span>  </span><span id="local-6989586621679099034"><span class="annot"><span class="annottext">&gt;&gt; :: forall a b. Moore a a -&gt; Moore a b -&gt; Moore a b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">(&gt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore a a -&gt; Moore a b -&gt; Moore a b
+forall a b. Moore a a -&gt; Moore a b -&gt; Moore a b
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">(*&gt;)</span></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098736"><span class="annot"><span class="hs-identifier hs-type">Copointed</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098736"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-108"></span><span>  </span><span id="local-6989586621679099038"><span class="annot"><span class="annottext">copoint :: forall a. Moore a a -&gt; a
+</span><a href="#local-6989586621679099038"><span class="hs-identifier hs-var hs-var hs-var hs-var">copoint</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679099040"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099040"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099040"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-109"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">copoint</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098727"><span id="local-6989586621679099045"><span class="annot"><span class="hs-identifier hs-type">Comonad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098727"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-112"></span><span>  </span><span id="local-6989586621679099049"><span class="annot"><span class="annottext">extract :: forall a. Moore a a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">extract</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679099050"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099050"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099050"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">extract</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-114"></span><span>  </span><span id="local-6989586621679099052"><span class="annot"><span class="annottext">extend :: forall a b. (Moore a a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+</span><a href="#local-6989586621679099052"><span class="hs-identifier hs-var hs-var hs-var hs-var">extend</span></a></span></span><span> </span><span id="local-6989586621679099054"><span class="annot"><span class="annottext">Moore a a -&gt; b
+</span><a href="#local-6989586621679099054"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679099055"><span class="annot"><span class="annottext">w :: Moore a a
+</span><a href="#local-6989586621679099055"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679099056"><span class="annot"><span class="annottext">a -&gt; Moore a a
+</span><a href="#local-6989586621679099056"><span class="hs-identifier hs-var">g</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Moore a a -&gt; b
+</span><a href="#local-6989586621679099054"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Moore a a
+</span><a href="#local-6989586621679099055"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Moore a a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall a b. (Moore a a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall (w :: * -&gt; *) a b. Comonad w =&gt; (w a -&gt; b) -&gt; w a -&gt; w b
+</span><span class="hs-identifier hs-var">extend</span></span><span> </span><span class="annot"><span class="annottext">Moore a a -&gt; b
+</span><a href="#local-6989586621679099054"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(Moore a a -&gt; Moore a b) -&gt; (a -&gt; Moore a a) -&gt; a -&gt; Moore a b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a a
+</span><a href="#local-6989586621679099056"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098754"><span class="annot"><span class="hs-identifier hs-type">ComonadApply</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098754"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-117"></span><span>  </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679099065"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679099065"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679099066"><span class="annot"><span class="annottext">a -&gt; Moore a (a -&gt; b)
+</span><a href="#local-6989586621679099066"><span class="hs-identifier hs-var">ff</span></a></span></span><span> </span><span id="local-6989586621679099067"><span class="annot"><span class="annottext">&lt;@&gt; :: forall a b. Moore a (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+</span><a href="#local-6989586621679099067"><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;@&gt;</span></a></span></span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679099069"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099069"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679099070"><span class="annot"><span class="annottext">a -&gt; Moore a a
+</span><a href="#local-6989586621679099070"><span class="hs-identifier hs-var">fa</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679099065"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099069"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679099071"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099071"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a (a -&gt; b)
+</span><a href="#local-6989586621679099066"><span class="hs-identifier hs-var">ff</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099071"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Moore a (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall a b. Moore a (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall (w :: * -&gt; *) a b.
+ComonadApply w =&gt;
+w (a -&gt; b) -&gt; w a -&gt; w b
+</span><span class="hs-operator hs-var">&lt;@&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a a
+</span><a href="#local-6989586621679099070"><span class="hs-identifier hs-var">fa</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099071"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-118"></span><span>  </span><span id="local-6989586621679099072"><span class="annot"><span class="annottext">Moore a a
+</span><a href="#local-6989586621679099072"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621679099073"><span class="annot"><span class="annottext">&lt;@ :: forall a b. Moore a a -&gt; Moore a b -&gt; Moore a a
+</span><a href="#local-6989586621679099073"><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;@</span></a></span></span><span> </span><span class="annot"><span class="annottext">Moore a b
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore a a
+</span><a href="#local-6989586621679099072"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-119"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">&lt;@</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-120"></span><span>  </span><span class="annot"><span class="annottext">Moore a a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679099075"><span class="annot"><span class="annottext">@&gt; :: forall a b. Moore a a -&gt; Moore a b -&gt; Moore a b
+</span><a href="#local-6989586621679099075"><span class="hs-operator hs-var hs-var hs-var hs-var">@&gt;</span></a></span></span><span> </span><span id="local-6989586621679099077"><span class="annot"><span class="annottext">Moore a b
+</span><a href="#local-6989586621679099077"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore a b
+</span><a href="#local-6989586621679099077"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-121"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">@&gt;</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098777"><span id="local-6989586621679099082"><span id="local-6989586621679099088"><span id="local-6989586621679099093"><span class="annot"><span class="hs-identifier hs-type">Distributive</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098777"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-124"></span><span>  </span><span id="local-6989586621679099106"><span class="annot"><span class="annottext">distribute :: forall (f :: * -&gt; *) a. Functor f =&gt; f (Moore a a) -&gt; Moore a (f a)
+</span><a href="#local-6989586621679099106"><span class="hs-identifier hs-var hs-var hs-var hs-var">distribute</span></a></span></span><span> </span><span id="local-6989586621679099108"><span class="annot"><span class="annottext">f (Moore a a)
+</span><a href="#local-6989586621679099108"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">f a -&gt; (a -&gt; Moore a (f a)) -&gt; Moore a (f a)
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Moore a a -&gt; a) -&gt; f (Moore a a) -&gt; f a
+forall a b. (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Moore a a -&gt; a
+forall a. Moore a a -&gt; a
+forall (w :: * -&gt; *) a. Comonad w =&gt; w a -&gt; a
+</span><span class="hs-identifier hs-var">extract</span></span><span> </span><span class="annot"><span class="annottext">f (Moore a a)
+</span><a href="#local-6989586621679099108"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">f (Moore a a) -&gt; Moore a (f a)
+forall (g :: * -&gt; *) (f :: * -&gt; *) a.
+(Distributive g, Functor f) =&gt;
+f (g a) -&gt; g (f a)
+forall (f :: * -&gt; *) a. Functor f =&gt; f (Moore a a) -&gt; Moore a (f a)
+</span><span class="hs-identifier hs-var">distribute</span></span><span> </span><span class="annot"><span class="annottext">(f (Moore a a) -&gt; Moore a (f a))
+-&gt; (a -&gt; f (Moore a a)) -&gt; a -&gt; Moore a (f a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Moore a a -&gt; a -&gt; Moore a a)
+-&gt; f (Moore a a) -&gt; a -&gt; f (Moore a a)
+forall (g :: * -&gt; *) (f :: * -&gt; *) a b.
+(Distributive g, Functor f) =&gt;
+(a -&gt; g b) -&gt; f a -&gt; g (f b)
+forall (f :: * -&gt; *) a b.
+Functor f =&gt;
+(a -&gt; a -&gt; b) -&gt; f a -&gt; a -&gt; f b
+</span><span class="hs-identifier hs-var">collect</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679099110"><span class="annot"><span class="annottext">a -&gt; Moore a a
+</span><a href="#local-6989586621679099110"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a a
+</span><a href="#local-6989586621679099110"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (Moore a a)
+</span><a href="#local-6989586621679099108"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098787"><span class="annot"><span class="hs-identifier hs-type">Functor.Representable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098787"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-127"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Rep"><span class="annot"><span class="hs-identifier hs-var">Rep</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098787"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679098787"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-128"></span><span>  </span><span id="local-6989586621679099119"><span class="annot"><span class="annottext">index :: forall a. Moore a a -&gt; Rep (Moore a) -&gt; a
+</span><a href="#local-6989586621679099119"><span class="hs-identifier hs-var hs-var hs-var hs-var">index</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore a a -&gt; [a] -&gt; a
+Moore a a -&gt; Rep (Moore a) -&gt; a
+forall a b. Moore a b -&gt; [a] -&gt; b
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) a b.
+Cosieve p f =&gt;
+p a b -&gt; f a -&gt; b
+</span><span class="hs-identifier hs-var">cosieve</span></span><span>
+</span><span id="line-129"></span><span>  </span><span id="local-6989586621679099124"><span class="annot"><span class="annottext">tabulate :: forall a. (Rep (Moore a) -&gt; a) -&gt; Moore a a
+</span><a href="#local-6989586621679099124"><span class="hs-identifier hs-var hs-var hs-var hs-var">tabulate</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Rep (Moore a) -&gt; a) -&gt; Moore a a
+(Corep Moore a -&gt; a) -&gt; Moore a a
+forall d c. (Corep Moore d -&gt; c) -&gt; Moore d c
+forall (p :: * -&gt; * -&gt; *) d c.
+Corepresentable p =&gt;
+(Corep p d -&gt; c) -&gt; p d c
+</span><span class="hs-identifier hs-var">cotabulate</span></span><span>
+</span><span id="line-130"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">tabulate</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Cosieve</span></span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-133"></span><span>  </span><span id="local-6989586621679099135"><span class="annot"><span class="annottext">cosieve :: forall a b. Moore a b -&gt; [a] -&gt; b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">cosieve</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679099136"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679099136"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679099136"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-134"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">cosieve</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679099137"><span class="annot"><span class="annottext">a -&gt; Moore a b
+</span><a href="#local-6989586621679099137"><span class="hs-identifier hs-var">k</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679099138"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099138"><span class="hs-identifier hs-var">a</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679099139"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679099139"><span class="hs-keyword hs-var">as</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore a b -&gt; [a] -&gt; b
+forall a b. Moore a b -&gt; [a] -&gt; b
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) a b.
+Cosieve p f =&gt;
+p a b -&gt; f a -&gt; b
+</span><span class="hs-identifier hs-var">cosieve</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Moore a b
+</span><a href="#local-6989586621679099137"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679099138"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679099139"><span class="hs-keyword hs-var">as</span></a></span><span>
+</span><span id="line-135"></span><span>
+</span><span id="line-136"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Costrong</span></span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-137"></span><span>  </span><span id="local-6989586621679099147"><span class="annot"><span class="annottext">unfirst :: forall a d b. Moore (a, d) (b, d) -&gt; Moore a b
+</span><a href="#local-6989586621679099147"><span class="hs-identifier hs-var hs-var hs-var hs-var">unfirst</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore (a, d) (b, d) -&gt; Moore a b
+forall (p :: * -&gt; * -&gt; *) a d b.
+Corepresentable p =&gt;
+p (a, d) (b, d) -&gt; p a b
+</span><span class="hs-identifier hs-var">unfirstCorep</span></span><span>
+</span><span id="line-138"></span><span>  </span><span id="local-6989586621679099151"><span class="annot"><span class="annottext">unsecond :: forall d a b. Moore (d, a) (d, b) -&gt; Moore a b
+</span><a href="#local-6989586621679099151"><span class="hs-identifier hs-var hs-var hs-var hs-var">unsecond</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore (d, a) (d, b) -&gt; Moore a b
+forall (p :: * -&gt; * -&gt; *) d a b.
+Corepresentable p =&gt;
+p (d, a) (d, b) -&gt; p a b
+</span><span class="hs-identifier hs-var">unsecondCorep</span></span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Profunctor.Corepresentable</span></span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-141"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Corep"><span class="annot"><span class="hs-identifier hs-var">Corep</span></span></span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-142"></span><span>  </span><span id="local-6989586621679099162"><span class="annot"><span class="annottext">cotabulate :: forall d c. (Corep Moore d -&gt; c) -&gt; Moore d c
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">cotabulate</span></span></span><span> </span><span id="local-6989586621679099163"><span class="annot"><span class="annottext">Corep Moore d -&gt; c
+</span><a href="#local-6989586621679099163"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">c -&gt; (d -&gt; Moore d c) -&gt; Moore d c
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Corep Moore d -&gt; c
+</span><a href="#local-6989586621679099163"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((d -&gt; Moore d c) -&gt; Moore d c) -&gt; (d -&gt; Moore d c) -&gt; Moore d c
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679099164"><span class="annot"><span class="annottext">d
+</span><a href="#local-6989586621679099164"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Corep Moore d -&gt; c) -&gt; Moore d c
+forall d c. (Corep Moore d -&gt; c) -&gt; Moore d c
+forall (p :: * -&gt; * -&gt; *) d c.
+Corepresentable p =&gt;
+(Corep p d -&gt; c) -&gt; p d c
+</span><span class="hs-identifier hs-var">cotabulate</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[d] -&gt; c
+Corep Moore d -&gt; c
+</span><a href="#local-6989586621679099163"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">([d] -&gt; c) -&gt; ([d] -&gt; [d]) -&gt; [d] -&gt; c
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="hs-special">(</span><span class="annot"><span class="annottext">d
+</span><a href="#local-6989586621679099164"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">d -&gt; [d] -&gt; [d]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098830"><span class="annot"><span class="hs-identifier hs-type">MonadFix</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098830"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-145"></span><span>  </span><span id="local-6989586621679099171"><span class="annot"><span class="annottext">mfix :: forall a. (a -&gt; Moore a a) -&gt; Moore a a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mfix</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; Moore a a) -&gt; Moore a a
+forall (f :: * -&gt; *) a. Representable f =&gt; (a -&gt; f a) -&gt; f a
+</span><span class="hs-identifier hs-var">mfixRep</span></span><span>
+</span><span id="line-146"></span><span>
+</span><span id="line-147"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098844"><span id="local-6989586621679099176"><span class="annot"><span class="hs-identifier hs-type">MonadZip</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098844"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-148"></span><span>  </span><span id="local-6989586621679099183"><span class="annot"><span class="annottext">mzipWith :: forall a b c. (a -&gt; b -&gt; c) -&gt; Moore a a -&gt; Moore a b -&gt; Moore a c
+</span><a href="#local-6989586621679099183"><span class="hs-identifier hs-var hs-var hs-var hs-var">mzipWith</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b -&gt; c) -&gt; Moore a a -&gt; Moore a b -&gt; Moore a c
+forall (f :: * -&gt; *) a b c.
+Representable f =&gt;
+(a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c
+</span><span class="hs-identifier hs-var">mzipWithRep</span></span><span>
+</span><span id="line-149"></span><span>  </span><span id="local-6989586621679099188"><span class="annot"><span class="annottext">munzip :: forall a b. Moore a (a, b) -&gt; (Moore a a, Moore a b)
+</span><a href="#local-6989586621679099188"><span class="hs-identifier hs-var hs-var hs-var hs-var">munzip</span></a></span></span><span> </span><span id="local-6989586621679099190"><span class="annot"><span class="annottext">Moore a (a, b)
+</span><a href="#local-6989586621679099190"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((a, b) -&gt; a) -&gt; Moore a (a, b) -&gt; Moore a a
+forall a b. (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(a, b) -&gt; a
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">Moore a (a, b)
+</span><a href="#local-6989586621679099190"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">((a, b) -&gt; b) -&gt; Moore a (a, b) -&gt; Moore a b
+forall a b. (a -&gt; b) -&gt; Moore a a -&gt; Moore a b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">(a, b) -&gt; b
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">Moore a (a, b)
+</span><a href="#local-6989586621679099190"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098864"><span id="local-6989586621679099198"><span class="annot"><span class="hs-identifier hs-type">MonadReader</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679098864"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098864"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-152"></span><span>  </span><span id="local-6989586621679099203"><span class="annot"><span class="annottext">ask :: Moore a [a]
+</span><a href="#local-6989586621679099203"><span class="hs-identifier hs-var hs-var hs-var hs-var">ask</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Moore a [a]
+Moore a (Rep (Moore a))
+forall (f :: * -&gt; *). Representable f =&gt; f (Rep f)
+</span><span class="hs-identifier hs-var">askRep</span></span><span>
+</span><span id="line-153"></span><span>  </span><span id="local-6989586621679099207"><span class="annot"><span class="annottext">local :: forall a. ([a] -&gt; [a]) -&gt; Moore a a -&gt; Moore a a
+</span><a href="#local-6989586621679099207"><span class="hs-identifier hs-var hs-var hs-var hs-var">local</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [a]) -&gt; Moore a a -&gt; Moore a a
+(Rep (Moore a) -&gt; Rep (Moore a)) -&gt; Moore a a -&gt; Moore a a
+forall (f :: * -&gt; *) a.
+Representable f =&gt;
+(Rep f -&gt; Rep f) -&gt; f a -&gt; f a
+</span><span class="hs-identifier hs-var">localRep</span></span><span>
+</span><span id="line-154"></span><span>
+</span><span id="line-155"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Closed</span></span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-156"></span><span>  </span><span id="local-6989586621679099218"><span class="annot"><span class="annottext">closed :: forall a b x. Moore a b -&gt; Moore (x -&gt; a) (x -&gt; b)
+</span><a href="#local-6989586621679099218"><span class="hs-identifier hs-var hs-var hs-var hs-var">closed</span></a></span></span><span> </span><span id="local-6989586621679099220"><span class="annot"><span class="annottext">Moore a b
+</span><a href="#local-6989586621679099220"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Corep Moore (x -&gt; a) -&gt; x -&gt; b) -&gt; Moore (x -&gt; a) (x -&gt; b)
+forall d c. (Corep Moore d -&gt; c) -&gt; Moore d c
+forall (p :: * -&gt; * -&gt; *) d c.
+Corepresentable p =&gt;
+(Corep p d -&gt; c) -&gt; p d c
+</span><span class="hs-identifier hs-var">cotabulate</span></span><span> </span><span class="annot"><span class="annottext">((Corep Moore (x -&gt; a) -&gt; x -&gt; b) -&gt; Moore (x -&gt; a) (x -&gt; b))
+-&gt; (Corep Moore (x -&gt; a) -&gt; x -&gt; b) -&gt; Moore (x -&gt; a) (x -&gt; b)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679099221"><span class="annot"><span class="annottext">Corep Moore (x -&gt; a)
+</span><a href="#local-6989586621679099221"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span id="local-6989586621679099222"><span class="annot"><span class="annottext">x
+</span><a href="#local-6989586621679099222"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Moore a b -&gt; [a] -&gt; b
+forall a b. Moore a b -&gt; [a] -&gt; b
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) a b.
+Cosieve p f =&gt;
+p a b -&gt; f a -&gt; b
+</span><span class="hs-identifier hs-var">cosieve</span></span><span> </span><span class="annot"><span class="annottext">Moore a b
+</span><a href="#local-6989586621679099220"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((x -&gt; a) -&gt; a) -&gt; [x -&gt; a] -&gt; [a]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(x -&gt; a) -&gt; x -&gt; a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">x
+</span><a href="#local-6989586621679099222"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[x -&gt; a]
+Corep Moore (x -&gt; a)
+</span><a href="#local-6989586621679099221"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-157"></span><span>
+</span><span id="line-158"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098882"><span id="local-6989586621679098883"><span id="local-6989586621679099226"><span id="local-6989586621679099230"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679098882"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098883"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098882"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-159"></span><span>  </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679099239"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679099239"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679099240"><span class="annot"><span class="annottext">a -&gt; Moore a b
+</span><a href="#local-6989586621679099240"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679099241"><span class="annot"><span class="annottext">&lt;&gt; :: Moore a b -&gt; Moore a b -&gt; Moore a b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span id="local-6989586621679099242"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679099242"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679099243"><span class="annot"><span class="annottext">a -&gt; Moore a b
+</span><a href="#local-6989586621679099243"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679099239"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; b
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679099242"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Moore a b
+</span><a href="#local-6989586621679099240"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Moore a b) -&gt; (a -&gt; Moore a b) -&gt; a -&gt; Moore a b
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a b
+</span><a href="#local-6989586621679099243"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-160"></span><span>
+</span><span id="line-161"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679098888"><span id="local-6989586621679098889"><span id="local-6989586621679099250"><span id="local-6989586621679099254"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679098888"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-type">Moore</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098889"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679098888"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-162"></span><span>  </span><span id="local-6989586621679099261"><span class="annot"><span class="annottext">mempty :: Moore a b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+forall a b. b -&gt; (a -&gt; Moore a b) -&gt; Moore a b
+</span><a href="Data.Machine.Moore.html#Moore"><span class="hs-identifier hs-var">Moore</span></a></span><span> </span><span class="annot"><span class="annottext">b
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Moore a b
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span class="hs-cpp">
+#if !(MIN_VERSION_base(4,11,0))
+</span><span>  </span><span class="hs-identifier">Moore</span><span> </span><span class="hs-identifier">x</span><span> </span><span class="hs-identifier">f</span><span> </span><span class="hs-special">`</span><span class="hs-identifier">mappend</span><span class="hs-special">`</span><span> </span><span class="hs-identifier">Moore</span><span> </span><span class="hs-identifier">y</span><span> </span><span class="hs-identifier">g</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">Moore</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">x</span><span> </span><span class="hs-special">`</span><span class="hs-identifier">mappend</span><span class="hs-special">`</span><span> </span><span class="hs-identifier">y</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">f</span><span> </span><span class="hs-special">`</span><span class="hs-identifier">mappend</span><span class="hs-special">`</span><span> </span><span class="hs-identifier">g</span><span class="hs-special">)</span><span class="hs-cpp">
+#endif
+</span></pre></body></html>

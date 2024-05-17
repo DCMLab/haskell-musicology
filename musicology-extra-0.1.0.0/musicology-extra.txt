@@ -8,7 +8,7 @@
 @version 0.1.0.0
 
 module Musicology.IO.CSV
-fn :: [Char]
+fn :: String
 type CsvTrack = (:->) "Track" Bool
 type CsvChannel = (:->) "Channel" Int
 type CsvOnset = (:->) "Onset" Int
@@ -16,18 +16,18 @@ type CsvOffset = (:->) "Offset" Int
 type CsvPitch = (:->) "Pitch" Int
 type CsvVelocity = (:->) "Velocity" Int
 type CsvNote = Record '[CsvTrack, CsvChannel, CsvOnset, CsvOffset, CsvPitch, CsvVelocity]
-csvVelocity' :: forall f_adt1 g_adt2 rs_adt3. (Functor f_adt1, RElem CsvVelocity rs_adt3 (RIndex CsvVelocity rs_adt3)) => (g_adt2 CsvVelocity -> f_adt1 (g_adt2 CsvVelocity)) -> Rec g_adt2 rs_adt3 -> f_adt1 (Rec g_adt2 rs_adt3)
-csvVelocity :: forall f_adsZ rs_adt0. (Functor f_adsZ, RElem CsvVelocity rs_adt0 (RIndex CsvVelocity rs_adt0)) => (Int -> f_adsZ Int) -> Record rs_adt0 -> f_adsZ (Record rs_adt0)
-csvPitch' :: forall f_adsW g_adsX rs_adsY. (Functor f_adsW, RElem CsvPitch rs_adsY (RIndex CsvPitch rs_adsY)) => (g_adsX CsvPitch -> f_adsW (g_adsX CsvPitch)) -> Rec g_adsX rs_adsY -> f_adsW (Rec g_adsX rs_adsY)
-csvPitch :: forall f_adsU rs_adsV. (Functor f_adsU, RElem CsvPitch rs_adsV (RIndex CsvPitch rs_adsV)) => (Int -> f_adsU Int) -> Record rs_adsV -> f_adsU (Record rs_adsV)
-csvOffset' :: forall f_adsR g_adsS rs_adsT. (Functor f_adsR, RElem CsvOffset rs_adsT (RIndex CsvOffset rs_adsT)) => (g_adsS CsvOffset -> f_adsR (g_adsS CsvOffset)) -> Rec g_adsS rs_adsT -> f_adsR (Rec g_adsS rs_adsT)
-csvOffset :: forall f_adsP rs_adsQ. (Functor f_adsP, RElem CsvOffset rs_adsQ (RIndex CsvOffset rs_adsQ)) => (Int -> f_adsP Int) -> Record rs_adsQ -> f_adsP (Record rs_adsQ)
-csvOnset' :: forall f_adsM g_adsN rs_adsO. (Functor f_adsM, RElem CsvOnset rs_adsO (RIndex CsvOnset rs_adsO)) => (g_adsN CsvOnset -> f_adsM (g_adsN CsvOnset)) -> Rec g_adsN rs_adsO -> f_adsM (Rec g_adsN rs_adsO)
-csvOnset :: forall f_adsK rs_adsL. (Functor f_adsK, RElem CsvOnset rs_adsL (RIndex CsvOnset rs_adsL)) => (Int -> f_adsK Int) -> Record rs_adsL -> f_adsK (Record rs_adsL)
-csvChannel' :: forall f_adsH g_adsI rs_adsJ. (Functor f_adsH, RElem CsvChannel rs_adsJ (RIndex CsvChannel rs_adsJ)) => (g_adsI CsvChannel -> f_adsH (g_adsI CsvChannel)) -> Rec g_adsI rs_adsJ -> f_adsH (Rec g_adsI rs_adsJ)
-csvChannel :: forall f_adsF rs_adsG. (Functor f_adsF, RElem CsvChannel rs_adsG (RIndex CsvChannel rs_adsG)) => (Int -> f_adsF Int) -> Record rs_adsG -> f_adsF (Record rs_adsG)
-csvTrack' :: forall f_adsC g_adsD rs_adsE. (Functor f_adsC, RElem CsvTrack rs_adsE (RIndex CsvTrack rs_adsE)) => (g_adsD CsvTrack -> f_adsC (g_adsD CsvTrack)) -> Rec g_adsD rs_adsE -> f_adsC (Rec g_adsD rs_adsE)
-csvTrack :: forall f_adsA rs_adsB. (Functor f_adsA, RElem CsvTrack rs_adsB (RIndex CsvTrack rs_adsB)) => (Bool -> f_adsA Bool) -> Record rs_adsB -> f_adsA (Record rs_adsB)
+csvVelocity' :: forall f_aeZn g_aeZo rs_aeZp. (Functor f_aeZn, RElem CsvVelocity rs_aeZp (RIndex CsvVelocity rs_aeZp)) => (g_aeZo CsvVelocity -> f_aeZn (g_aeZo CsvVelocity)) -> Rec g_aeZo rs_aeZp -> f_aeZn (Rec g_aeZo rs_aeZp)
+csvVelocity :: forall f_aeZl rs_aeZm. (Functor f_aeZl, RElem CsvVelocity rs_aeZm (RIndex CsvVelocity rs_aeZm)) => (Int -> f_aeZl Int) -> Record rs_aeZm -> f_aeZl (Record rs_aeZm)
+csvPitch' :: forall f_aeZi g_aeZj rs_aeZk. (Functor f_aeZi, RElem CsvPitch rs_aeZk (RIndex CsvPitch rs_aeZk)) => (g_aeZj CsvPitch -> f_aeZi (g_aeZj CsvPitch)) -> Rec g_aeZj rs_aeZk -> f_aeZi (Rec g_aeZj rs_aeZk)
+csvPitch :: forall f_aeZg rs_aeZh. (Functor f_aeZg, RElem CsvPitch rs_aeZh (RIndex CsvPitch rs_aeZh)) => (Int -> f_aeZg Int) -> Record rs_aeZh -> f_aeZg (Record rs_aeZh)
+csvOffset' :: forall f_aeZd g_aeZe rs_aeZf. (Functor f_aeZd, RElem CsvOffset rs_aeZf (RIndex CsvOffset rs_aeZf)) => (g_aeZe CsvOffset -> f_aeZd (g_aeZe CsvOffset)) -> Rec g_aeZe rs_aeZf -> f_aeZd (Rec g_aeZe rs_aeZf)
+csvOffset :: forall f_aeZb rs_aeZc. (Functor f_aeZb, RElem CsvOffset rs_aeZc (RIndex CsvOffset rs_aeZc)) => (Int -> f_aeZb Int) -> Record rs_aeZc -> f_aeZb (Record rs_aeZc)
+csvOnset' :: forall f_aeZ8 g_aeZ9 rs_aeZa. (Functor f_aeZ8, RElem CsvOnset rs_aeZa (RIndex CsvOnset rs_aeZa)) => (g_aeZ9 CsvOnset -> f_aeZ8 (g_aeZ9 CsvOnset)) -> Rec g_aeZ9 rs_aeZa -> f_aeZ8 (Rec g_aeZ9 rs_aeZa)
+csvOnset :: forall f_aeZ6 rs_aeZ7. (Functor f_aeZ6, RElem CsvOnset rs_aeZ7 (RIndex CsvOnset rs_aeZ7)) => (Int -> f_aeZ6 Int) -> Record rs_aeZ7 -> f_aeZ6 (Record rs_aeZ7)
+csvChannel' :: forall f_aeZ3 g_aeZ4 rs_aeZ5. (Functor f_aeZ3, RElem CsvChannel rs_aeZ5 (RIndex CsvChannel rs_aeZ5)) => (g_aeZ4 CsvChannel -> f_aeZ3 (g_aeZ4 CsvChannel)) -> Rec g_aeZ4 rs_aeZ5 -> f_aeZ3 (Rec g_aeZ4 rs_aeZ5)
+csvChannel :: forall f_aeZ1 rs_aeZ2. (Functor f_aeZ1, RElem CsvChannel rs_aeZ2 (RIndex CsvChannel rs_aeZ2)) => (Int -> f_aeZ1 Int) -> Record rs_aeZ2 -> f_aeZ1 (Record rs_aeZ2)
+csvTrack' :: forall f_aeYY g_aeYZ rs_aeZ0. (Functor f_aeYY, RElem CsvTrack rs_aeZ0 (RIndex CsvTrack rs_aeZ0)) => (g_aeYZ CsvTrack -> f_aeYY (g_aeYZ CsvTrack)) -> Rec g_aeYZ rs_aeZ0 -> f_aeYY (Rec g_aeYZ rs_aeZ0)
+csvTrack :: forall f_aeYW rs_aeYX. (Functor f_aeYW, RElem CsvTrack rs_aeYX (RIndex CsvTrack rs_aeYX)) => (Bool -> f_aeYW Bool) -> Record rs_aeYX -> f_aeYW (Record rs_aeYX)
 csvNoteParser :: ParserOptions
 loadPiece :: FilePath -> IO (Frame CsvNote)
 frameNotes :: Frame CsvNote -> [Note MidiInterval Int]
@@ -35,7 +35,7 @@ frameNotes :: Frame CsvNote -> [Note MidiInterval Int]
 module Musicology.Internal.GatedQueue
 type GatedQueue k v = Map k v
 
--- | <i>O(log n)</i>. Insert a new key and value in the map. If the key is
+-- | &lt;math&gt;. Insert a new key and value in the map. If the key is
 --   already present in the map, the associated value is replaced with the
 --   supplied value. <a>insert</a> is equivalent to <tt><a>insertWith</a>
 --   <a>const</a></tt>.
@@ -47,7 +47,7 @@ type GatedQueue k v = Map k v
 --   </pre>
 insert :: Ord k => k -> a -> Map k a -> Map k a
 
--- | <i>O(log n)</i>. Insert with a function, combining new value and old
+-- | &lt;math&gt;. Insert with a function, combining new value and old
 --   value. <tt><a>insertWith</a> f key value mp</tt> will insert the pair
 --   (key, value) into <tt>mp</tt> if key does not exist in the map. If the
 --   key does exist, the function will insert the pair <tt>(key, f
@@ -61,7 +61,7 @@ insert :: Ord k => k -> a -> Map k a -> Map k a
 insertWith :: Ord k => (a -> a -> a) -> k -> a -> Map k a -> Map k a
 release :: Ord k => GatedQueue k v -> k -> (GatedQueue k v, [v])
 
--- | <i>O(1)</i>. Is the map empty?
+-- | &lt;math&gt;. Is the map empty?
 --   
 --   <pre>
 --   Data.Map.null (empty)           == True
@@ -69,11 +69,10 @@ release :: Ord k => GatedQueue k v -> k -> (GatedQueue k v, [v])
 --   </pre>
 null :: Map k a -> Bool
 
--- | <i>O(m*log(n/m + 1)), m &lt;= n</i>. The expression (<tt><a>union</a>
---   t1 t2</tt>) takes the left-biased union of <tt>t1</tt> and
---   <tt>t2</tt>. It prefers <tt>t1</tt> when duplicate keys are
---   encountered, i.e. (<tt><a>union</a> == <a>unionWith</a>
---   <a>const</a></tt>).
+-- | &lt;math&gt;. The expression (<tt><a>union</a> t1 t2</tt>) takes the
+--   left-biased union of <tt>t1</tt> and <tt>t2</tt>. It prefers
+--   <tt>t1</tt> when duplicate keys are encountered, i.e.
+--   (<tt><a>union</a> == <a>unionWith</a> <a>const</a></tt>).
 --   
 --   <pre>
 --   union (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "a"), (7, "C")]
@@ -117,50 +116,50 @@ asSecs :: MidiNote -> Note MidiInterval Double
 type MidiRecord = Record '["onsetTicks" :-> Int, "offsetTicks" :-> Int, "onsetWholes" :-> Ratio Int, "offsetWholes" :-> Ratio Int, "onsetSecs" :-> Double, "offsetSecs" :-> Double, "pitch" :-> Int, "velocity" :-> Int, "trackNum" :-> Int, "channel" :-> Int, "keySharps" :-> Int, "keyMajor" :-> Bool, "bar" :-> Int, "beat" :-> Int, "subbeat" :-> Ratio Int]
 type RatioInt = Ratio Int
 type OnsetTicks = (:->) "onsetTicks" Int
-onsetTicks' :: forall f_aisW g_aisX rs_aisY. (Functor f_aisW, RElem OnsetTicks rs_aisY (RIndex OnsetTicks rs_aisY)) => (g_aisX OnsetTicks -> f_aisW (g_aisX OnsetTicks)) -> Rec g_aisX rs_aisY -> f_aisW (Rec g_aisX rs_aisY)
-onsetTicks :: forall f_aisU rs_aisV. (Functor f_aisU, RElem OnsetTicks rs_aisV (RIndex OnsetTicks rs_aisV)) => (Int -> f_aisU Int) -> Record rs_aisV -> f_aisU (Record rs_aisV)
+onsetTicks' :: forall f_aiE9 g_aiEa rs_aiEb. (Functor f_aiE9, RElem OnsetTicks rs_aiEb (RIndex OnsetTicks rs_aiEb)) => (g_aiEa OnsetTicks -> f_aiE9 (g_aiEa OnsetTicks)) -> Rec g_aiEa rs_aiEb -> f_aiE9 (Rec g_aiEa rs_aiEb)
+onsetTicks :: forall f_aiE7 rs_aiE8. (Functor f_aiE7, RElem OnsetTicks rs_aiE8 (RIndex OnsetTicks rs_aiE8)) => (Int -> f_aiE7 Int) -> Record rs_aiE8 -> f_aiE7 (Record rs_aiE8)
 type OffsetTicks = (:->) "offsetTicks" Int
-offsetTicks' :: forall f_aive g_aivf rs_aivg. (Functor f_aive, RElem OffsetTicks rs_aivg (RIndex OffsetTicks rs_aivg)) => (g_aivf OffsetTicks -> f_aive (g_aivf OffsetTicks)) -> Rec g_aivf rs_aivg -> f_aive (Rec g_aivf rs_aivg)
-offsetTicks :: forall f_aivc rs_aivd. (Functor f_aivc, RElem OffsetTicks rs_aivd (RIndex OffsetTicks rs_aivd)) => (Int -> f_aivc Int) -> Record rs_aivd -> f_aivc (Record rs_aivd)
+offsetTicks' :: forall f_aiGC g_aiGD rs_aiGE. (Functor f_aiGC, RElem OffsetTicks rs_aiGE (RIndex OffsetTicks rs_aiGE)) => (g_aiGD OffsetTicks -> f_aiGC (g_aiGD OffsetTicks)) -> Rec g_aiGD rs_aiGE -> f_aiGC (Rec g_aiGD rs_aiGE)
+offsetTicks :: forall f_aiGA rs_aiGB. (Functor f_aiGA, RElem OffsetTicks rs_aiGB (RIndex OffsetTicks rs_aiGB)) => (Int -> f_aiGA Int) -> Record rs_aiGB -> f_aiGA (Record rs_aiGB)
 type OnsetWholes = (:->) "onsetWholes" RatioInt
-onsetWholes' :: forall f_aixw g_aixx rs_aixy. (Functor f_aixw, RElem OnsetWholes rs_aixy (RIndex OnsetWholes rs_aixy)) => (g_aixx OnsetWholes -> f_aixw (g_aixx OnsetWholes)) -> Rec g_aixx rs_aixy -> f_aixw (Rec g_aixx rs_aixy)
-onsetWholes :: forall f_aixu rs_aixv. (Functor f_aixu, RElem OnsetWholes rs_aixv (RIndex OnsetWholes rs_aixv)) => (RatioInt -> f_aixu RatioInt) -> Record rs_aixv -> f_aixu (Record rs_aixv)
+onsetWholes' :: forall f_aiJ5 g_aiJ6 rs_aiJ7. (Functor f_aiJ5, RElem OnsetWholes rs_aiJ7 (RIndex OnsetWholes rs_aiJ7)) => (g_aiJ6 OnsetWholes -> f_aiJ5 (g_aiJ6 OnsetWholes)) -> Rec g_aiJ6 rs_aiJ7 -> f_aiJ5 (Rec g_aiJ6 rs_aiJ7)
+onsetWholes :: forall f_aiJ3 rs_aiJ4. (Functor f_aiJ3, RElem OnsetWholes rs_aiJ4 (RIndex OnsetWholes rs_aiJ4)) => (RatioInt -> f_aiJ3 RatioInt) -> Record rs_aiJ4 -> f_aiJ3 (Record rs_aiJ4)
 type OffsetWholes = (:->) "offsetWholes" RatioInt
-offsetWholes' :: forall f_aizO g_aizP rs_aizQ. (Functor f_aizO, RElem OffsetWholes rs_aizQ (RIndex OffsetWholes rs_aizQ)) => (g_aizP OffsetWholes -> f_aizO (g_aizP OffsetWholes)) -> Rec g_aizP rs_aizQ -> f_aizO (Rec g_aizP rs_aizQ)
-offsetWholes :: forall f_aizM rs_aizN. (Functor f_aizM, RElem OffsetWholes rs_aizN (RIndex OffsetWholes rs_aizN)) => (RatioInt -> f_aizM RatioInt) -> Record rs_aizN -> f_aizM (Record rs_aizN)
+offsetWholes' :: forall f_aiLy g_aiLz rs_aiLA. (Functor f_aiLy, RElem OffsetWholes rs_aiLA (RIndex OffsetWholes rs_aiLA)) => (g_aiLz OffsetWholes -> f_aiLy (g_aiLz OffsetWholes)) -> Rec g_aiLz rs_aiLA -> f_aiLy (Rec g_aiLz rs_aiLA)
+offsetWholes :: forall f_aiLw rs_aiLx. (Functor f_aiLw, RElem OffsetWholes rs_aiLx (RIndex OffsetWholes rs_aiLx)) => (RatioInt -> f_aiLw RatioInt) -> Record rs_aiLx -> f_aiLw (Record rs_aiLx)
 type OnsetSecs = (:->) "onsetSecs" Int
-onsetSecs' :: forall f_aiC6 g_aiC7 rs_aiC8. (Functor f_aiC6, RElem OnsetSecs rs_aiC8 (RIndex OnsetSecs rs_aiC8)) => (g_aiC7 OnsetSecs -> f_aiC6 (g_aiC7 OnsetSecs)) -> Rec g_aiC7 rs_aiC8 -> f_aiC6 (Rec g_aiC7 rs_aiC8)
-onsetSecs :: forall f_aiC4 rs_aiC5. (Functor f_aiC4, RElem OnsetSecs rs_aiC5 (RIndex OnsetSecs rs_aiC5)) => (Int -> f_aiC4 Int) -> Record rs_aiC5 -> f_aiC4 (Record rs_aiC5)
+onsetSecs' :: forall f_aiO1 g_aiO2 rs_aiO3. (Functor f_aiO1, RElem OnsetSecs rs_aiO3 (RIndex OnsetSecs rs_aiO3)) => (g_aiO2 OnsetSecs -> f_aiO1 (g_aiO2 OnsetSecs)) -> Rec g_aiO2 rs_aiO3 -> f_aiO1 (Rec g_aiO2 rs_aiO3)
+onsetSecs :: forall f_aiNZ rs_aiO0. (Functor f_aiNZ, RElem OnsetSecs rs_aiO0 (RIndex OnsetSecs rs_aiO0)) => (Int -> f_aiNZ Int) -> Record rs_aiO0 -> f_aiNZ (Record rs_aiO0)
 type OffsetSecs = (:->) "offsetSecs" Int
-offsetSecs' :: forall f_aiEo g_aiEp rs_aiEq. (Functor f_aiEo, RElem OffsetSecs rs_aiEq (RIndex OffsetSecs rs_aiEq)) => (g_aiEp OffsetSecs -> f_aiEo (g_aiEp OffsetSecs)) -> Rec g_aiEp rs_aiEq -> f_aiEo (Rec g_aiEp rs_aiEq)
-offsetSecs :: forall f_aiEm rs_aiEn. (Functor f_aiEm, RElem OffsetSecs rs_aiEn (RIndex OffsetSecs rs_aiEn)) => (Int -> f_aiEm Int) -> Record rs_aiEn -> f_aiEm (Record rs_aiEn)
+offsetSecs' :: forall f_aiQu g_aiQv rs_aiQw. (Functor f_aiQu, RElem OffsetSecs rs_aiQw (RIndex OffsetSecs rs_aiQw)) => (g_aiQv OffsetSecs -> f_aiQu (g_aiQv OffsetSecs)) -> Rec g_aiQv rs_aiQw -> f_aiQu (Rec g_aiQv rs_aiQw)
+offsetSecs :: forall f_aiQs rs_aiQt. (Functor f_aiQs, RElem OffsetSecs rs_aiQt (RIndex OffsetSecs rs_aiQt)) => (Int -> f_aiQs Int) -> Record rs_aiQt -> f_aiQs (Record rs_aiQt)
 type Pitch = (:->) "pitch" Int
-pitch' :: forall f_aiGG g_aiGH rs_aiGI. (Functor f_aiGG, RElem Pitch rs_aiGI (RIndex Pitch rs_aiGI)) => (g_aiGH Pitch -> f_aiGG (g_aiGH Pitch)) -> Rec g_aiGH rs_aiGI -> f_aiGG (Rec g_aiGH rs_aiGI)
-pitch :: forall f_aiGE rs_aiGF. (Functor f_aiGE, RElem Pitch rs_aiGF (RIndex Pitch rs_aiGF)) => (Int -> f_aiGE Int) -> Record rs_aiGF -> f_aiGE (Record rs_aiGF)
+pitch' :: forall f_aiSX g_aiSY rs_aiSZ. (Functor f_aiSX, RElem Pitch rs_aiSZ (RIndex Pitch rs_aiSZ)) => (g_aiSY Pitch -> f_aiSX (g_aiSY Pitch)) -> Rec g_aiSY rs_aiSZ -> f_aiSX (Rec g_aiSY rs_aiSZ)
+pitch :: forall f_aiSV rs_aiSW. (Functor f_aiSV, RElem Pitch rs_aiSW (RIndex Pitch rs_aiSW)) => (Int -> f_aiSV Int) -> Record rs_aiSW -> f_aiSV (Record rs_aiSW)
 type Velocity = (:->) "velocity" Int
-velocity' :: forall f_aiIY g_aiIZ rs_aiJ0. (Functor f_aiIY, RElem Velocity rs_aiJ0 (RIndex Velocity rs_aiJ0)) => (g_aiIZ Velocity -> f_aiIY (g_aiIZ Velocity)) -> Rec g_aiIZ rs_aiJ0 -> f_aiIY (Rec g_aiIZ rs_aiJ0)
-velocity :: forall f_aiIW rs_aiIX. (Functor f_aiIW, RElem Velocity rs_aiIX (RIndex Velocity rs_aiIX)) => (Int -> f_aiIW Int) -> Record rs_aiIX -> f_aiIW (Record rs_aiIX)
+velocity' :: forall f_aiVq g_aiVr rs_aiVs. (Functor f_aiVq, RElem Velocity rs_aiVs (RIndex Velocity rs_aiVs)) => (g_aiVr Velocity -> f_aiVq (g_aiVr Velocity)) -> Rec g_aiVr rs_aiVs -> f_aiVq (Rec g_aiVr rs_aiVs)
+velocity :: forall f_aiVo rs_aiVp. (Functor f_aiVo, RElem Velocity rs_aiVp (RIndex Velocity rs_aiVp)) => (Int -> f_aiVo Int) -> Record rs_aiVp -> f_aiVo (Record rs_aiVp)
 type TrackNum = (:->) "trackNum" Int
-trackNum' :: forall f_aiLg g_aiLh rs_aiLi. (Functor f_aiLg, RElem TrackNum rs_aiLi (RIndex TrackNum rs_aiLi)) => (g_aiLh TrackNum -> f_aiLg (g_aiLh TrackNum)) -> Rec g_aiLh rs_aiLi -> f_aiLg (Rec g_aiLh rs_aiLi)
-trackNum :: forall f_aiLe rs_aiLf. (Functor f_aiLe, RElem TrackNum rs_aiLf (RIndex TrackNum rs_aiLf)) => (Int -> f_aiLe Int) -> Record rs_aiLf -> f_aiLe (Record rs_aiLf)
+trackNum' :: forall f_aiXT g_aiXU rs_aiXV. (Functor f_aiXT, RElem TrackNum rs_aiXV (RIndex TrackNum rs_aiXV)) => (g_aiXU TrackNum -> f_aiXT (g_aiXU TrackNum)) -> Rec g_aiXU rs_aiXV -> f_aiXT (Rec g_aiXU rs_aiXV)
+trackNum :: forall f_aiXR rs_aiXS. (Functor f_aiXR, RElem TrackNum rs_aiXS (RIndex TrackNum rs_aiXS)) => (Int -> f_aiXR Int) -> Record rs_aiXS -> f_aiXR (Record rs_aiXS)
 type Channel = (:->) "channel" Int
-channel' :: forall f_aiNy g_aiNz rs_aiNA. (Functor f_aiNy, RElem Channel rs_aiNA (RIndex Channel rs_aiNA)) => (g_aiNz Channel -> f_aiNy (g_aiNz Channel)) -> Rec g_aiNz rs_aiNA -> f_aiNy (Rec g_aiNz rs_aiNA)
-channel :: forall f_aiNw rs_aiNx. (Functor f_aiNw, RElem Channel rs_aiNx (RIndex Channel rs_aiNx)) => (Int -> f_aiNw Int) -> Record rs_aiNx -> f_aiNw (Record rs_aiNx)
+channel' :: forall f_aj0m g_aj0n rs_aj0o. (Functor f_aj0m, RElem Channel rs_aj0o (RIndex Channel rs_aj0o)) => (g_aj0n Channel -> f_aj0m (g_aj0n Channel)) -> Rec g_aj0n rs_aj0o -> f_aj0m (Rec g_aj0n rs_aj0o)
+channel :: forall f_aj0k rs_aj0l. (Functor f_aj0k, RElem Channel rs_aj0l (RIndex Channel rs_aj0l)) => (Int -> f_aj0k Int) -> Record rs_aj0l -> f_aj0k (Record rs_aj0l)
 type KeySharps = (:->) "keySharps" Int
-keySharps' :: forall f_aiPQ g_aiPR rs_aiPS. (Functor f_aiPQ, RElem KeySharps rs_aiPS (RIndex KeySharps rs_aiPS)) => (g_aiPR KeySharps -> f_aiPQ (g_aiPR KeySharps)) -> Rec g_aiPR rs_aiPS -> f_aiPQ (Rec g_aiPR rs_aiPS)
-keySharps :: forall f_aiPO rs_aiPP. (Functor f_aiPO, RElem KeySharps rs_aiPP (RIndex KeySharps rs_aiPP)) => (Int -> f_aiPO Int) -> Record rs_aiPP -> f_aiPO (Record rs_aiPP)
+keySharps' :: forall f_aj2P g_aj2Q rs_aj2R. (Functor f_aj2P, RElem KeySharps rs_aj2R (RIndex KeySharps rs_aj2R)) => (g_aj2Q KeySharps -> f_aj2P (g_aj2Q KeySharps)) -> Rec g_aj2Q rs_aj2R -> f_aj2P (Rec g_aj2Q rs_aj2R)
+keySharps :: forall f_aj2N rs_aj2O. (Functor f_aj2N, RElem KeySharps rs_aj2O (RIndex KeySharps rs_aj2O)) => (Int -> f_aj2N Int) -> Record rs_aj2O -> f_aj2N (Record rs_aj2O)
 type KeyMajor = (:->) "keyMajor" Bool
-keyMajor' :: forall f_aiS8 g_aiS9 rs_aiSa. (Functor f_aiS8, RElem KeyMajor rs_aiSa (RIndex KeyMajor rs_aiSa)) => (g_aiS9 KeyMajor -> f_aiS8 (g_aiS9 KeyMajor)) -> Rec g_aiS9 rs_aiSa -> f_aiS8 (Rec g_aiS9 rs_aiSa)
-keyMajor :: forall f_aiS6 rs_aiS7. (Functor f_aiS6, RElem KeyMajor rs_aiS7 (RIndex KeyMajor rs_aiS7)) => (Bool -> f_aiS6 Bool) -> Record rs_aiS7 -> f_aiS6 (Record rs_aiS7)
+keyMajor' :: forall f_aj5i g_aj5j rs_aj5k. (Functor f_aj5i, RElem KeyMajor rs_aj5k (RIndex KeyMajor rs_aj5k)) => (g_aj5j KeyMajor -> f_aj5i (g_aj5j KeyMajor)) -> Rec g_aj5j rs_aj5k -> f_aj5i (Rec g_aj5j rs_aj5k)
+keyMajor :: forall f_aj5g rs_aj5h. (Functor f_aj5g, RElem KeyMajor rs_aj5h (RIndex KeyMajor rs_aj5h)) => (Bool -> f_aj5g Bool) -> Record rs_aj5h -> f_aj5g (Record rs_aj5h)
 type Bar = (:->) "bar" Int
-bar' :: forall f_aiUq g_aiUr rs_aiUs. (Functor f_aiUq, RElem Bar rs_aiUs (RIndex Bar rs_aiUs)) => (g_aiUr Bar -> f_aiUq (g_aiUr Bar)) -> Rec g_aiUr rs_aiUs -> f_aiUq (Rec g_aiUr rs_aiUs)
-bar :: forall f_aiUo rs_aiUp. (Functor f_aiUo, RElem Bar rs_aiUp (RIndex Bar rs_aiUp)) => (Int -> f_aiUo Int) -> Record rs_aiUp -> f_aiUo (Record rs_aiUp)
+bar' :: forall f_aj7L g_aj7M rs_aj7N. (Functor f_aj7L, RElem Bar rs_aj7N (RIndex Bar rs_aj7N)) => (g_aj7M Bar -> f_aj7L (g_aj7M Bar)) -> Rec g_aj7M rs_aj7N -> f_aj7L (Rec g_aj7M rs_aj7N)
+bar :: forall f_aj7J rs_aj7K. (Functor f_aj7J, RElem Bar rs_aj7K (RIndex Bar rs_aj7K)) => (Int -> f_aj7J Int) -> Record rs_aj7K -> f_aj7J (Record rs_aj7K)
 type Beat = (:->) "beat" Int
-beat' :: forall f_aiWI g_aiWJ rs_aiWK. (Functor f_aiWI, RElem Beat rs_aiWK (RIndex Beat rs_aiWK)) => (g_aiWJ Beat -> f_aiWI (g_aiWJ Beat)) -> Rec g_aiWJ rs_aiWK -> f_aiWI (Rec g_aiWJ rs_aiWK)
-beat :: forall f_aiWG rs_aiWH. (Functor f_aiWG, RElem Beat rs_aiWH (RIndex Beat rs_aiWH)) => (Int -> f_aiWG Int) -> Record rs_aiWH -> f_aiWG (Record rs_aiWH)
+beat' :: forall f_ajae g_ajaf rs_ajag. (Functor f_ajae, RElem Beat rs_ajag (RIndex Beat rs_ajag)) => (g_ajaf Beat -> f_ajae (g_ajaf Beat)) -> Rec g_ajaf rs_ajag -> f_ajae (Rec g_ajaf rs_ajag)
+beat :: forall f_ajac rs_ajad. (Functor f_ajac, RElem Beat rs_ajad (RIndex Beat rs_ajad)) => (Int -> f_ajac Int) -> Record rs_ajad -> f_ajac (Record rs_ajad)
 type Subbeat = (:->) "subbeat" RatioInt
-subbeat' :: forall f_aiZ0 g_aiZ1 rs_aiZ2. (Functor f_aiZ0, RElem Subbeat rs_aiZ2 (RIndex Subbeat rs_aiZ2)) => (g_aiZ1 Subbeat -> f_aiZ0 (g_aiZ1 Subbeat)) -> Rec g_aiZ1 rs_aiZ2 -> f_aiZ0 (Rec g_aiZ1 rs_aiZ2)
-subbeat :: forall f_aiYY rs_aiYZ. (Functor f_aiYY, RElem Subbeat rs_aiYZ (RIndex Subbeat rs_aiYZ)) => (RatioInt -> f_aiYY RatioInt) -> Record rs_aiYZ -> f_aiYY (Record rs_aiYZ)
+subbeat' :: forall f_ajcH g_ajcI rs_ajcJ. (Functor f_ajcH, RElem Subbeat rs_ajcJ (RIndex Subbeat rs_ajcJ)) => (g_ajcI Subbeat -> f_ajcH (g_ajcI Subbeat)) -> Rec g_ajcI rs_ajcJ -> f_ajcH (Rec g_ajcI rs_ajcJ)
+subbeat :: forall f_ajcF rs_ajcG. (Functor f_ajcF, RElem Subbeat rs_ajcG (RIndex Subbeat rs_ajcG)) => (RatioInt -> f_ajcF RatioInt) -> Record rs_ajcG -> f_ajcF (Record rs_ajcG)
 midiNoteToRecord :: MidiNote -> MidiRecord
 printNote :: MidiNote -> IO ()
 type PrepEv a = (Int, Message, (a, Message))
@@ -206,8 +205,8 @@ instance GHC.Classes.Eq Musicology.IO.MidiFile.MidiNote
 instance Control.DeepSeq.NFData Musicology.IO.MidiFile.MidiNote
 
 module Musicology.Grams
-(.:) :: (b -> c) -> (a1 -> a2 -> b) -> a1 -> a2 -> c
-(.::) :: (b -> c) -> (a1 -> a2 -> a3 -> a4 -> b) -> a1 -> a2 -> a3 -> a4 -> c
+(.:) :: (b -> c) -> (a -> a -> b) -> a -> a -> c
+(.::) :: (b -> c) -> (a -> a -> a -> a -> b) -> a -> a -> a -> a -> c
 gramsMach :: Int -> Process a [a]
 grams :: Foldable t => Int -> t a -> [[a]]
 skipgramsRMach :: (Num k, Ord k, Integral n, Monad m) => m Bool -> ([a] -> Bool) -> (a -> a -> k) -> n -> k -> ProcessT m a [a]
@@ -220,8 +219,8 @@ mkCoin :: (PrimMonad m, Integral n) => Double -> n -> Gen (PrimState m) -> m Boo
 skipgramsR :: (Foldable t, Num k, Ord k, Integral n, PrimMonad m) => t a -> Double -> Gen (PrimState m) -> ([a] -> Bool) -> (a -> a -> k) -> n -> k -> m [[a]]
 skipgramsRS :: (Foldable t, Num k, Ord k, Integral n, PrimMonad m) => t a -> Double -> Gen (PrimState m) -> ([a] -> Bool) -> (a -> a -> k) -> n -> k -> m [[a]]
 enum :: (Num b, Enum b) => [a] -> [(a, b)]
-indexCost :: Num a1 => (a2, a1) -> (a3, a1) -> a1
-mune :: [[(b1, b2)]] -> [[b1]]
+indexCost :: Num a => (a, a) -> (a, a) -> a
+mune :: [[(b, b)]] -> [[b]]
 indexSkipgrams :: [a] -> Int -> Int -> [[a]]
 indexSkipgramsR :: PrimMonad m => [a] -> Double -> Gen (PrimState m) -> Int -> Int -> m [[a]]
 indexSkipgramsS :: [a] -> Int -> Int -> [[a]]
@@ -241,6 +240,6 @@ polygrams :: (HasTime a, Foldable t, Integral n) => t a -> n -> n -> TimeOf a ->
 polygramsR :: (HasTime a, Foldable t, Integral n, PrimMonad m) => t a -> Double -> Double -> Gen (PrimState m) -> n -> n -> TimeOf a -> m [[[a]]]
 verticalsMach :: (Integral n, Monad m, HasTime a) => m Bool -> n -> TimeOf a -> ProcessT m a [a]
 horizontalsMach :: (Integral n, Monad m, HasTime a) => m Bool -> n -> TimeOf a -> ProcessT m [a] [[a]]
-polygramsMachR :: (Monad m, HasTime a, Integral n1, Integral n2) => m Bool -> m Bool -> n1 -> n2 -> TimeOf a -> TimeOf a -> MachineT m (Is a) [[a]]
+polygramsMachR :: (Monad m, HasTime a, Integral n, Integral n) => m Bool -> m Bool -> n -> n -> TimeOf a -> TimeOf a -> MachineT m (Is a) [[a]]
 polygramsMach :: (HasTime a, Integral n) => n -> n -> TimeOf a -> TimeOf a -> Process a [[a]]
 polygrams' :: (HasTime a, Foldable t, Integral n) => t a -> n -> n -> TimeOf a -> [[[a]]]

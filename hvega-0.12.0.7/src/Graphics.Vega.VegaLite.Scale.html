@@ -1,0 +1,495 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="annot"><span class="hs-comment">{-|
+Module      : Graphics.Vega.VegaLite.Scale
+Copyright   : (c) Douglas Burke, 2018-2021
+License     : BSD3
+
+Maintainer  : dburke.gw@gmail.com
+Stability   : unstable
+Portability : OverloadedStrings
+
+Scale-related functionality.
+
+-}</span></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Graphics.Vega.VegaLite.Scale</span><span>
+</span><span id="line-17"></span><span>       </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#ScaleDomain"><span class="hs-identifier">ScaleDomain</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DomainLimits"><span class="hs-identifier">DomainLimits</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#ScaleRange"><span class="hs-identifier">ScaleRange</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#ScaleNice"><span class="hs-identifier">ScaleNice</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NTimeUnit"><span class="hs-identifier">NTimeUnit</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span>         </span><span class="hs-comment">-- not for external export</span><span>
+</span><span id="line-24"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleDomainProperty"><span class="hs-identifier">scaleDomainProperty</span></a></span><span>
+</span><span id="line-25"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#domainLimitsSpec"><span class="hs-identifier">domainLimitsSpec</span></a></span><span>
+</span><span id="line-26"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleNiceSpec"><span class="hs-identifier">scaleNiceSpec</span></a></span><span>
+</span><span id="line-27"></span><span>       </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">(.=)</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">object</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">toJSON</span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson.Types</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Pair</span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html"><span class="hs-identifier">Graphics.Vega.VegaLite.Foundation</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#Channel"><span class="hs-identifier">Channel</span></a></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#FieldName"><span class="hs-identifier">FieldName</span></a></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#fromT"><span class="hs-identifier">fromT</span></a></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#channelLabel"><span class="hs-identifier">channelLabel</span></a></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html"><span class="hs-identifier">Graphics.Vega.VegaLite.Specification</span></a></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier">VLSpec</span></a></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#SelectionLabel"><span class="hs-identifier">SelectionLabel</span></a></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html"><span class="hs-identifier">Graphics.Vega.VegaLite.Time</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DateTime"><span class="hs-identifier">DateTime</span></a></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#dateTimeSpec"><span class="hs-identifier">dateTimeSpec</span></a></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="annot"><span class="hs-comment">{-|
+
+Describes the scale domain (type of data in scale). For full details see the
+&lt;https://vega.github.io/vega-lite/docs/scale.html#domain Vega-Lite documentation&gt;.
+
+In @0.11.0.0@ the functionality has been split into 'ScaleDomain' and
+'DomainLimits'.
+-}</span></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-keyword">data</span><span> </span><span id="ScaleDomain"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#ScaleDomain"><span class="hs-identifier hs-var">ScaleDomain</span></a></span></span><span>
+</span><span id="line-61"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="DMax"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DMax"><span class="hs-identifier hs-var">DMax</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-62"></span><span>      </span><span class="hs-comment">-- ^ Sets the maximum value in the scale domain.</span><span>
+</span><span id="line-63"></span><span>      </span><span class="hs-comment">--   It is only intended for scales with a continuous domain.</span><span>
+</span><span id="line-64"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-65"></span><span>      </span><span class="hs-comment">--   It is supported in Vega-Lite 4.14 and later.</span><span>
+</span><span id="line-66"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-67"></span><span>      </span><span class="hs-comment">--   @since 0.11.0.0</span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DMaxTime"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DMaxTime"><span class="hs-identifier hs-var">DMaxTime</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DateTime"><span class="hs-identifier hs-type">DateTime</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-69"></span><span>      </span><span class="hs-comment">-- ^ 'DMax' for dates.</span><span>
+</span><span id="line-70"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-71"></span><span>      </span><span class="hs-comment">--   It is supported in Vega-Lite 4.14 and later.</span><span>
+</span><span id="line-72"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-73"></span><span>      </span><span class="hs-comment">--   @since 0.11.0.0</span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DMid"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DMid"><span class="hs-identifier hs-var">DMid</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-75"></span><span>      </span><span class="hs-comment">-- ^ Sets the mid-point of a continuous diverging domain.</span><span>
+</span><span id="line-76"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-77"></span><span>      </span><span class="hs-comment">--   It replaces 'Graphics.Vega.VegaLite.SDomainMid'.</span><span>
+</span><span id="line-78"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-79"></span><span>      </span><span class="hs-comment">--   @since 0.11.0.0</span><span>
+</span><span id="line-80"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DMin"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DMin"><span class="hs-identifier hs-var">DMin</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-81"></span><span>      </span><span class="hs-comment">-- ^ Sets the minimum value in the scale domain.</span><span>
+</span><span id="line-82"></span><span>      </span><span class="hs-comment">--   It is only intended for scales with a continuous domain.</span><span>
+</span><span id="line-83"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-84"></span><span>      </span><span class="hs-comment">--   It is supported in Vega-Lite 4.14 and later.</span><span>
+</span><span id="line-85"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-86"></span><span>      </span><span class="hs-comment">--   @since 0.11.0.0</span><span>
+</span><span id="line-87"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DMinTime"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DMinTime"><span class="hs-identifier hs-var">DMinTime</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DateTime"><span class="hs-identifier hs-type">DateTime</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-88"></span><span>      </span><span class="hs-comment">-- ^ 'DMin' for dates.</span><span>
+</span><span id="line-89"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-90"></span><span>      </span><span class="hs-comment">--   It is supported in Vega-Lite 4.14 and later.</span><span>
+</span><span id="line-91"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-92"></span><span>      </span><span class="hs-comment">--   @since 0.11.0.0</span><span>
+</span><span id="line-93"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DSelection"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DSelection"><span class="hs-identifier hs-var">DSelection</span></a></span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#SelectionLabel"><span class="hs-identifier hs-type">SelectionLabel</span></a></span><span>
+</span><span id="line-94"></span><span>      </span><span class="hs-comment">-- ^ Scale domain based on a named interactive selection.</span><span>
+</span><span id="line-95"></span><span>      </span><span class="hs-comment">--   See also 'DSelectionField' and 'DSelectionChannel', which should</span><span>
+</span><span id="line-96"></span><span>      </span><span class="hs-comment">--   be used when a selection is</span><span>
+</span><span id="line-97"></span><span>      </span><span class="hs-comment">--   [projected](https://vega.github.io/vega-lite/docs/project.html)</span><span>
+</span><span id="line-98"></span><span>      </span><span class="hs-comment">--   over multiple fields or encodings.</span><span>
+</span><span id="line-99"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-100"></span><span>      </span><span class="hs-comment">--   In @0.7.0.0@ the argument type was changed to @SelectionLabel@</span><span>
+</span><span id="line-101"></span><span>      </span><span class="hs-comment">--   (which is a type synonym for @Text@).</span><span>
+</span><span id="line-102"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DSelectionField"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DSelectionField"><span class="hs-identifier hs-var">DSelectionField</span></a></span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#SelectionLabel"><span class="hs-identifier hs-type">SelectionLabel</span></a></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#FieldName"><span class="hs-identifier hs-type">FieldName</span></a></span><span>
+</span><span id="line-103"></span><span>      </span><span class="hs-comment">-- ^ Use the given selection /and/ associated field, when the selection</span><span>
+</span><span id="line-104"></span><span>      </span><span class="hs-comment">--   is projected over multiple fields or encodings.</span><span>
+</span><span id="line-105"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-106"></span><span>      </span><span class="hs-comment">--   @since 0.7.0.0</span><span>
+</span><span id="line-107"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DSelectionChannel"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DSelectionChannel"><span class="hs-identifier hs-var">DSelectionChannel</span></a></span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#SelectionLabel"><span class="hs-identifier hs-type">SelectionLabel</span></a></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#Channel"><span class="hs-identifier hs-type">Channel</span></a></span><span>
+</span><span id="line-108"></span><span>      </span><span class="hs-comment">-- ^ Use the given selection /and/ associated encoding, when the selection</span><span>
+</span><span id="line-109"></span><span>      </span><span class="hs-comment">--   is projected over multiple fields or encodings.</span><span>
+</span><span id="line-110"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-111"></span><span>      </span><span class="hs-comment">--   @since 0.7.0.0</span><span>
+</span><span id="line-112"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="DUnionWith"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DUnionWith"><span class="hs-identifier hs-var">DUnionWith</span></a></span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DomainLimits"><span class="hs-identifier hs-type">DomainLimits</span></a></span><span>
+</span><span id="line-113"></span><span>      </span><span class="hs-comment">-- ^ Combine the domain of the data with the provided domain.</span><span>
+</span><span id="line-114"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-115"></span><span>      </span><span class="hs-comment">--   The following example will use a range of at least 0 to 100,</span><span>
+</span><span id="line-116"></span><span>      </span><span class="hs-comment">--   but this will be increased if the data (either initially or</span><span>
+</span><span id="line-117"></span><span>      </span><span class="hs-comment">--   via any updates to the Vege-Lite visualization) exceeds this:</span><span>
+</span><span id="line-118"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-119"></span><span>      </span><span class="hs-comment">--   @'Graphics.Vega.VegaLite.PScale' ['Graphics.Vega.VegaLite.SDomainOpt' (DUnionWith ('DNumbers' [0, 100]))]@</span><span>
+</span><span id="line-120"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-121"></span><span>      </span><span class="hs-comment">--   @since 0.6.0.0</span><span>
+</span><span id="line-122"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Unaggregated"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#Unaggregated"><span class="hs-identifier hs-var">Unaggregated</span></a></span></span><span>
+</span><span id="line-123"></span><span>      </span><span class="hs-comment">-- ^ Indicate that a domain of aggregated data should be scaled to</span><span>
+</span><span id="line-124"></span><span>      </span><span class="hs-comment">--   the domain of the data prior to aggregation.</span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- For now we do not include Unaggregated in DomainLimits as the</span><span>
+</span><span id="line-128"></span><span class="hs-comment">-- documentaiton suggests we should ubt the schema does not: see</span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- https://github.com/vega/vega-lite/issues/7022</span><span>
+</span><span id="line-130"></span><span class="hs-comment">--</span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span class="annot"><span class="hs-comment">{-|
+
+Represent the range of the domain, which is used by 'VL.SDomain'
+and 'DUnionWith'.
+
+Prior to @0.11.0.0@ this was part of 'ScaleDomain'.
+
+@since 0.11.0.0
+-}</span></span><span>
+</span><span id="line-141"></span><span class="hs-keyword">data</span><span> </span><span id="DomainLimits"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DomainLimits"><span class="hs-identifier hs-var">DomainLimits</span></a></span></span><span>
+</span><span id="line-142"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="DNumbers"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DNumbers"><span class="hs-identifier hs-var">DNumbers</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span>
+</span><span id="line-143"></span><span>    </span><span class="hs-comment">-- ^ Numeric values that define a scale domain.</span><span>
+</span><span id="line-144"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-145"></span><span>    </span><span class="hs-comment">--   It is expected that this contains two values (minimum and</span><span>
+</span><span id="line-146"></span><span>    </span><span class="hs-comment">--   maximum), but more can be given for</span><span>
+</span><span id="line-147"></span><span>    </span><span class="hs-comment">--   [piecewise  quantitative scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise).</span><span>
+</span><span id="line-148"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="DStrings"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DStrings"><span class="hs-identifier hs-var">DStrings</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span class="hs-special">]</span><span>
+</span><span id="line-149"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ String values that define a scale domain</span></span><span>
+</span><span id="line-150"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="DDateTimes"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DDateTimes"><span class="hs-identifier hs-var">DDateTimes</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="Graphics.Vega.VegaLite.Time.html#DateTime"><span class="hs-identifier hs-type">DateTime</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
+</span><span id="line-151"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Date-time values that define a scale domain.</span></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleDomainProperty"><span class="hs-identifier hs-type">scaleDomainProperty</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#ScaleDomain"><span class="hs-identifier hs-type">ScaleDomain</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Pair</span></span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span id="scaleDomainProperty"><span class="annot"><span class="annottext">scaleDomainProperty :: ScaleDomain -&gt; Pair
+</span><a href="Graphics.Vega.VegaLite.Scale.html#scaleDomainProperty"><span class="hs-identifier hs-var hs-var">scaleDomainProperty</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DMax"><span class="hs-identifier hs-type">DMax</span></a></span><span> </span><span id="local-6989586621679117712"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679117712"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;domainMax&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Double -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679117712"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-157"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleDomainProperty"><span class="hs-identifier hs-var">scaleDomainProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DMaxTime"><span class="hs-identifier hs-type">DMaxTime</span></a></span><span> </span><span id="local-6989586621679117713"><span class="annot"><span class="annottext">[DateTime]
+</span><a href="#local-6989586621679117713"><span class="hs-identifier hs-var">dts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;domainMax&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; VLSpec -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[DateTime] -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Time.html#dateTimeSpec"><span class="hs-identifier hs-var">dateTimeSpec</span></a></span><span> </span><span class="annot"><span class="annottext">[DateTime]
+</span><a href="#local-6989586621679117713"><span class="hs-identifier hs-var">dts</span></a></span><span>
+</span><span id="line-158"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleDomainProperty"><span class="hs-identifier hs-var">scaleDomainProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DMid"><span class="hs-identifier hs-type">DMid</span></a></span><span> </span><span id="local-6989586621679117714"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679117714"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;domainMid&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Double -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679117714"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-159"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleDomainProperty"><span class="hs-identifier hs-var">scaleDomainProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DMin"><span class="hs-identifier hs-type">DMin</span></a></span><span> </span><span id="local-6989586621679117715"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679117715"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;domainMin&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Double -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679117715"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-160"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleDomainProperty"><span class="hs-identifier hs-var">scaleDomainProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DMinTime"><span class="hs-identifier hs-type">DMinTime</span></a></span><span> </span><span id="local-6989586621679117716"><span class="annot"><span class="annottext">[DateTime]
+</span><a href="#local-6989586621679117716"><span class="hs-identifier hs-var">dts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;domainMin&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; VLSpec -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[DateTime] -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Time.html#dateTimeSpec"><span class="hs-identifier hs-var">dateTimeSpec</span></a></span><span> </span><span class="annot"><span class="annottext">[DateTime]
+</span><a href="#local-6989586621679117716"><span class="hs-identifier hs-var">dts</span></a></span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleDomainProperty"><span class="hs-identifier hs-var">scaleDomainProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DSelection"><span class="hs-identifier hs-type">DSelection</span></a></span><span> </span><span id="local-6989586621679117717"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679117717"><span class="hs-identifier hs-var">selName</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;domain&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; VLSpec -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; VLSpec
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;selection&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679117717"><span class="hs-identifier hs-var">selName</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-164"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleDomainProperty"><span class="hs-identifier hs-var">scaleDomainProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DSelectionField"><span class="hs-identifier hs-type">DSelectionField</span></a></span><span> </span><span id="local-6989586621679117718"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679117718"><span class="hs-identifier hs-var">selName</span></a></span></span><span> </span><span id="local-6989586621679117719"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679117719"><span class="hs-identifier hs-var">field</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;domain&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; VLSpec -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; VLSpec
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;selection&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679117718"><span class="hs-identifier hs-var">selName</span></a></span><span>
+</span><span id="line-165"></span><span>                                                                         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;field&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679117719"><span class="hs-identifier hs-var">field</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-166"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleDomainProperty"><span class="hs-identifier hs-var">scaleDomainProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DSelectionChannel"><span class="hs-identifier hs-type">DSelectionChannel</span></a></span><span> </span><span id="local-6989586621679117720"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679117720"><span class="hs-identifier hs-var">selName</span></a></span></span><span> </span><span id="local-6989586621679117721"><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679117721"><span class="hs-identifier hs-var">ch</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;domain&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; VLSpec -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; VLSpec
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;selection&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679117720"><span class="hs-identifier hs-var">selName</span></a></span><span>
+</span><span id="line-167"></span><span>                                                                        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;encoding&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Text -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Channel -&gt; Text
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#channelLabel"><span class="hs-identifier hs-var">channelLabel</span></a></span><span> </span><span class="annot"><span class="annottext">Channel
+</span><a href="#local-6989586621679117721"><span class="hs-identifier hs-var">ch</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-168"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleDomainProperty"><span class="hs-identifier hs-var">scaleDomainProperty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DUnionWith"><span class="hs-identifier hs-type">DUnionWith</span></a></span><span> </span><span id="local-6989586621679117722"><span class="annot"><span class="annottext">DomainLimits
+</span><a href="#local-6989586621679117722"><span class="hs-identifier hs-var">sd</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;domain&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; VLSpec -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">[Pair] -&gt; VLSpec
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;unionWith&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; VLSpec -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">DomainLimits -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Scale.html#domainLimitsSpec"><span class="hs-identifier hs-var">domainLimitsSpec</span></a></span><span> </span><span class="annot"><span class="annottext">DomainLimits
+</span><a href="#local-6989586621679117722"><span class="hs-identifier hs-var">sd</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-169"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleDomainProperty"><span class="hs-identifier hs-var">scaleDomainProperty</span></a></span><span> </span><span class="annot"><span class="annottext">ScaleDomain
+</span><a href="Graphics.Vega.VegaLite.Scale.html#Unaggregated"><span class="hs-identifier hs-var">Unaggregated</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;domain&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; VLSpec -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#fromT"><span class="hs-identifier hs-var">fromT</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;unaggregated&quot;</span></span><span>
+</span><span id="line-170"></span><span>
+</span><span id="line-171"></span><span>
+</span><span id="line-172"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#domainLimitsSpec"><span class="hs-identifier hs-type">domainLimitsSpec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DomainLimits"><span class="hs-identifier hs-type">DomainLimits</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier hs-type">VLSpec</span></a></span><span>
+</span><span id="line-173"></span><span id="domainLimitsSpec"><span class="annot"><span class="annottext">domainLimitsSpec :: DomainLimits -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Scale.html#domainLimitsSpec"><span class="hs-identifier hs-var hs-var">domainLimitsSpec</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DNumbers"><span class="hs-identifier hs-type">DNumbers</span></a></span><span> </span><span id="local-6989586621679117723"><span class="annot"><span class="annottext">[Double]
+</span><a href="#local-6989586621679117723"><span class="hs-identifier hs-var">nums</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[VLSpec] -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Double -&gt; VLSpec) -&gt; [Double] -&gt; [VLSpec]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">[Double]
+</span><a href="#local-6989586621679117723"><span class="hs-identifier hs-var">nums</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-174"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#domainLimitsSpec"><span class="hs-identifier hs-var">domainLimitsSpec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DDateTimes"><span class="hs-identifier hs-type">DDateTimes</span></a></span><span> </span><span id="local-6989586621679117724"><span class="annot"><span class="annottext">[[DateTime]]
+</span><a href="#local-6989586621679117724"><span class="hs-identifier hs-var">dts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[VLSpec] -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">([DateTime] -&gt; VLSpec) -&gt; [[DateTime]] -&gt; [VLSpec]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">[DateTime] -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Time.html#dateTimeSpec"><span class="hs-identifier hs-var">dateTimeSpec</span></a></span><span> </span><span class="annot"><span class="annottext">[[DateTime]]
+</span><a href="#local-6989586621679117724"><span class="hs-identifier hs-var">dts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-175"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#domainLimitsSpec"><span class="hs-identifier hs-var">domainLimitsSpec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#DStrings"><span class="hs-identifier hs-type">DStrings</span></a></span><span> </span><span id="local-6989586621679117725"><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679117725"><span class="hs-identifier hs-var">cats</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[VLSpec] -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Text -&gt; VLSpec) -&gt; [Text] -&gt; [VLSpec]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">[Text]
+</span><a href="#local-6989586621679117725"><span class="hs-identifier hs-var">cats</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-176"></span><span>
+</span><span id="line-177"></span><span>
+</span><span id="line-178"></span><span class="annot"><span class="hs-comment">{-|
+
+Describes the way a scale can be rounded to \&quot;nice\&quot; numbers. For full details see the
+&lt;https://vega.github.io/vega-lite/docs/scale.html#continuous Vega-Lite documentation&gt;.
+
+Prior to version @0.10.0.0@ the time units were included in the constructors
+for @ScaleNice@.
+
+-}</span></span><span>
+</span><span id="line-187"></span><span class="hs-keyword">data</span><span> </span><span id="ScaleNice"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#ScaleNice"><span class="hs-identifier hs-var">ScaleNice</span></a></span></span><span>
+</span><span id="line-188"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="NTU"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NTU"><span class="hs-identifier hs-var">NTU</span></a></span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NTimeUnit"><span class="hs-identifier hs-type">NTimeUnit</span></a></span><span>
+</span><span id="line-189"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Time range.</span></span><span>
+</span><span id="line-190"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="NInterval"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NInterval"><span class="hs-identifier hs-var">NInterval</span></a></span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NTimeUnit"><span class="hs-identifier hs-type">NTimeUnit</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-191"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ \&quot;Nice\&quot; temporal interval values when scaling.</span></span><span>
+</span><span id="line-192"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="IsNice"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#IsNice"><span class="hs-identifier hs-var">IsNice</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-193"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Enable or disable nice scaling.</span></span><span>
+</span><span id="line-194"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="NTickCount"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NTickCount"><span class="hs-identifier hs-var">NTickCount</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-195"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Desired number of tick marks in a \&quot;nice\&quot; scaling.</span></span><span>
+</span><span id="line-196"></span><span>
+</span><span id="line-197"></span><span class="annot"><span class="hs-comment">{-|
+
+The time intervals that can be rounded to \&quot;nice\&quot; numbers.
+
+Prior to @0.10.0.0@ these were part of 'ScaleNice'.
+
+-}</span></span><span>
+</span><span id="line-204"></span><span>
+</span><span id="line-205"></span><span class="hs-keyword">data</span><span> </span><span id="NTimeUnit"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NTimeUnit"><span class="hs-identifier hs-var">NTimeUnit</span></a></span></span><span>
+</span><span id="line-206"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="NMillisecond"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NMillisecond"><span class="hs-identifier hs-var">NMillisecond</span></a></span></span><span>
+</span><span id="line-207"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Nice time intervals that try to align with rounded milliseconds.</span></span><span>
+</span><span id="line-208"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="NSecond"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NSecond"><span class="hs-identifier hs-var">NSecond</span></a></span></span><span>
+</span><span id="line-209"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Nice time intervals that try to align with whole or rounded seconds.</span></span><span>
+</span><span id="line-210"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="NMinute"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NMinute"><span class="hs-identifier hs-var">NMinute</span></a></span></span><span>
+</span><span id="line-211"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Nice time intervals that try to align with whole or rounded minutes.</span></span><span>
+</span><span id="line-212"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="NHour"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NHour"><span class="hs-identifier hs-var">NHour</span></a></span></span><span>
+</span><span id="line-213"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Nice time intervals that try to align with whole or rounded hours.</span></span><span>
+</span><span id="line-214"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="NDay"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NDay"><span class="hs-identifier hs-var">NDay</span></a></span></span><span>
+</span><span id="line-215"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Nice time intervals that try to align with whole or rounded days.</span></span><span>
+</span><span id="line-216"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="NWeek"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NWeek"><span class="hs-identifier hs-var">NWeek</span></a></span></span><span>
+</span><span id="line-217"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Nice time intervals that try to align with whole or rounded weeks.</span></span><span>
+</span><span id="line-218"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="NMonth"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NMonth"><span class="hs-identifier hs-var">NMonth</span></a></span></span><span>
+</span><span id="line-219"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Nice time intervals that try to align with whole or rounded months.</span></span><span>
+</span><span id="line-220"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="NYear"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NYear"><span class="hs-identifier hs-var">NYear</span></a></span></span><span>
+</span><span id="line-221"></span><span>    </span><span class="annot"><span class="hs-comment">-- ^ Nice time intervals that try to align with whole or rounded years.</span></span><span>
+</span><span id="line-222"></span><span>
+</span><span id="line-223"></span><span>
+</span><span id="line-224"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#nTimeUnitSpec"><span class="hs-identifier hs-type">nTimeUnitSpec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NTimeUnit"><span class="hs-identifier hs-type">NTimeUnit</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier hs-type">VLSpec</span></a></span><span>
+</span><span id="line-225"></span><span id="nTimeUnitSpec"><span class="annot"><span class="annottext">nTimeUnitSpec :: NTimeUnit -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Scale.html#nTimeUnitSpec"><span class="hs-identifier hs-var hs-var">nTimeUnitSpec</span></a></span></span><span> </span><span class="annot"><span class="annottext">NTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Scale.html#NMillisecond"><span class="hs-identifier hs-var">NMillisecond</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#fromT"><span class="hs-identifier hs-var">fromT</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;millisecond&quot;</span></span><span>
+</span><span id="line-226"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#nTimeUnitSpec"><span class="hs-identifier hs-var">nTimeUnitSpec</span></a></span><span> </span><span class="annot"><span class="annottext">NTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Scale.html#NSecond"><span class="hs-identifier hs-var">NSecond</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#fromT"><span class="hs-identifier hs-var">fromT</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;second&quot;</span></span><span>
+</span><span id="line-227"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#nTimeUnitSpec"><span class="hs-identifier hs-var">nTimeUnitSpec</span></a></span><span> </span><span class="annot"><span class="annottext">NTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Scale.html#NMinute"><span class="hs-identifier hs-var">NMinute</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#fromT"><span class="hs-identifier hs-var">fromT</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;minute&quot;</span></span><span>
+</span><span id="line-228"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#nTimeUnitSpec"><span class="hs-identifier hs-var">nTimeUnitSpec</span></a></span><span> </span><span class="annot"><span class="annottext">NTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Scale.html#NHour"><span class="hs-identifier hs-var">NHour</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#fromT"><span class="hs-identifier hs-var">fromT</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;hour&quot;</span></span><span>
+</span><span id="line-229"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#nTimeUnitSpec"><span class="hs-identifier hs-var">nTimeUnitSpec</span></a></span><span> </span><span class="annot"><span class="annottext">NTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Scale.html#NDay"><span class="hs-identifier hs-var">NDay</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#fromT"><span class="hs-identifier hs-var">fromT</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;day&quot;</span></span><span>
+</span><span id="line-230"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#nTimeUnitSpec"><span class="hs-identifier hs-var">nTimeUnitSpec</span></a></span><span> </span><span class="annot"><span class="annottext">NTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Scale.html#NWeek"><span class="hs-identifier hs-var">NWeek</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#fromT"><span class="hs-identifier hs-var">fromT</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;week&quot;</span></span><span>
+</span><span id="line-231"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#nTimeUnitSpec"><span class="hs-identifier hs-var">nTimeUnitSpec</span></a></span><span> </span><span class="annot"><span class="annottext">NTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Scale.html#NMonth"><span class="hs-identifier hs-var">NMonth</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#fromT"><span class="hs-identifier hs-var">fromT</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;month&quot;</span></span><span>
+</span><span id="line-232"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#nTimeUnitSpec"><span class="hs-identifier hs-var">nTimeUnitSpec</span></a></span><span> </span><span class="annot"><span class="annottext">NTimeUnit
+</span><a href="Graphics.Vega.VegaLite.Scale.html#NYear"><span class="hs-identifier hs-var">NYear</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Foundation.html#fromT"><span class="hs-identifier hs-var">fromT</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;year&quot;</span></span><span>
+</span><span id="line-233"></span><span>
+</span><span id="line-234"></span><span>
+</span><span id="line-235"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleNiceSpec"><span class="hs-identifier hs-type">scaleNiceSpec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#ScaleNice"><span class="hs-identifier hs-type">ScaleNice</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Specification.html#VLSpec"><span class="hs-identifier hs-type">VLSpec</span></a></span><span>
+</span><span id="line-236"></span><span id="scaleNiceSpec"><span class="annot"><span class="annottext">scaleNiceSpec :: ScaleNice -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Scale.html#scaleNiceSpec"><span class="hs-identifier hs-var hs-var">scaleNiceSpec</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NTU"><span class="hs-identifier hs-type">NTU</span></a></span><span> </span><span id="local-6989586621679117739"><span class="annot"><span class="annottext">NTimeUnit
+</span><a href="#local-6989586621679117739"><span class="hs-identifier hs-var">tu</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NTimeUnit -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Scale.html#nTimeUnitSpec"><span class="hs-identifier hs-var">nTimeUnitSpec</span></a></span><span> </span><span class="annot"><span class="annottext">NTimeUnit
+</span><a href="#local-6989586621679117739"><span class="hs-identifier hs-var">tu</span></a></span><span>
+</span><span id="line-237"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleNiceSpec"><span class="hs-identifier hs-var">scaleNiceSpec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NInterval"><span class="hs-identifier hs-type">NInterval</span></a></span><span> </span><span id="local-6989586621679117740"><span class="annot"><span class="annottext">NTimeUnit
+</span><a href="#local-6989586621679117740"><span class="hs-identifier hs-var">tu</span></a></span></span><span> </span><span id="local-6989586621679117741"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117741"><span class="hs-identifier hs-var">step</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-238"></span><span>  </span><span class="annot"><span class="annottext">[Pair] -&gt; VLSpec
+</span><span class="hs-identifier hs-var">object</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;interval&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; VLSpec -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">NTimeUnit -&gt; VLSpec
+</span><a href="Graphics.Vega.VegaLite.Scale.html#nTimeUnitSpec"><span class="hs-identifier hs-var">nTimeUnitSpec</span></a></span><span> </span><span class="annot"><span class="annottext">NTimeUnit
+</span><a href="#local-6989586621679117740"><span class="hs-identifier hs-var">tu</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;step&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; Int -&gt; Pair
+forall kv v. (KeyValue kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117741"><span class="hs-identifier hs-var">step</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-239"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleNiceSpec"><span class="hs-identifier hs-var">scaleNiceSpec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#IsNice"><span class="hs-identifier hs-type">IsNice</span></a></span><span> </span><span id="local-6989586621679117742"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679117742"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679117742"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-240"></span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#scaleNiceSpec"><span class="hs-identifier hs-var">scaleNiceSpec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#NTickCount"><span class="hs-identifier hs-type">NTickCount</span></a></span><span> </span><span id="local-6989586621679117743"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117743"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; VLSpec
+forall a. ToJSON a =&gt; a -&gt; VLSpec
+</span><span class="hs-identifier hs-var">toJSON</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679117743"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-241"></span><span>
+</span><span id="line-242"></span><span>
+</span><span id="line-243"></span><span class="annot"><span class="hs-comment">{-|
+
+Describes a scale range of scale output values. For full details see the
+&lt;https://vega.github.io/vega-lite/docs/scale.html#range Vega-Lite documentation&gt;.
+
+For color scales you can also specify a color [scheme](https://vega.github.io/vega-lite/docs/scale.html#scheme)
+instead of range.
+
+Any directly specified range for @x@ and @y@ channels will be ignored. Range can be customized
+via the view's corresponding [size](https://vega.github.io/vega-lite/docs/size.html)
+('Graphics.Vega.VegaLite.width' and 'Graphics.Vega.VegaLite.height') or via range steps and paddings properties (e.g. 'Graphics.Vega.VegaLite.SCRangeStep')
+for band and point scales.
+
+-}</span></span><span>
+</span><span id="line-257"></span><span>
+</span><span id="line-258"></span><span class="hs-keyword">data</span><span> </span><span id="ScaleRange"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#ScaleRange"><span class="hs-identifier hs-var">ScaleRange</span></a></span></span><span>
+</span><span id="line-259"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="RField"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#RField"><span class="hs-identifier hs-var">RField</span></a></span></span><span> </span><span class="annot"><a href="Graphics.Vega.VegaLite.Foundation.html#FieldName"><span class="hs-identifier hs-type">FieldName</span></a></span><span>
+</span><span id="line-260"></span><span>      </span><span class="hs-comment">-- ^ For [discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete)</span><span>
+</span><span id="line-261"></span><span>      </span><span class="hs-comment">--   and [discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing)</span><span>
+</span><span id="line-262"></span><span>      </span><span class="hs-comment">--   scales, the name if the field to use.</span><span>
+</span><span id="line-263"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-264"></span><span>      </span><span class="hs-comment">--   For example. if the field \&quot;color\&quot; contains CSS color names, we can say</span><span>
+</span><span id="line-265"></span><span>      </span><span class="hs-comment">--   @RField \&quot;color\&quot;@.</span><span>
+</span><span id="line-266"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-267"></span><span>      </span><span class="hs-comment">--   It is supported in Vega-Lite 4.14 and later.</span><span>
+</span><span id="line-268"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-269"></span><span>      </span><span class="hs-comment">--   @since 0.11.0.0</span><span>
+</span><span id="line-270"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="RMax"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#RMax"><span class="hs-identifier hs-var">RMax</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-271"></span><span>      </span><span class="hs-comment">-- ^ Sets the maximum value in the scale range.</span><span>
+</span><span id="line-272"></span><span>      </span><span class="hs-comment">--   It is only intended for scales with a continuous range.</span><span>
+</span><span id="line-273"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-274"></span><span>      </span><span class="hs-comment">--   It is supported in Vega-Lite 4.14 and later.</span><span>
+</span><span id="line-275"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-276"></span><span>      </span><span class="hs-comment">--   @since 0.11.0.0</span><span>
+</span><span id="line-277"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="RMin"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#RMin"><span class="hs-identifier hs-var">RMin</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-278"></span><span>      </span><span class="hs-comment">-- ^ Sets the minimum value in the scale range.</span><span>
+</span><span id="line-279"></span><span>      </span><span class="hs-comment">--   It is only intended for scales with a continuous range.</span><span>
+</span><span id="line-280"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-281"></span><span>      </span><span class="hs-comment">--   It is supported in Vega-Lite 4.14 and later.</span><span>
+</span><span id="line-282"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-283"></span><span>      </span><span class="hs-comment">--   @since 0.11.0.0</span><span>
+</span><span id="line-284"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="RPair"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#RPair"><span class="hs-identifier hs-var">RPair</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-285"></span><span>      </span><span class="hs-comment">-- ^ The minimum and maximum values.</span><span>
+</span><span id="line-286"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-287"></span><span>      </span><span class="hs-comment">--   @since 0.9.0.0</span><span>
+</span><span id="line-288"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="RHeight"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#RHeight"><span class="hs-identifier hs-var">RHeight</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-289"></span><span>      </span><span class="hs-comment">-- ^ Specify the width as a number and height as the string @&quot;height&quot;@.</span><span>
+</span><span id="line-290"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-291"></span><span>      </span><span class="hs-comment">--   @since 0.9.0.0</span><span>
+</span><span id="line-292"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="RWidth"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#RWidth"><span class="hs-identifier hs-var">RWidth</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
+</span><span id="line-293"></span><span>      </span><span class="hs-comment">-- ^ Specify the height as a number and width as the string @&quot;width&quot;@.</span><span>
+</span><span id="line-294"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-295"></span><span>      </span><span class="hs-comment">--   @since 0.9.0.0</span><span>
+</span><span id="line-296"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="RNumbers"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#RNumbers"><span class="hs-identifier hs-var">RNumbers</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span>
+</span><span id="line-297"></span><span>      </span><span class="hs-comment">-- ^ For [continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous),</span><span>
+</span><span id="line-298"></span><span>      </span><span class="hs-comment">--   a two-element array indicating minimum and maximum values, or an array with more than</span><span>
+</span><span id="line-299"></span><span>      </span><span class="hs-comment">--   two entries for specifying a</span><span>
+</span><span id="line-300"></span><span>      </span><span class="hs-comment">--   [piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise).</span><span>
+</span><span id="line-301"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-302"></span><span>      </span><span class="hs-comment">--   Support for the two-element version may be removed (ie this left only</span><span>
+</span><span id="line-303"></span><span>      </span><span class="hs-comment">--   for piecewise scales).</span><span>
+</span><span id="line-304"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="RNumberLists"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#RNumberLists"><span class="hs-identifier hs-var">RNumberLists</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
+</span><span id="line-305"></span><span>      </span><span class="hs-comment">-- ^ A scale range comprising of numeric lists, such as custom dash styles for</span><span>
+</span><span id="line-306"></span><span>      </span><span class="hs-comment">--   the 'Graphics.Vega.VegaLite.strokeDash' channel encoding.</span><span>
+</span><span id="line-307"></span><span>      </span><span class="hs-comment">--</span><span>
+</span><span id="line-308"></span><span>      </span><span class="hs-comment">--   @since 0.6.0.0</span><span>
+</span><span id="line-309"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="RStrings"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#RStrings"><span class="hs-identifier hs-var">RStrings</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span class="hs-special">]</span><span>
+</span><span id="line-310"></span><span>      </span><span class="annot"><span class="hs-comment">-- ^ Text scale range for discrete scales.</span></span><span>
+</span><span id="line-311"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="RName"><span class="annot"><a href="Graphics.Vega.VegaLite.Scale.html#RName"><span class="hs-identifier hs-var">RName</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">T.Text</span></span><span>
+</span><span id="line-312"></span><span>      </span><span class="hs-comment">-- ^ Name of a [pre-defined named scale range](https://vega.github.io/vega-lite/docs/scale.html#range-config)</span><span>
+</span><span id="line-313"></span><span>      </span><span class="hs-comment">--   (e.g. \&quot;symbol\&quot; or \&quot;diverging\&quot;).</span><span>
+</span><span id="line-314"></span><span>
+</span><span id="line-315"></span><span class="hs-comment">{-
+
+TODO:
+
+* TickCount accepts number or TimeInterval but this is a subset of ScaleNice
+
+-}</span><span>
+</span><span id="line-322"></span></pre></body></html>
