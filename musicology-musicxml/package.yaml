@@ -23,7 +23,7 @@ dependencies:
 - musicology-core
 - musicology-pitch
 - musicology-time
-- xml-conduit
+- xml
 - Frames
 - bytestring
 - mtl
@@ -43,7 +43,6 @@ executables:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
-    - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
@@ -52,7 +51,6 @@ executables:
     main:                Main.hs
     source-dirs:         app/tojson
     ghc-options:
-    - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
@@ -65,7 +63,6 @@ tests:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
-    - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:

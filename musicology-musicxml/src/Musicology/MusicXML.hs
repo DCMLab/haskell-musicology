@@ -14,17 +14,13 @@ module Musicology.MusicXML
   , xmlNotes, parseScore
   ) where
 
---import Text.XML.Light
---import Text.XML.Light.Lexer (XmlSource)
-import Text.XML
-import Text.XML.Cursor
+import Text.XML.Light
 import Frames
 import Frames.InCore (VectorFor)
 import Data.Vinyl.Core (Rec(..))
 import qualified Data.Vector as V
 import qualified Data.Map as M
 
--- import Data.ByteString
 import Data.Foldable (for_)
 import Data.List (sort, find, sortOn, uncons)
 import Data.Maybe (isJust, catMaybes, listToMaybe, fromMaybe)
@@ -45,79 +41,75 @@ import Musicology.Time
 -- helpers
 ----------
 
-hasAttrib :: Element -> Name -> Bool
-hasAttrib (Element _ attrs _) name = M.member name attrs -- any ((==k) . attrKey) (elementAttributes el)
+qname :: String -> QName
+qname name = QName name Nothing Nothing
 
-setAttrib :: Element -> Name -> Text -> Element
-setAttrib (Element name attrs children) k v = Element name attrs' children
-  where attrs' = M.insert k v attrs
+qname' :: String -> String -> QName
+qname' name ns = QName name Nothing (Just ns)
 
-ename :: Element -> Name
-ename = elementName
+hasAttrib :: Element -> QName -> Bool
+hasAttrib (Element _ attrs _ _) name = any ((==name) . attrKey) attrs
 
-getContent :: Node -> Maybe T.Text
-getContent (NodeContent t) = Just t
-getContent _ = Nothing
+setAttrib :: Element -> QName -> String -> Element
+setAttrib (Element name attrs children line) k v = Element name attrs' children line
+  where attrs' = Attr k v : filter ((/=k) . attrKey) attrs
 
-getElt :: Node -> Maybe Element
-getElt (NodeElement elt) = Just elt
-getElt _ = Nothing
-
-strContent :: Element -> String
-strContent elt = T.unpack $ mconcat $ catMaybes $ getContent <$> elementNodes elt
-
-firstInt :: Element -> Name -> Maybe Int
+firstInt :: Element -> String -> Maybe Int
 firstInt elt subname = do
   sub <- listToMaybe $ namedChildren elt subname
   readMaybe $ strContent sub
 
-firstInt' :: Element -> Name -> Int -> Int
+firstInt' :: Element -> String -> Int -> Int
 firstInt' elt subname def = fromMaybe def $ firstInt elt subname
 
-hasChild :: Element -> Name -> Bool
-hasChild elt name = not $ null $ fromNode (NodeElement elt) $/ element name
+hasChild :: Element -> String -> Bool
+hasChild elt name = isJust $ findChild (qname name) elt
 
-firstChild :: Element -> Name -> Maybe Element
+firstChild :: Element -> String -> Maybe Element
 firstChild elt name = listToMaybe $ namedChildren elt name
 
-namedChildren :: Element -> Name -> [Element]
-namedChildren elt name = catMaybes $ getElt . node <$> (fromNode (NodeElement elt) $/ element name)
+namedChildren :: Element -> String -> [Element]
+namedChildren elt name = findChildren (qname name) elt
 
-allChildren :: Element -> [Element]
-allChildren (Element _ _ nodes) = catMaybes $ getElt <$> nodes
+attrIs :: Element -> String -> String -> Bool
+attrIs elt name val = findAttr (qname name) elt == Just val
 
-attrIs :: Element -> Name -> T.Text -> Bool
-attrIs elt name val = M.lookup name (elementAttributes elt) == Just val
-
-readIntList :: T.Text -> Maybe [Int]
-readIntList str = readMaybe $ "[" <> T.unpack str <> "]"
+readIntList :: String -> Maybe [Int]
+readIntList str = readMaybe $ "[" <> str <> "]"
 
 -- generating ids
 -----------------
 
-parseWithIds :: Bool -> LT.Text -> Maybe Document
-parseWithIds keep input = do
-  doc <- parseWithoutIds input
-  pure $ doc {documentRoot = evalState (addIds $ documentRoot doc) 0}
+addNewIds keep root = evalState (addIds root) 0
   where next :: State Int Int
         next = get >>= \n -> put (n+1) >> pure n
-        qID = "xml:id" --QName "id" Nothing (Just "xml")
+        qID = qname' "id" "xml"
         addIds elt = do
           e <- elt'
           c <- cont'
-          pure $ e { elementNodes = c }
-          where elt' = if nameLocalName (elementName elt) == "note" && (not keep || not (hasAttrib elt qID))
-                       then next >>= \i -> pure $ setAttrib elt qID ("note" <> T.pack (show i))
+          pure $ e { elContent = c }
+          where elt' = if qName (elName elt) == "note" && (not keep || not (hasAttrib elt qID))
+                       then next >>= \i -> pure $ setAttrib elt qID ("note" <> show i)
                        else pure elt
-                cont' = mapM contentIds (elementNodes elt)
-        contentIds (NodeElement e) = NodeElement <$> addIds e
+                cont' = mapM contentIds (elContent elt)
+        contentIds (Elem e) = Elem <$> addIds e
         contentIds other = pure other
 
-parseWithoutIds :: LT.Text -> Maybe Document
-parseWithoutIds txt = either (const Nothing) Just $ parseText def txt
-
 idfy :: Bool -> LT.Text -> LT.Text
-idfy keep input = maybe "" (renderText def) $ parseWithIds keep input
+idfy keep input = mconcat $ LT.pack . ppContent . idfyContent <$> parseXML input
+  where contents = parseXML input
+        idfyContent (Elem elt) = Elem $ addNewIds keep elt
+        idfyContent other = other
+
+parseWithIds :: Bool -> LT.Text -> Maybe Element
+parseWithIds keep input = do
+  root <- parseWithoutIds input
+  pure $ addNewIds keep root
+
+parseWithoutIds :: LT.Text -> Maybe Element
+parseWithoutIds = parseXMLDoc
+-- parseWithoutIds txt = either (const Nothing) Just $ parseText def txt
+
 
 -- note list
 ------------
@@ -222,10 +214,10 @@ data FlowCommand = BwRepeat Int
                  | StopEnding
                  | Fine (Maybe [Int])
                  | DaCapo (Maybe [Int])
-                 | DalSegno Text (Maybe [Int])
-                 | ToCoda Text (Maybe [Int])
-                 | Coda Text
-                 | Segno Text
+                 | DalSegno String (Maybe [Int])
+                 | ToCoda String (Maybe [Int])
+                 | Coda String
+                 | Segno String
                  | StartEnding [Int]
                  | FwRepeat
   deriving (Eq, Ord, Show)
@@ -235,7 +227,7 @@ type RepStack t = [(t, Int, [FlowMarker t])]
 data FlowState t = FS
   { fsNow :: t -- current time
   , fsMarkers :: [FlowMarker t] -- all markers from here to end of piece
-  , fsSegno :: M.Map Text ([FlowMarker t], t, RepStack t) -- segnos with their repetition stacks
+  , fsSegno :: M.Map String ([FlowMarker t], t, RepStack t) -- segnos with their repetition stacks
   , fsStack :: RepStack t -- repetition stack
   , fsGCount :: M.Map (FlowMarker t) Int -- how often did we depart from this location?
   , fsJumps :: [Jump t] -- output: jumps
@@ -354,12 +346,12 @@ data ParsingState n = PS
   , psFlow :: [FlowMarker (Ratio Int)]
   } deriving Show
 
-xmlNotes :: Maybe Document -> [XmlNote]
+xmlNotes :: Maybe Element -> [XmlNote]
 xmlNotes = maybe [] (fst . parseScore)
 
-parseScore :: Document -> ([XmlNote], [[(Ratio Int, TimeSignature)]])
-parseScore (Document _ root _i)
-  | ename root == "score-partwise" = (sortOn _onsetHeard $ reverse notes, sigmaps)
+parseScore :: Element -> ([XmlNote], [[(Ratio Int, TimeSignature)]])
+parseScore root
+  | elName root == qname "score-partwise" = (sortOn _onsetHeard $ reverse notes, sigmaps)
   | otherwise = ([], [])
   where parts = uncurry parsePart <$> zip (namedChildren root "part") [1..]
         notes = concatMap fst parts
@@ -375,14 +367,14 @@ parsePart part parti = (notes, sigs)
           mapM_ doMeasure $ namedChildren part "measure"
           modify $ \st -> st { psNotes = psNotes st <> psTied st }
         doMeasure m = do
-          mapM_ mElt $ allChildren m
+          mapM_ mElt $ elChildren m
           st <- get
           when (psFirstBar st) $ do
             let firstSigOn = if psTime st < measureDuration (psTimeSig st)
                   then psTime st
                   else 0%1
             put $ st { psFirstBar = False, psSigs = [(firstSigOn, psTimeSig st)]}
-        mElt elt = case ename elt of
+        mElt elt = case qName $ elName elt of
           "barline"    -> doBarLine elt
           "attributes" -> doAttribs elt
           "direction"  -> doDirection elt
@@ -394,24 +386,24 @@ parsePart part parti = (notes, sigs)
 doBarLine :: Element -> State (ParsingState XmlNoteW) ()
 doBarLine elt = do
   for_ (firstChild elt "repeat") $ \rep ->
-    case attr rep "direction" of
+    case attr "direction" rep  of
       Just "forward"  -> pushFlow FwRepeat
       Just "backward" -> pushFlow $ BwRepeat $
-        fromMaybe 2 (attr rep "times" >>= readMaybe . T.unpack)
+        fromMaybe 2 (attr "times" rep >>= readMaybe)
       _ -> pure ()
   for_ (firstChild elt "ending") $ \end ->
-    case attr end "type" of
-      Just "start" -> for_ (attr end "number" >>= readIntList) $
+    case attr "type" end of
+      Just "start" -> for_ (attr "number" end >>= readIntList) $
         \nums -> pushFlow $ StartEnding nums
       Just "stop" -> pushFlow StopEnding
       _ -> pure () -- includes "discontinue"
-  where attr child name = M.lookup name (elementAttributes child)
+  where attr name = findAttr (qname name)
         pushFlow flow = modify $
           \st -> st { psFlow = FM (psTime st) flow : psFlow st }
 
 doAttribs :: Element -> State (ParsingState XmlNoteW) ()
-doAttribs elt = forM_ (allChildren elt) $ \att ->
-  case ename att of
+doAttribs elt = forM_ (elChildren elt) $ \att ->
+  case qName $ elName att of
     "divisions" -> for_ (readMaybe $ strContent att) $
                    \div -> modify $ \st -> st { psDiv = div }
     "transpose" -> let maybeChrom = firstInt att "chromatic"
@@ -430,7 +422,7 @@ doAttribs elt = forM_ (allChildren elt) $ \att ->
 doDirection :: Element -> State (ParsingState XmlNoteW) ()
 doDirection elt = mapM_ doSound (namedChildren elt "sound")
   where doSound sound = do
-          let attr name = M.lookup name (elementAttributes sound)
+          let attr name = findAttr (qname name) sound
               only = attr "time-only" >>= readIntList
               pushFlow flow = modify $
                 \st -> st { psFlow = FM (psTime st) flow : psFlow st }
@@ -481,8 +473,7 @@ doNote note parti = do
         -- chrom = psTransChrom st + chrom' + oct * 12 + alt
 
     -- id
-    let id = fmap T.unpack $ M.lookup "id" (elementAttributes note) <|>
-                             M.lookup "xml:id" (elementAttributes note)
+    let id = findAttr (qname "id") note <|> findAttr (qname' "id" "xml") note
 
     -- ties
     let ties = namedChildren note "tie"
